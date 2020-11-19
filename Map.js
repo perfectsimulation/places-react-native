@@ -3,6 +3,7 @@ import {
   View,
   Pressable,
   Text,
+  TextInput,
   Image,
   StyleSheet
 } from 'react-native';
@@ -19,13 +20,41 @@ const Map = () => {
     longitudeDelta: 0.0421,
   });
 
+  const [pins, setPins] = useState([]);
+
   const [hideCreatePin, setHideCreatePin] = useState(false);
 
   const [isDraggingMap, setIsDraggingMap] = useState(false);
 
-  const useLastRegionForPin = () => {
+  const [isNamingNewPin, setIsNamingNewPin] = useState(false);
+
+  const [newPinName, setNewPinName] = useState(null);
+
+  const saveCurrentRegion = () => {
     setCurrentRegion(mapView.current.__lastRegion);
     setIsDraggingMap(false);
+    setIsNamingNewPin(true);
+  }
+
+  const onPressConfirmButton = () => {
+    createPin();
+    setHideCreatePin(true);
+    setIsNamingNewPin(false);
+    setNewPinName(null);
+  }
+
+  const createPin = () => {
+    const pinCoordinate = {
+      latitude: currentRegion.latitude,
+      longitude: currentRegion.longitude
+    };
+
+    const pin = {
+      coordinate: pinCoordinate,
+      title: newPinName
+    };
+
+    pins.push(pin);
   }
 
   return (
@@ -35,36 +64,51 @@ const Map = () => {
           ref={mapView}
           style={styles.map}
           region={currentRegion}
+          showsUserLocation={true}
           onTouchStart={() => setIsDraggingMap(true)}
-          onTouchEnd={() => useLastRegionForPin()}
+          onTouchEnd={() => saveCurrentRegion()}
         >
-          {!hideCreatePin && (
+          {pins.map((pin, index) => (
             <Marker
+              key={index}
+              coordinate={pin.coordinate}
+              title={pin.title}
               tracksViewChanges={false}
-              coordinate={{
-                latitude: currentRegion.latitude,
-                longitude: currentRegion.longitude
-              }}
             >
               <Image
                 style={styles.pinImage}
                 source={require('./map-pin.png')}
               />
             </Marker>
-          )}
+          ))}
         </MapView>
+        {!hideCreatePin && !isDraggingMap && (
+          <Text style={styles.dragMapText}>
+            Drag map to position new pin
+          </Text>
+        )}
         {!hideCreatePin && (
           <View style={styles.createPinContainer}>
             <Image
               style={styles.pinImage}
               source={require('./map-pin.png')}
             />
+            {isNamingNewPin && !isDraggingMap && (
+              <View style={styles.newPinNameContainer}>
+                <TextInput
+                  style={styles.newPinNameInput}
+                  value={newPinName}
+                  placeholder={'Name this pin'}
+                  placeholderTextColor={'#ffffff7e'}
+                  underlineColorAndroid={'transparent'}
+                  autoCapitalize={'none'}
+                  autoCompleteType={'off'}
+                  maxLength={28}
+                  onChangeText={(text) => setNewPinName(text)}
+                />
+              </View>
+            )}
           </View>
-        )}
-        {!hideCreatePin && !isDraggingMap && (
-          <Text style={styles.dragMapText}>
-            Drag map to position new pin
-          </Text>
         )}
         {hideCreatePin && (
           <Pressable
@@ -76,7 +120,7 @@ const Map = () => {
             </Text>
           </Pressable>
         )}
-        {!hideCreatePin && (
+        {!hideCreatePin && !isDraggingMap && (
           <View style={styles.confirmCancelButtonsContainer}>
             <Pressable
               style={styles.cancelButton}
@@ -88,7 +132,7 @@ const Map = () => {
             </Pressable>
             <Pressable
               style={styles.confirmButton}
-              onPress={() => setHideCreatePin(!hideCreatePin)}
+              onPress={() => onPressConfirmButton()}
             >
               <Text style={styles.confirmButtonText}>
                 ✓
@@ -123,6 +167,37 @@ const styles = StyleSheet.create({
     height: 40,
     width: 40
   },
+  newPinNameContainer: {
+    position: 'absolute',
+    bottom: 40,
+    minWidth: 132,
+    maxWidth: 400,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'stretch'
+  },
+  newPinNameInput: {
+    height: 30,
+    width: '100%',
+    paddingLeft: 6,
+    paddingRight: 6,
+    backgroundColor: '#00000060',
+    flex: 1,
+    fontSize: 20,
+    fontWeight: '400',
+    color: 'white'
+  },
+  newPinNameInputFocused: {
+    height: 30,
+    width: '100%',
+    paddingLeft: 6,
+    paddingRight: 6,
+    backgroundColor: '#00000060',
+    flex: 1,
+    fontSize: 20,
+    fontWeight: '400',
+    color: 'white'
+  },
   dragMapText: {
     position: 'absolute',
     top: 64,
@@ -131,7 +206,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#00000060',
     fontSize: 20,
     lineHeight: 30,
-    fontWeight: '500',
+    fontWeight: '400',
     textAlign: 'center',
     color: 'white'
   },
@@ -166,7 +241,7 @@ const styles = StyleSheet.create({
     width: 64,
     marginRight: 32,
     borderRadius: 64,
-    backgroundColor: '#BE000088',
+    backgroundColor: '#be000088',
     display: 'flex',
     justifyContent: 'center',
     alignItems: "center"
@@ -182,8 +257,8 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   confirmButtonText: {
-    fontSize: 48,
-    lineHeight: 66,
+    fontSize: 44,
+    lineHeight: 62,
     height: 64,
     width: 64,
     fontWeight: '400',
