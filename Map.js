@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Pressable,
@@ -8,6 +8,7 @@ import {
   StyleSheet
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import Geolocation from '@react-native-community/geolocation';
 
 const Map = () => {
 
@@ -22,13 +23,30 @@ const Map = () => {
 
   const [pins, setPins] = useState([]);
 
-  const [hideCreatePin, setHideCreatePin] = useState(false);
+  const [hideCreatePin, setHideCreatePin] = useState(true);
 
   const [isDraggingMap, setIsDraggingMap] = useState(false);
 
   const [isNamingNewPin, setIsNamingNewPin] = useState(false);
 
   const [newPinName, setNewPinName] = useState(null);
+
+  useEffect(() => {
+    const setUserRegion = () => {
+      Geolocation.getCurrentPosition((userPosition) => {
+        const userRegion = {
+          latitude: userPosition.coords.latitude,
+          longitude: userPosition.coords.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421
+        };
+
+        setCurrentRegion(userRegion);
+      });
+    }
+
+    setUserRegion();
+  }, []);
 
   const saveCurrentRegion = () => {
     setCurrentRegion(mapView.current.__lastRegion);
