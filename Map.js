@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
+import loadPins from './server';
 
 const Map = () => {
 
@@ -31,6 +32,7 @@ const Map = () => {
 
   const [newPinName, setNewPinName] = useState(null);
 
+  // Use user position to set initial map region
   useEffect(() => {
     const setUserRegion = () => {
       Geolocation.getCurrentPosition((userPosition) => {
@@ -46,6 +48,18 @@ const Map = () => {
     }
 
     setUserRegion();
+  }, []);
+
+  // Fetch pins
+  useEffect(() => {
+    const getPinsData = async () => {
+      const pinsData = await loadPins();
+      return pinsData;
+    }
+
+    getPinsData()
+      .then((pinsData) => { setPins(pinsData) })
+      .catch((error) => { alert(error.message) });
   }, []);
 
   const saveCurrentRegion = () => {
@@ -89,8 +103,8 @@ const Map = () => {
           {pins.map((pin, index) => (
             <Marker
               key={index}
-              coordinate={pin.coordinate}
               title={pin.title}
+              coordinate={pin.coordinate}
               tracksViewChanges={false}
             >
               <Image
