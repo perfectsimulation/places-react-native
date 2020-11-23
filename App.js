@@ -7,29 +7,26 @@
 
 import React from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
   StatusBar,
-  useWindowDimensions,
+  View,
+  StyleSheet
 } from 'react-native';
 
 import Map from './Map';
 
 const App = () => {
-  const window = useWindowDimensions();
   return (
     <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <View style={styles.container}>
         <Map />
-      </SafeAreaView>
+      </View>
     </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    top: 10,
     height: window.height,
     width: window.width
   }

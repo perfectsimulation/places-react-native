@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Pressable,
@@ -10,17 +10,11 @@ import {
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import loadPins from './server';
+import OptionsMenu from './OptionsMenu';
 
 const Map = () => {
 
-  const mapView = useRef(null);
-
-  const [currentRegion, setCurrentRegion] = useState({
-    latitude: 38.9610685,
-    longitude: -120.0987182,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
+  const [currentRegion, setCurrentRegion] = useState(null);
 
   const [pins, setPins] = useState([]);
 
@@ -31,6 +25,8 @@ const Map = () => {
   const [isNamingNewPin, setIsNamingNewPin] = useState(false);
 
   const [newPinName, setNewPinName] = useState(null);
+
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
 
   // Use user position to set initial map region
   useEffect(() => {
@@ -62,10 +58,23 @@ const Map = () => {
       .catch((error) => { alert(error.message) });
   }, []);
 
-  const saveCurrentRegion = () => {
-    setCurrentRegion(mapView.current.__lastRegion);
+  const onTouchMapStart = () => {
+    setIsDraggingMap(true);
+  }
+
+  const onTouchMapEnd = () => {
     setIsDraggingMap(false);
     setIsNamingNewPin(true);
+  }
+
+  const onPressAddOptionButton = () => {
+    setHideCreatePin(false);
+    setIsNamingNewPin(true);
+    setShowOptionsMenu(false);
+  }
+
+  const onPressCancelButton = () => {
+    setHideCreatePin(true);
   }
 
   const onPressConfirmButton = () => {
@@ -89,16 +98,21 @@ const Map = () => {
     pins.push(pin);
   }
 
+  if (!currentRegion) {
+    return <></>;
+  }
+
   return (
     <>
       <View style={styles.container}>
         <MapView
-          ref={mapView}
           style={styles.map}
-          region={currentRegion}
           showsUserLocation={true}
-          onTouchStart={() => setIsDraggingMap(true)}
-          onTouchEnd={() => saveCurrentRegion()}
+          mapType={'hybrid'}
+          initialRegion={currentRegion}
+          onRegionChangeComplete={(region) => setCurrentRegion(region)}
+          onTouchStart={() => onTouchMapStart()}
+          onTouchEnd={() => onTouchMapEnd()}
         >
           {pins.map((pin, index) => (
             <Marker
@@ -122,7 +136,7 @@ const Map = () => {
         {!hideCreatePin && (
           <View style={styles.createPinContainer}>
             <Image
-              style={styles.pinImage}
+              style={styles.createPinImage}
               source={require('./map-pin.png')}
             />
             {isNamingNewPin && !isDraggingMap && (
@@ -144,33 +158,46 @@ const Map = () => {
         )}
         {hideCreatePin && (
           <Pressable
-            style={styles.createButton}
-            onPress={() => setHideCreatePin(false)}
+            style={styles.menuButton}
+            onPress={() => setShowOptionsMenu(true)}
           >
-            <Text style={styles.buttonText}>
-              +
-            </Text>
+            <Image
+              style={styles.buttonImage}
+              source={require('./open.png')}
+            />
           </Pressable>
         )}
         {!hideCreatePin && !isDraggingMap && (
           <View style={styles.confirmCancelButtonsContainer}>
             <Pressable
               style={styles.cancelButton}
-              onPress={() => setHideCreatePin(true)}
+              onPress={() => onPressCancelButton()}
             >
-              <Text style={styles.buttonText}>
-                ×
-              </Text>
+              <Image
+                style={styles.largeButtonImage}
+                source={require('./cancel.png')}
+              />
             </Pressable>
             <Pressable
               style={styles.confirmButton}
               onPress={() => onPressConfirmButton()}
             >
-              <Text style={styles.confirmButtonText}>
-                ✓
-              </Text>
+              <Image
+                style={styles.largeButtonImage}
+                source={require('./confirm.png')}
+              />
             </Pressable>
           </View>
+        )}
+        {showOptionsMenu && (
+          <OptionsMenu
+            onPressSettingsButton={() => console.log('settings')}
+            onPressFavoritesButton={() => console.log('favorites')}
+            onPressUserButton={() => console.log('user')}
+            onPressSearchButton={() => console.log('search')}
+            onPressAddButton={() => onPressAddOptionButton()}
+            onPressCloseButton={() => setShowOptionsMenu(false)}
+          />
         )}
       </View>
     </>
@@ -183,7 +210,7 @@ const styles = StyleSheet.create({
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: "center"
+    alignItems: 'center'
   },
   map: {
     ...StyleSheet.absoluteFillObject
@@ -192,7 +219,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: "center"
+    alignItems: 'center'
+  },
+  createPinImage: {
+    position: 'relative',
+    top: 6.4,
+    height: 40,
+    width: 40
   },
   pinImage: {
     position: 'relative',
@@ -213,18 +246,7 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingLeft: 6,
     paddingRight: 6,
-    backgroundColor: '#00000060',
-    flex: 1,
-    fontSize: 20,
-    fontWeight: '400',
-    color: 'white'
-  },
-  newPinNameInputFocused: {
-    height: 30,
-    width: '100%',
-    paddingLeft: 6,
-    paddingRight: 6,
-    backgroundColor: '#00000060',
+    backgroundColor: '#000000cf',
     flex: 1,
     fontSize: 20,
     fontWeight: '400',
@@ -235,32 +257,28 @@ const styles = StyleSheet.create({
     top: 64,
     height: 30,
     width: '100%',
-    backgroundColor: '#00000060',
+    backgroundColor: '#000000cf',
     fontSize: 20,
     lineHeight: 30,
     fontWeight: '400',
     textAlign: 'center',
     color: 'white'
   },
-  createButton: {
+  menuButton: {
     position: 'absolute',
     bottom: 32,
-    height: 64,
-    width: 64,
-    borderRadius: 64,
+    height: 52,
+    width: 52,
+    borderRadius: 52,
     backgroundColor: '#00000088',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: "center"
+    alignItems: 'center'
   },
-  buttonText: {
-    fontSize: 64,
-    lineHeight: 66,
-    height: 64,
-    width: 64,
-    fontWeight: '300',
-    textAlign: 'center',
-    color: 'white'
+  buttonImage: {
+    bottom: 2,
+    height: 36,
+    width: 36
   },
   confirmCancelButtonsContainer: {
     position: 'absolute',
@@ -273,29 +291,24 @@ const styles = StyleSheet.create({
     width: 64,
     marginRight: 32,
     borderRadius: 64,
-    backgroundColor: '#be000088',
+    backgroundColor: '#be0000cf',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: "center"
+    alignItems: 'center'
   },
   confirmButton: {
     height: 64,
     width: 64,
-    borderRadius: 64,
     marginLeft: 32,
-    backgroundColor: '#0088007f',
+    borderRadius: 64,
+    backgroundColor: '#008800cf',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: "center"
+    alignItems: 'center'
   },
-  confirmButtonText: {
-    fontSize: 44,
-    lineHeight: 62,
-    height: 64,
-    width: 64,
-    fontWeight: '400',
-    textAlign: 'center',
-    color: 'white'
+  largeButtonImage: {
+    height: 42,
+    width: 42
   }
 });
 
