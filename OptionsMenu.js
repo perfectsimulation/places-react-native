@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
+  Animated,
   View,
   Pressable,
   Text,
@@ -8,6 +9,78 @@ import {
 } from 'react-native';
 
 const UserMenu = (props) => {
+
+  const animDuration = 300;
+
+  const beforeOpacity = props.showOptionsMenu ? 0 : 1;
+  const afterOpacity = props.showOptionsMenu ? 1 : 0;
+
+  const beforeTranslateY = props.showOptionsMenu ? 500 : 0;
+  const afterTranslateY = props.showOptionsMenu ? 0 : 500;
+
+  const beforeShow = props.showOptionsMenu ? 1000 : 0;
+  const afterShow = props.showOptionsMenu ? 0 : 1000;
+
+  const opacityAnim = useRef(new Animated.Value(beforeOpacity)).current;
+  const transformYAnim = useRef(new Animated.Value(beforeTranslateY)).current;
+  const showMenu = useRef(new Animated.Value(beforeShow)).current;
+
+  const [isFirstRender, setIsFirstRender] = useState(true);
+
+  // opacity animation
+  useEffect(() => {
+    Animated.timing(
+      opacityAnim, {
+        toValue: afterOpacity,
+        duration: isFirstRender ? 0 : animDuration,
+        useNativeDriver: true,
+      }
+    ).start();
+  }, [afterOpacity, opacityAnim]);
+
+  // transform Y menu
+  useEffect(() => {
+    if (props.showOptionsMenu) {
+      Animated.timing(
+        showMenu, {
+          toValue: afterShow,
+          duration: 0,
+          useNativeDriver: true,
+        }
+      ).start();
+    } else {
+      // translate entire menu off-screen upon animation completion
+      const timer = setTimeout(() => {
+        Animated.timing(
+          showMenu, {
+            toValue: afterShow,
+            duration: 0,
+            useNativeDriver: true,
+          }
+        ).start();
+
+        return (() => {
+          clearTimeout(timer);
+        });
+      }, animDuration);
+    }
+  }, [afterShow, showMenu]);
+
+  // transform Y animation
+  useEffect(() => {
+    Animated.timing(
+      transformYAnim, {
+        toValue: afterTranslateY,
+        duration: isFirstRender ? 0 : animDuration,
+        useNativeDriver: true,
+      }
+    ).start();
+  }, [afterTranslateY, transformYAnim]);
+
+  useEffect(() => {
+    setIsFirstRender(false);
+  }, []);
+
   const {
     onPressSettingsButton,
     onPressFavoritesButton,
@@ -16,10 +89,16 @@ const UserMenu = (props) => {
     onPressAddButton,
     onPressCloseButton
   } = props;
+
   return (
     <>
-      <View style={styles.container}>
-        <View style={styles.optionsContainer}>
+      <Animated.View style={[styles.container, {
+        transform: [{ translateY: showMenu }],
+          opacity: opacityAnim
+        }]}>
+        <Animated.View style={[styles.optionsContainer, {
+          transform: [{ translateY: transformYAnim }]
+        }]}>
           <View style={styles.optionsRow}>
             <Pressable
               style={styles.optionButton}
@@ -86,7 +165,7 @@ const UserMenu = (props) => {
               />
             </Pressable>
           </View>
-        </View>
+        </Animated.View>
         <Pressable
           style={styles.closeButton}
           onPress={() => onPressCloseButton()}
@@ -96,13 +175,15 @@ const UserMenu = (props) => {
             source={require('./close.png')}
           />
         </Pressable>
-      </View>
+      </Animated.View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    position: 'absolute',
+    bottom: 0,
     height: '100%',
     width: '100%',
     backgroundColor: '#000000df',
@@ -113,7 +194,6 @@ const styles = StyleSheet.create({
   optionsContainer: {
     height: '50%',
     width: '100%',
-    margin: 20,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',

@@ -189,16 +189,15 @@ const Map = () => {
             </Pressable>
           </View>
         )}
-        {showOptionsMenu && (
-          <OptionsMenu
-            onPressSettingsButton={() => console.log('settings')}
-            onPressFavoritesButton={() => console.log('favorites')}
-            onPressUserButton={() => console.log('user')}
-            onPressSearchButton={() => console.log('search')}
-            onPressAddButton={() => onPressAddOptionButton()}
-            onPressCloseButton={() => setShowOptionsMenu(false)}
-          />
-        )}
+        <OptionsMenu
+          showOptionsMenu={showOptionsMenu}
+          onPressSettingsButton={() => console.log('settings')}
+          onPressFavoritesButton={() => console.log('favorites')}
+          onPressUserButton={() => console.log('user')}
+          onPressSearchButton={() => console.log('search')}
+          onPressAddButton={() => onPressAddOptionButton()}
+          onPressCloseButton={() => setShowOptionsMenu(false)}
+        />
       </View>
     </>
   );
