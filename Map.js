@@ -123,7 +123,7 @@ const Map = () => {
             >
               <Image
                 style={styles.pinImage}
-                source={require('./map-pin.png')}
+                source={require('./icons/map-pin.png')}
               />
             </Marker>
           ))}
@@ -137,7 +137,7 @@ const Map = () => {
           <View style={styles.createPinContainer}>
             <Image
               style={styles.createPinImage}
-              source={require('./map-pin.png')}
+              source={require('./icons/map-pin.png')}
             />
             {isNamingNewPin && !isDraggingMap && (
               <View style={styles.newPinNameContainer}>
@@ -163,7 +163,7 @@ const Map = () => {
           >
             <Image
               style={styles.buttonImage}
-              source={require('./open.png')}
+              source={require('./icons/open.png')}
             />
           </Pressable>
         )}
@@ -175,7 +175,7 @@ const Map = () => {
             >
               <Image
                 style={styles.largeButtonImage}
-                source={require('./cancel.png')}
+                source={require('./icons/cancel.png')}
               />
             </Pressable>
             <Pressable
@@ -184,17 +184,17 @@ const Map = () => {
             >
               <Image
                 style={styles.largeButtonImage}
-                source={require('./confirm.png')}
+                source={require('./icons/confirm.png')}
               />
             </Pressable>
           </View>
         )}
         <OptionsMenu
           showOptionsMenu={showOptionsMenu}
-          onPressSettingsButton={() => console.log('settings')}
-          onPressFavoritesButton={() => console.log('favorites')}
-          onPressUserButton={() => console.log('user')}
-          onPressSearchButton={() => console.log('search')}
+          onPressConnectButton={() => console.log('connect')}
+          onPressExploreButton={() => console.log('explore')}
+          onPressPlacesButton={() => console.log('places')}
+          onPressSavedButton={() => console.log('saved')}
           onPressAddButton={() => onPressAddOptionButton()}
           onPressCloseButton={() => setShowOptionsMenu(false)}
         />
