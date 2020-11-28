@@ -3,7 +3,6 @@ import {
   Animated,
   View,
   Pressable,
-  Text,
   Image,
   StyleSheet
 } from 'react-native';
@@ -15,38 +14,13 @@ const OptionsMenu = (props) => {
   const beforeOpacity = props.showOptionsMenu ? 0 : 1;
   const afterOpacity = props.showOptionsMenu ? 1 : 0;
 
-  // transform XY - upper left button
-  const beforeUpperLeftButtonPosition = props.showOptionsMenu ? { x: 0, y: 0 } : { x: -120, y: -300 };
-  const afterUpperLeftButtonPosition = props.showOptionsMenu ? { x: -120, y: -300 } : { x: 0, y: 0 };
-
-  // transform XY - upper right button
-  const beforeUpperRightButtonPosition = props.showOptionsMenu ? { x: 0, y: 0 } : { x: 120, y: -300 };
-  const afterUpperRightButtonPosition = props.showOptionsMenu ? { x: 120, y: -300 } : { x: 0, y: 0 };
-
-  // transform XY - middle button
-  const beforeMiddleButtonPosition = props.showOptionsMenu ? { x: 0, y: 0 } : { x: 0, y: -200 };
-  const afterMiddleButtonPosition = props.showOptionsMenu ? { x: 0, y: -200 } : { x: 0, y: 0 };
-
-  // transform XY - lower left button
-  const beforeLowerLeftButtonPosition = props.showOptionsMenu ? { x: 0, y: 0 } : { x: -120, y: -100 };
-  const afterLowerLeftButtonPosition = props.showOptionsMenu ? { x: -120, y: -100 } : { x: 0, y: 0 };
-
-  // transform XY - lower right button
-  const beforeLowerRightButtonPosition = props.showOptionsMenu ? { x: 0, y: 0 } : { x: 120, y: -100 };
-  const afterLowerRightButtonPosition = props.showOptionsMenu ? { x: 120, y: -100 } : { x: 0, y: 0 };
-
-  // transform Y - entire menu, instant
+  // transform Y - entire menu, instant TODO use window height
   const beforeShow = props.showOptionsMenu ? 1000 : 0;
   const afterShow = props.showOptionsMenu ? 0 : 1000;
 
   // animation ref values
   const showMenu = useRef(new Animated.Value(beforeShow)).current;
   const opacityAnim = useRef(new Animated.Value(beforeOpacity)).current;
-  const upperLeftButtonAnim = useRef(new Animated.ValueXY(beforeUpperLeftButtonPosition)).current;
-  const upperRightButtonAnim = useRef(new Animated.ValueXY(beforeUpperRightButtonPosition)).current;
-  const middleButtonAnim = useRef(new Animated.ValueXY(beforeMiddleButtonPosition)).current;
-  const lowerLeftButtonAnim = useRef(new Animated.ValueXY(beforeLowerLeftButtonPosition)).current;
-  const lowerRightButtonAnim = useRef(new Animated.ValueXY(beforeLowerRightButtonPosition)).current;
 
   // do not animate on first render
   const [isFirstRender, setIsFirstRender] = useState(true);
@@ -55,7 +29,7 @@ const OptionsMenu = (props) => {
   const transitionDuration = 300;
   const animDuration = isFirstRender ? 0 : transitionDuration;
 
-  // transform Y - entire menu, instant
+  // animate position of menu container
   useEffect(() => {
     if (props.showOptionsMenu) {
       Animated.timing(
@@ -83,7 +57,7 @@ const OptionsMenu = (props) => {
     }
   }, [afterShow, showMenu]);
 
-  // opacity - entire menu
+  // fade in/out menu container
   useEffect(() => {
     Animated.timing(
       opacityAnim, {
@@ -93,12 +67,6 @@ const OptionsMenu = (props) => {
       }
     ).start();
   }, [afterOpacity, opacityAnim]);
-
-  // transform XY - upper left button position
-  // transform XY - upper right button position
-  // transform XY - middle button position
-  // transform XY - lower left button position
-  // transform XY - lower right button position
 
   // record the elapsed first render
   useEffect(() => {
@@ -111,11 +79,11 @@ const OptionsMenu = (props) => {
   }
 
   const {
-    onPressConnectButton,
-    onPressExploreButton,
-    onPressUserButton,
-    onPressSavedButton,
-    onPressAddButton,
+    onPressConnectButton, // top left
+    onPressExploreButton, // top right
+    onPressPlacesButton,  // middle
+    onPressSavedButton,   // bottom left
+    onPressAddButton,     // bottom right
     onPressCloseButton
   } = props;
 
@@ -132,9 +100,10 @@ const OptionsMenu = (props) => {
             showPosition={{ x: -120, y: -300 }}
             hidePosition={{ x: 0, y: 0 }}
             transitionDuration={animDuration}
-            labelText={'Connect'}
-            iconImageName={require('./icons/user.png')}
+            labelText={'Talk'}
+            iconImageName={require('./icons/connect.png')}
             containerStyle={styles.optionButtonContainer}
+            iconStyle={styles.talkButtonImage}
           />
           <OptionButton
             onPress={() => onPressExploreButton()}
@@ -143,8 +112,9 @@ const OptionsMenu = (props) => {
             hidePosition={{ x: 0, y: 0 }}
             transitionDuration={animDuration}
             labelText={'Explore'}
-            iconImageName={require('./icons/explore.png')}
+            iconImageName={require('./icons/search.png')}
             containerStyle={styles.optionButtonContainer}
+            iconStyle={styles.exploreButtonImage}
           />
           <OptionButton
             onPress={() => onPressPlacesButton()}
@@ -153,8 +123,9 @@ const OptionsMenu = (props) => {
             hidePosition={{ x: 0, y: 0 }}
             transitionDuration={animDuration}
             labelText={'Places'}
-            iconImageName={require('./icons/list.png')}
+            iconImageName={require('./icons/globe.png')}
             containerStyle={styles.optionButtonContainer}
+            iconStyle={styles.placesButtonImage}
           />
           <OptionButton
             onPress={() => onPressSavedButton()}
@@ -176,6 +147,7 @@ const OptionsMenu = (props) => {
             labelText={'Add'}
             iconImageName={require('./icons/add.png')}
             containerStyle={styles.optionButtonContainer}
+            iconStyle={styles.addButtonImage}
           />
         </View>
         <Pressable
@@ -220,15 +192,27 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 14
   },
-  savedButtonImage: {
-    top: 2,
+  talkButtonImage: {
+    top: 3,
     height: 46,
     width: 46
   },
-  connectButtonImage: {
-    top: 2,
+  exploreButtonImage: {
+    height: 40,
+    width: 40
+  },
+  savedButtonImage: {
+    top: 3,
     height: 46,
     width: 46
+  },
+  placesButtonImage: {
+    height: 60,
+    width: 60
+  },
+  addButtonImage: {
+    height: 42,
+    width: 42
   },
   closeButtonImage: {
     bottom: 2,

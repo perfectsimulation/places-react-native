@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import {
   Animated,
   Easing,
+  View,
   Pressable,
   Text,
   Image,
@@ -10,8 +11,8 @@ import {
 
 const OptionButton = (props) => {
 
-  // required props: shouldShow
-  // optional props: showPosition,
+  // optional props: shouldShow,
+  //                 showPosition,
   //                 hidePosition,
   //                 transitionDuration,
   //                 transitionDuration,
@@ -22,6 +23,11 @@ const OptionButton = (props) => {
     hidePosition,
     transitionDuration
   } = props;
+
+  const show = shouldShow ?? true;
+  const showPos = showPosition ?? { x: 0, y: 0 };
+  const hidePos = hidePosition ?? { x: 0, y: 0 };
+  const duration = transitionDuration ?? 0;
 
   // animate onPress feedback
   const [isPressing, setIsPressing] = useState(false);
@@ -45,13 +51,13 @@ const OptionButton = (props) => {
   ).current;
 
    // animate transform position
-   const initialPosition = shouldShow ? hidePosition : showPosition;
-   const finalPosition = shouldShow ? showPosition : hidePosition;
+   const initialPosition = show ? hidePos : showPos;
+   const finalPosition = show ? showPos : hidePos;
    const positionValue = useRef(new Animated.ValueXY(initialPosition)).current;
 
   // do not animate on first render
   const [isFirstRender, setIsFirstRender] = useState(true);
-  const animationDuration = isFirstRender ? 0 : transitionDuration;
+  const animationDuration = isFirstRender ? 0 : duration;
 
   // spring transform from initial to final position
   useEffect(() => {
@@ -62,7 +68,7 @@ const OptionButton = (props) => {
         useNativeDriver: true
       }
     ).start();
-  }, [shouldShow, positionValue]);
+  }, [show, positionValue]);
 
   useEffect(() => {
     if (isPressing) {
@@ -75,14 +81,6 @@ const OptionButton = (props) => {
   useEffect(() => {
     setIsFirstRender(false);
   });
-
-  const onPressStart = () => {
-    setIsPressing(true);
-  }
-
-  const onPressEnd = () => {
-    setIsPressing(false);
-  }
 
   const {
     onPress,
@@ -99,10 +97,6 @@ const OptionButton = (props) => {
   const label = labelStyle ?? styles.label;
   const icon = iconStyle ?? styles.icon;
 
-  const animatePress = () => {
-
-  }
-
   return (
     <Animated.View
       style={[container, {
@@ -118,14 +112,21 @@ const OptionButton = (props) => {
         onPressOut={() => setIsPressing(false)}
         onPress={() => onPress()}
       >
-        <Text style={label}>{labelText}</Text>
-        <Image style={icon} source={iconImageName} />
+        {labelText && (
+          <Text style={label}>{labelText}</Text>
+        )}
         {isPressing && (
-          <Animated.View
-            style={[styles.feedback, {
-              transform: [ { rotate: rotation } ]
-            }]}
-          />
+          <>
+            <Animated.View
+              style={[styles.feedbackBorder, {
+                transform: [ { rotate: rotation } ]
+              }]}
+            />
+            <View style={styles.feedbackOpacity} />
+          </>
+        )}
+        {iconImageName && (
+          <Image style={icon} source={iconImageName} />
         )}
       </Pressable>
     </Animated.View>
@@ -156,14 +157,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textTransform: 'uppercase',
     letterSpacing: 2,
-    backgroundColor: 'darkred',
+    // backgroundColor: 'darkred',
     color: 'white'
   },
   icon: {
-    height: 36,
-    width: 36
+    height: 42,
+    width: 42
   },
-  feedback: {
+  feedbackBorder: {
     position: 'absolute',
     height: 68,
     width: 68,
@@ -171,9 +172,17 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     borderWidth: 1,
     borderStyle: 'dashed',
-    backgroundColor: 'transparent',
-    // opacity: 0.7
+    backgroundColor: 'transparent'
   },
+  feedbackOpacity: {
+    position: 'absolute',
+    height: 64,
+    width: 64,
+    borderRadius: 64,
+    margin: 12,
+    backgroundColor: '#000000',
+    opacity: 0.2
+  }
 });
 
 export default OptionButton;

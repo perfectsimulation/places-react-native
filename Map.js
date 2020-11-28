@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Pressable,
-  Text,
-  TextInput,
   Image,
   StyleSheet
 } from 'react-native';
@@ -11,6 +9,7 @@ import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import loadPins from './server';
 import OptionsMenu from './OptionsMenu';
+import AddPinOverlay from './AddPinOverlay';
 
 const Map = () => {
 
@@ -128,34 +127,15 @@ const Map = () => {
             </Marker>
           ))}
         </MapView>
-        {!hideCreatePin && !isDraggingMap && (
-          <Text style={styles.dragMapText}>
-            Drag map to position new pin
-          </Text>
-        )}
-        {!hideCreatePin && (
-          <View style={styles.createPinContainer}>
-            <Image
-              style={styles.createPinImage}
-              source={require('./icons/map-pin.png')}
-            />
-            {isNamingNewPin && !isDraggingMap && (
-              <View style={styles.newPinNameContainer}>
-                <TextInput
-                  style={styles.newPinNameInput}
-                  value={newPinName}
-                  placeholder={'Name this pin'}
-                  placeholderTextColor={'#ffffff7e'}
-                  underlineColorAndroid={'transparent'}
-                  autoCapitalize={'none'}
-                  autoCompleteType={'off'}
-                  maxLength={28}
-                  onChangeText={(text) => setNewPinName(text)}
-                />
-              </View>
-            )}
-          </View>
-        )}
+        <AddPinOverlay
+          hide={hideCreatePin}
+          isDraggingMap={isDraggingMap}
+          isNamingPin={isNamingNewPin}
+          onPressCancelButton={() => onPressCancelButton()}
+          onPressConfirmButton={() => onPressConfirmButton()}
+          newPinName={newPinName}
+          setNewPinName={(text) => setNewPinName(text)}
+        />
         {hideCreatePin && (
           <Pressable
             style={styles.menuButton}
@@ -166,28 +146,6 @@ const Map = () => {
               source={require('./icons/open.png')}
             />
           </Pressable>
-        )}
-        {!hideCreatePin && !isDraggingMap && (
-          <View style={styles.confirmCancelButtonsContainer}>
-            <Pressable
-              style={styles.cancelButton}
-              onPress={() => onPressCancelButton()}
-            >
-              <Image
-                style={styles.largeButtonImage}
-                source={require('./icons/cancel.png')}
-              />
-            </Pressable>
-            <Pressable
-              style={styles.confirmButton}
-              onPress={() => onPressConfirmButton()}
-            >
-              <Image
-                style={styles.largeButtonImage}
-                source={require('./icons/confirm.png')}
-              />
-            </Pressable>
-          </View>
         )}
         <OptionsMenu
           showOptionsMenu={showOptionsMenu}
@@ -214,54 +172,10 @@ const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject
   },
-  createPinContainer: {
-    position: 'absolute',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  createPinImage: {
-    position: 'relative',
-    top: 6.4,
-    height: 40,
-    width: 40
-  },
   pinImage: {
     position: 'relative',
     height: 40,
     width: 40
-  },
-  newPinNameContainer: {
-    position: 'absolute',
-    bottom: 40,
-    minWidth: 132,
-    maxWidth: 400,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'stretch'
-  },
-  newPinNameInput: {
-    height: 30,
-    width: '100%',
-    paddingLeft: 6,
-    paddingRight: 6,
-    backgroundColor: '#000000cf',
-    flex: 1,
-    fontSize: 20,
-    fontWeight: '400',
-    color: 'white'
-  },
-  dragMapText: {
-    position: 'absolute',
-    top: 64,
-    height: 30,
-    width: '100%',
-    backgroundColor: '#000000cf',
-    fontSize: 20,
-    lineHeight: 30,
-    fontWeight: '400',
-    textAlign: 'center',
-    color: 'white'
   },
   menuButton: {
     position: 'absolute',
@@ -278,36 +192,6 @@ const styles = StyleSheet.create({
     bottom: 2,
     height: 36,
     width: 36
-  },
-  confirmCancelButtonsContainer: {
-    position: 'absolute',
-    bottom: 32,
-    display: 'flex',
-    flexDirection: 'row'
-  },
-  cancelButton: {
-    height: 64,
-    width: 64,
-    marginRight: 32,
-    borderRadius: 64,
-    backgroundColor: '#be0000cf',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  confirmButton: {
-    height: 64,
-    width: 64,
-    marginLeft: 32,
-    borderRadius: 64,
-    backgroundColor: '#008800cf',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  largeButtonImage: {
-    height: 42,
-    width: 42
   }
 });
 
