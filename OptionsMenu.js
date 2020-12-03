@@ -7,6 +7,7 @@ import {
   StyleSheet
 } from 'react-native';
 import OptionButton from './OptionButton';
+import CloseButton from './CloseButton';
 
 const OptionsMenu = (props) => {
 
@@ -73,7 +74,7 @@ const OptionsMenu = (props) => {
     setIsFirstRender(false);
   }, []);
 
-  // TODO look into a better 
+  // TODO look into a better way
   if (isFirstRender) {
     return <View style={styles.loading} />;
   }
@@ -89,21 +90,23 @@ const OptionsMenu = (props) => {
 
   return (
     <>
-      <Animated.View style={[styles.container, {
-        transform: [{ translateY: showMenu }],
-          opacity: opacityAnim
-        }]}>
+      <Animated.View
+        style={[styles.container, {
+          transform: [{ translateY: showMenu }],
+            opacity: opacityAnim
+        }]}
+      >
         <View style={styles.optionsContainer}>
-        <OptionButton
+          <OptionButton
             onPress={() => onPressConnectButton()}
             shouldShow={props.showOptionsMenu}
             showPosition={{ x: -120, y: -300 }}
             hidePosition={{ x: 0, y: 0 }}
             transitionDuration={animDuration}
-            labelText={'Talk'}
-            iconImageName={require('./icons/connect.png')}
+            labelText={'Activity'}
+            iconImageName={require('./icons/activity.png')}
             containerStyle={styles.optionButtonContainer}
-            iconStyle={styles.talkButtonImage}
+            iconStyle={styles.activityButtonImage}
           />
           <OptionButton
             onPress={() => onPressExploreButton()}
@@ -150,15 +153,9 @@ const OptionsMenu = (props) => {
             iconStyle={styles.addButtonImage}
           />
         </View>
-        <Pressable
-          style={styles.closeButton}
-          onPress={() => onPressCloseButton()}
-        >
-          <Image
-            style={styles.closeButtonImage}
-            source={require('./icons/close.png')}
-          />
-        </Pressable>
+        <CloseButton
+          onClose={() => onPressCloseButton()}
+        />
       </Animated.View>
     </>
   );
@@ -192,43 +189,26 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 14
   },
-  talkButtonImage: {
-    top: 3,
-    height: 46,
-    width: 46
-  },
-  exploreButtonImage: {
-    height: 40,
-    width: 40
-  },
-  savedButtonImage: {
-    top: 3,
-    height: 46,
-    width: 46
-  },
-  placesButtonImage: {
-    height: 60,
-    width: 60
-  },
-  addButtonImage: {
+  activityButtonImage: {
     height: 42,
     width: 42
   },
-  closeButtonImage: {
-    bottom: 2,
-    height: 36,
-    width: 36
+  exploreButtonImage: {
+    height: 38,
+    width: 38
   },
-  closeButton: {
-    position: 'absolute',
-    bottom: 32,
-    height: 52,
-    width: 52,
-    borderRadius: 52,
-    backgroundColor: '#ffffffef',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
+  placesButtonImage: {
+    height: 58,
+    width: 58
+  },
+  savedButtonImage: {
+    top: 2,
+    height: 46,
+    width: 46
+  },
+  addButtonImage: {
+    height: 40,
+    width: 40
   }
 });
 

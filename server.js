@@ -17,7 +17,10 @@ const getUsers = async () => {
 
 const parseUserPin = (user) => {
   const userPin = {
-    "title": user.name,
+    "key": user.id,
+    "user": user.name,
+    "title": user.company.name,
+    "description": user.company.catchPhrase,
     "coordinate": {
       "latitude": parseFloat(user.address.geo.lat),
       "longitude": parseFloat(user.address.geo.lng)

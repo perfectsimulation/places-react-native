@@ -10,6 +10,7 @@ import Geolocation from '@react-native-community/geolocation';
 import loadPins from './server';
 import OptionsMenu from './OptionsMenu';
 import AddPinOverlay from './AddPinOverlay';
+import MenuScreen from './MenuScreen';
 
 const Map = () => {
 
@@ -26,6 +27,8 @@ const Map = () => {
   const [newPinName, setNewPinName] = useState(null);
 
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+
+  const [showMenu, setShowMenu] = useState(false);
 
   // Use user position to set initial map region
   useEffect(() => {
@@ -83,6 +86,10 @@ const Map = () => {
     setNewPinName(null);
   }
 
+  const onCloseMenu = () => {
+    setShowMenu(false);
+  }
+
   const createPin = () => {
     const pinCoordinate = {
       latitude: currentRegion.latitude,
@@ -117,6 +124,7 @@ const Map = () => {
             <Marker
               key={index}
               title={pin.title}
+              description={pin.description}
               coordinate={pin.coordinate}
               tracksViewChanges={false}
             >
@@ -151,11 +159,18 @@ const Map = () => {
           showOptionsMenu={showOptionsMenu}
           onPressConnectButton={() => console.log('connect')}
           onPressExploreButton={() => console.log('explore')}
-          onPressPlacesButton={() => console.log('places')}
+          onPressPlacesButton={() => setShowMenu(true)}
           onPressSavedButton={() => console.log('saved')}
           onPressAddButton={() => onPressAddOptionButton()}
           onPressCloseButton={() => setShowOptionsMenu(false)}
         />
+        {showMenu && (
+          <MenuScreen
+            headerIconSource={require('./icons/open.png')}
+            pins={pins}
+            onClose={() => onCloseMenu()}
+          />
+        )}
       </View>
     </>
   );
@@ -183,7 +198,8 @@ const styles = StyleSheet.create({
     height: 52,
     width: 52,
     borderRadius: 52,
-    backgroundColor: '#00000088',
+    backgroundColor: '#ffffffdf',
+    backgroundColor: '#000000df',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'
