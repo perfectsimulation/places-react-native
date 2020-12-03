@@ -7,6 +7,7 @@ import {
 
 const CloseButton = (props) => {
 
+  // null check
   const { onClose } = props;
   const onPress = onClose ?? (() => {});
 

@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
+  Text,
   Image,
   FlatList,
   StyleSheet
 } from 'react-native';
-import CloseButton from './CloseButton';
+import Menu from './Menu';
 import PinCard from './PinCard';
 
-const MenuScreen = (props) => {
+const PlacesMenu = (props) => {
+
   const {
-    headerIconSource,
+    shouldShow,
     pins,
     onClose
   } = props;
 
+  // null checks / default values
+  const show = shouldShow ?? true;
+  const onClosePlaces = onClose ?? (() => {});
+
+  // pins
   const [listItems, setListItems] = useState(pins);
 
   useEffect(() => {
@@ -26,12 +33,12 @@ const MenuScreen = (props) => {
   );
 
   return (
-    <>
+    <Menu
+      shouldShow={show}
+      onClose={() => onClosePlaces()}
+    >
       <View style={styles.container}>
-        <Image
-          style={styles.headerIcon}
-          source={headerIconSource}
-        />
+        <Text style={styles.headerText}>Places</Text>
         <FlatList
           style={styles.flatList}
           keyExtractor={(pin) => pin.key.toString()}
@@ -39,8 +46,7 @@ const MenuScreen = (props) => {
           renderItem={({ item }) => renderPin(item)}
         />
       </View>
-      <CloseButton onClose={() => onClose()}/>
-    </>
+    </Menu>
   );
 }
 
@@ -49,20 +55,26 @@ const styles = StyleSheet.create({
     position: 'absolute',
     height: '100%',
     width: '100%',
-    backgroundColor: '#000000cf',
+    backgroundColor: '#ffffff10',
     display: 'flex',
     alignItems: 'center'
   },
-  headerIcon: {
+  headerText: {
     position: 'absolute',
-    top: 64,
-    height: 44,
-    width: 44
+    top: 60,
+    paddingLeft: 2,
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    color: 'white'
   },
   flatList: {
-    top: 114,
+    marginBottom: 96,
+    top: 96,
     width: '100%'
   }
 });
 
-export default MenuScreen;
+export default PlacesMenu;

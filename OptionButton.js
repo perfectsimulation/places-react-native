@@ -151,9 +151,9 @@ const styles = StyleSheet.create({
   label: {
     position: 'absolute',
     bottom: 70,
-    fontSize: 12,
-    height: 16, 
+    height: 16,
     width: 88,
+    fontSize: 12,
     textAlign: 'center',
     textTransform: 'uppercase',
     letterSpacing: 2,

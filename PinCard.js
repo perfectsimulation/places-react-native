@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
-  Image,
   Text,
-  StyleSheet,
-  TouchableWithoutFeedback
+  Image,
+  StyleSheet
 } from 'react-native';
 
 const PinCard = (props) => {
@@ -13,16 +12,18 @@ const PinCard = (props) => {
   const {
     title,
     description,
-    user,
     coordinate,
+    photo
   } = pin;
 
   return (
     <View style={styles.container}>
-      <View style={styles.image} />
+      <View style={styles.imageContainer}>
+        <Image style={styles.image} source={{ uri: photo }} />
+      </View>
       <View style={styles.textContainer}>
         <Text style={styles.titleText}>{title}</Text>
-        <Text style={styles.descriptionText}>{description}</Text>
+        <Text style={styles.subText}>{description}</Text>
       </View>
     </View>
   );
@@ -32,22 +33,31 @@ const styles = StyleSheet.create({
   container: {
     borderBottomWidth: 1,
     borderStyle: 'solid',
-    borderColor: 'yellow',
-    backgroundColor: 'darkred'
+    borderColor: '#ffffff20'
   },
-  image: {
+  imageContainer: {
+    padding: 10,
     maxHeight: 140,
     height: 140,
-    width: '100%',
-    backgroundColor: 'gray'
+    width: '100%'
+  },
+  image: {
+    height: '100%',
+    width: '100%'
   },
   textContainer: {
-    margin: 10
+    margin: 10,
+    marginTop: 0
   },
   titleText: {
+    fontWeight: '500',
     color: 'white'
   },
-  descriptionText: {},
+  subText: {
+    marginTop: 2,
+    fontSize: 12,
+    color: '#ffffff88'
+  },
   addNoteTouchable: {},
   notification: {},
 });

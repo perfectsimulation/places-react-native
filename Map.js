@@ -10,7 +10,7 @@ import Geolocation from '@react-native-community/geolocation';
 import loadPins from './server';
 import OptionsMenu from './OptionsMenu';
 import AddPinOverlay from './AddPinOverlay';
-import MenuScreen from './MenuScreen';
+import PlacesMenu from './PlacesMenu';
 
 const Map = () => {
 
@@ -86,6 +86,11 @@ const Map = () => {
     setNewPinName(null);
   }
 
+  const onPressPlacesButton = () => {
+    setShowOptionsMenu(false);
+    setShowMenu(true);
+  }
+
   const onCloseMenu = () => {
     setShowMenu(false);
   }
@@ -97,8 +102,9 @@ const Map = () => {
     };
 
     const pin = {
+      key: pins.length + 1,
+      title: newPinName,
       coordinate: pinCoordinate,
-      title: newPinName
     };
 
     pins.push(pin);
@@ -159,18 +165,16 @@ const Map = () => {
           showOptionsMenu={showOptionsMenu}
           onPressConnectButton={() => console.log('connect')}
           onPressExploreButton={() => console.log('explore')}
-          onPressPlacesButton={() => setShowMenu(true)}
+          onPressPlacesButton={() => onPressPlacesButton()}
           onPressSavedButton={() => console.log('saved')}
           onPressAddButton={() => onPressAddOptionButton()}
-          onPressCloseButton={() => setShowOptionsMenu(false)}
+          onCloseOptionsMenu={() => setShowOptionsMenu(false)}
         />
-        {showMenu && (
-          <MenuScreen
-            headerIconSource={require('./icons/open.png')}
-            pins={pins}
-            onClose={() => onCloseMenu()}
-          />
-        )}
+        <PlacesMenu
+          shouldShow={showMenu}
+          pins={pins}
+          onClose={() => onCloseMenu()}
+        />
       </View>
     </>
   );
@@ -198,7 +202,6 @@ const styles = StyleSheet.create({
     height: 52,
     width: 52,
     borderRadius: 52,
-    backgroundColor: '#ffffffdf',
     backgroundColor: '#000000df',
     display: 'flex',
     justifyContent: 'center',
