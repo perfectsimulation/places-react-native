@@ -97,6 +97,10 @@ const Menu = (props) => {
 
   return (
     <Animated.View
+      onTouchEnd={(e) => {
+        if (e.target == e.currentTarget)
+          setShouldClose(true)
+      }}
       style={[styles.container, {
         transform: [{ translateY: translateAnim }],
           opacity: opacityAnim
@@ -121,7 +125,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     height: '100%',
     width: '100%',
-    backgroundColor: '#000000bf',
+    backgroundColor: '#151515c3',
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center'

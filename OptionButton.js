@@ -11,12 +11,6 @@ import {
 
 const OptionButton = (props) => {
 
-  // optional props: shouldShow,
-  //                 showPosition,
-  //                 hidePosition,
-  //                 transitionDuration,
-  //                 transitionDuration,
-
   const {
     shouldShow,
     showPosition,
@@ -24,6 +18,7 @@ const OptionButton = (props) => {
     transitionDuration
   } = props;
 
+  // null checks / default values
   const show = shouldShow ?? true;
   const showPos = showPosition ?? { x: 0, y: 0 };
   const hidePos = hidePosition ?? { x: 0, y: 0 };
@@ -171,8 +166,7 @@ const styles = StyleSheet.create({
     borderRadius: 68,
     borderColor: 'white',
     borderWidth: 1,
-    borderStyle: 'dashed',
-    backgroundColor: 'transparent'
+    borderStyle: 'dashed'
   },
   feedbackOpacity: {
     position: 'absolute',

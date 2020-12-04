@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  Image,
   FlatList,
   StyleSheet
 } from 'react-native';
@@ -55,7 +54,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     height: '100%',
     width: '100%',
-    backgroundColor: '#ffffff10',
     display: 'flex',
     alignItems: 'center'
   },

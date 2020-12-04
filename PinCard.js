@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
+  Pressable,
   Image,
   StyleSheet
 } from 'react-native';
@@ -17,7 +18,7 @@ const PinCard = (props) => {
   } = pin;
 
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={() => console.log(title)}>
       <View style={styles.imageContainer}>
         <Image style={styles.image} source={{ uri: photo }} />
       </View>
@@ -25,7 +26,7 @@ const PinCard = (props) => {
         <Text style={styles.titleText}>{title}</Text>
         <Text style={styles.subText}>{description}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

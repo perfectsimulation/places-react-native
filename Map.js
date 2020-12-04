@@ -8,6 +8,7 @@ import {
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import loadPins from './server';
+import MenuButton from './MenuButton';
 import OptionsMenu from './OptionsMenu';
 import AddPinOverlay from './AddPinOverlay';
 import PlacesMenu from './PlacesMenu';
@@ -150,20 +151,13 @@ const Map = () => {
           newPinName={newPinName}
           setNewPinName={(text) => setNewPinName(text)}
         />
-        {hideCreatePin && (
-          <Pressable
-            style={styles.menuButton}
-            onPress={() => setShowOptionsMenu(true)}
-          >
-            <Image
-              style={styles.buttonImage}
-              source={require('./icons/open.png')}
-            />
-          </Pressable>
-        )}
+        <MenuButton
+          shouldShow={hideCreatePin}
+          onPress={() => setShowOptionsMenu(true)}
+        />
         <OptionsMenu
           showOptionsMenu={showOptionsMenu}
-          onPressConnectButton={() => console.log('connect')}
+          onPressActivityButton={() => console.log('activity')}
           onPressExploreButton={() => console.log('explore')}
           onPressPlacesButton={() => onPressPlacesButton()}
           onPressSavedButton={() => console.log('saved')}
@@ -195,22 +189,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     height: 40,
     width: 40
-  },
-  menuButton: {
-    position: 'absolute',
-    bottom: 32,
-    height: 52,
-    width: 52,
-    borderRadius: 52,
-    backgroundColor: '#000000df',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  buttonImage: {
-    bottom: 2,
-    height: 36,
-    width: 36
   }
 });
 

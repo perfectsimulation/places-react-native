@@ -8,12 +8,15 @@ import {
   StyleSheet
 } from 'react-native';
 
-const CloseButton = (props) => {
+const MenuButton = (props) => {
 
-  const { onClose } = props;
+  const {
+    shouldShow,
+    onPress
+  } = props;
 
   // null check / default value
-  const onPress = onClose ?? (() => {});
+  const show = shouldShow ?? true;
 
   // capture onPressIn and onPressOut
   const [isPressIn, setIsPressIn] = useState(false);
@@ -30,7 +33,7 @@ const CloseButton = (props) => {
   const scaleValue = useRef(new Animated.Value(0)).current;
   const scale = scaleValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 0.8]
+    outputRange: [0.8, 1]
   });
 
   const feedbackOpacityAnimation = useRef(
@@ -68,6 +71,10 @@ const CloseButton = (props) => {
     }
   }, [isPressOut, scaleValue, opacityValue]);
 
+  if (!show) {
+    return <></>;
+  }
+
   return (
     <Pressable
       style={styles.button}
@@ -76,11 +83,11 @@ const CloseButton = (props) => {
       onPressOut={() => setIsPressOut(true)}
     >
       {isPressIn && (
-        <View style={styles.feedback} />
+        <View style={styles.pressInFeedback} />
       )}
       {isPressOut && (
         <Animated.View
-          style={[styles.feedback, {
+          style={[styles.pressOutFeedback, {
             transform: [ { scale: scale } ],
             opacity: opacity
           }]}
@@ -88,7 +95,7 @@ const CloseButton = (props) => {
       )}
       <Image
         style={styles.icon}
-        source={require('./icons/close.png')}
+        source={require('./icons/open.png')}
       />
     </Pressable>
   );
@@ -101,30 +108,32 @@ const styles = StyleSheet.create({
     height: 52,
     width: 52,
     borderRadius: 52,
-    backgroundColor: '#ffffffef',
+    backgroundColor: '#000000df',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 3,
+    alignItems: 'center'
   },
   icon: {
     bottom: 2,
-    height: 34,
-    width: 34
+    height: 36,
+    width: 36
   },
-  feedback: {
+  pressInFeedback: {
+    position: 'absolute',
+    height: 53,
+    width: 53,
+    borderRadius: 53,
+    borderColor: '#fff',
+    borderWidth: 1
+  },
+  pressOutFeedback: {
     position: 'absolute',
     height: 65,
     width: 65,
     borderRadius: 65,
     borderColor: '#fff',
-    borderWidth: 1,
-    backgroundColor: '#ffffff1f'
+    borderWidth: 1
   }
 });
 
-export default CloseButton;
+export default MenuButton;
