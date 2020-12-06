@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  View,
   StyleSheet
 } from 'react-native';
 import Menu from './Menu';
@@ -9,7 +8,7 @@ import OptionButton from './OptionButton';
 const OptionsMenu = (props) => {
 
   const {
-    showOptionsMenu,
+    shouldShow,
     onPressActivityButton, // top left
     onPressExploreButton,  // top right
     onPressPlacesButton,   // middle
@@ -21,12 +20,12 @@ const OptionsMenu = (props) => {
   return (
     <>
       <Menu
-        shouldShow={showOptionsMenu}
+        shouldShow={shouldShow}
         onClose={() => onCloseOptionsMenu()}
       >
         <OptionButton
           onPress={() => onPressActivityButton()}
-          shouldShow={showOptionsMenu}
+          shouldShow={shouldShow}
           showPosition={{ x: -120, y: -300 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Activity'}
@@ -36,7 +35,7 @@ const OptionsMenu = (props) => {
         />
         <OptionButton
           onPress={() => onPressExploreButton()}
-          shouldShow={showOptionsMenu}
+          shouldShow={shouldShow}
           showPosition={{ x: 120, y: -300 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Explore'}
@@ -46,7 +45,7 @@ const OptionsMenu = (props) => {
         />
         <OptionButton
           onPress={() => onPressPlacesButton()}
-          shouldShow={showOptionsMenu}
+          shouldShow={shouldShow}
           showPosition={{ x: 0, y: -200 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Places'}
@@ -56,7 +55,7 @@ const OptionsMenu = (props) => {
         />
         <OptionButton
           onPress={() => onPressSavedButton()}
-          shouldShow={showOptionsMenu}
+          shouldShow={shouldShow}
           showPosition={{ x: -120, y: -100 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Saved'}
@@ -66,7 +65,7 @@ const OptionsMenu = (props) => {
         />
         <OptionButton
           onPress={() => onPressAddButton()}
-          shouldShow={showOptionsMenu}
+          shouldShow={shouldShow}
           showPosition={{ x: 120, y: -100 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Add'}

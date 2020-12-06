@@ -1,34 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Pressable,
   Image,
   StyleSheet
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import loadPins from './server';
+import AddPinOverlay from './AddPinOverlay';
 import MenuButton from './MenuButton';
 import OptionsMenu from './OptionsMenu';
-import AddPinOverlay from './AddPinOverlay';
 import PlacesMenu from './PlacesMenu';
+import PinDetail from './PinDetail';
 
 const Map = () => {
 
   const [currentRegion, setCurrentRegion] = useState(null);
-
   const [pins, setPins] = useState([]);
-
-  const [hideCreatePin, setHideCreatePin] = useState(true);
-
+  const [showAddPinOverlay, setShowAddPinOverlay] = useState(false);
   const [isDraggingMap, setIsDraggingMap] = useState(false);
-
   const [isNamingNewPin, setIsNamingNewPin] = useState(false);
-
   const [newPinName, setNewPinName] = useState(null);
-
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
-
   const [showMenu, setShowMenu] = useState(false);
 
   // Use user position to set initial map region
@@ -70,19 +63,19 @@ const Map = () => {
     setIsNamingNewPin(true);
   }
 
-  const onPressAddOptionButton = () => {
-    setHideCreatePin(false);
+  const onPressAddButton = () => {
+    setShowAddPinOverlay(true);
     setIsNamingNewPin(true);
     setShowOptionsMenu(false);
   }
 
   const onPressCancelButton = () => {
-    setHideCreatePin(true);
+    setShowAddPinOverlay(false);
   }
 
   const onPressConfirmButton = () => {
     createPin();
-    setHideCreatePin(true);
+    setShowAddPinOverlay(false);
     setIsNamingNewPin(false);
     setNewPinName(null);
   }
@@ -116,61 +109,64 @@ const Map = () => {
   }
 
   return (
-    <>
-      <View style={styles.container}>
-        <MapView
-          style={styles.map}
-          showsUserLocation={true}
-          mapType={'hybrid'}
-          initialRegion={currentRegion}
-          onRegionChangeComplete={(region) => setCurrentRegion(region)}
-          onTouchStart={() => onTouchMapStart()}
-          onTouchEnd={() => onTouchMapEnd()}
-        >
-          {pins.map((pin, index) => (
-            <Marker
-              key={index}
-              title={pin.title}
-              description={pin.description}
-              coordinate={pin.coordinate}
-              tracksViewChanges={false}
-            >
-              <Image
-                style={styles.pinImage}
-                source={require('./icons/map-pin.png')}
-              />
-            </Marker>
-          ))}
-        </MapView>
-        <AddPinOverlay
-          hide={hideCreatePin}
-          isDraggingMap={isDraggingMap}
-          isNamingPin={isNamingNewPin}
-          onPressCancelButton={() => onPressCancelButton()}
-          onPressConfirmButton={() => onPressConfirmButton()}
-          newPinName={newPinName}
-          setNewPinName={(text) => setNewPinName(text)}
-        />
-        <MenuButton
-          shouldShow={hideCreatePin}
-          onPress={() => setShowOptionsMenu(true)}
-        />
-        <OptionsMenu
-          showOptionsMenu={showOptionsMenu}
-          onPressActivityButton={() => console.log('activity')}
-          onPressExploreButton={() => console.log('explore')}
-          onPressPlacesButton={() => onPressPlacesButton()}
-          onPressSavedButton={() => console.log('saved')}
-          onPressAddButton={() => onPressAddOptionButton()}
-          onCloseOptionsMenu={() => setShowOptionsMenu(false)}
-        />
-        <PlacesMenu
-          shouldShow={showMenu}
-          pins={pins}
-          onClose={() => onCloseMenu()}
-        />
-      </View>
-    </>
+    <View style={styles.container}>
+      <MapView
+        style={styles.map}
+        showsUserLocation={true}
+        mapType={'hybrid'}
+        initialRegion={currentRegion}
+        onRegionChangeComplete={(region) => setCurrentRegion(region)}
+        onTouchStart={() => onTouchMapStart()}
+        onTouchEnd={() => onTouchMapEnd()}
+      >
+        {pins.map((pin, index) => (
+          <Marker
+            key={index}
+            title={pin.title}
+            description={pin.description}
+            coordinate={pin.coordinate}
+            tracksViewChanges={false}
+          >
+            <Image
+              style={styles.pinImage}
+              source={require('./icons/map-pin.png')}
+            />
+          </Marker>
+        ))}
+      </MapView>
+      <MenuButton
+        shouldShow={!showAddPinOverlay}
+        onPress={() => setShowOptionsMenu(true)}
+      />
+      <AddPinOverlay
+        shouldShow={showAddPinOverlay}
+        isDraggingMap={isDraggingMap}
+        isNamingPin={isNamingNewPin}
+        onPressCancelButton={() => onPressCancelButton()}
+        onPressConfirmButton={() => onPressConfirmButton()}
+        newPinName={newPinName}
+        setNewPinName={(text) => setNewPinName(text)}
+      />
+      <OptionsMenu
+        shouldShow={showOptionsMenu}
+        onPressActivityButton={() => console.log('activity')}
+        onPressExploreButton={() => console.log('explore')}
+        onPressPlacesButton={() => onPressPlacesButton()}
+        onPressSavedButton={() => console.log('saved')}
+        onPressAddButton={() => onPressAddButton()}
+        onCloseOptionsMenu={() => setShowOptionsMenu(false)}
+      />
+      <PlacesMenu
+        shouldShow={showMenu}
+        pins={pins}
+        onClose={() => onCloseMenu()}
+      />
+      <PinDetail
+        shouldShow={true}
+        showPreview={true}
+        pin={pins[0]}
+      />
+    </View>
   );
 };
 

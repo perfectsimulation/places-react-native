@@ -9,8 +9,9 @@ import {
 import OptionButton from './OptionButton';
 
 const AddPinOverlay = (props) => {
+
   const {
-    hide,
+    shouldShow,
     isDraggingMap,
     isNamingPin,
     newPinName,
@@ -19,37 +20,39 @@ const AddPinOverlay = (props) => {
     onPressConfirmButton,
   } = props;
 
+  if (!shouldShow) {
+    return <></>;
+  }
+
   return (
     <>
-      {!hide && !isDraggingMap && (
+      {!isDraggingMap && (
         <Text style={styles.dragMapText}>
           Drag map to position new pin
         </Text>
       )}
-      {!hide && (
-        <View style={styles.createPinContainer}>
-          <Image
-            style={styles.createPinImage}
-            source={require('./icons/map-pin.png')}
-          />
-          {isNamingPin && !isDraggingMap && (
-            <View style={styles.newPinNameContainer}>
-              <TextInput
-                style={styles.newPinNameInput}
-                value={newPinName}
-                placeholder={'Name this pin'}
-                placeholderTextColor={'#ffffff7e'}
-                underlineColorAndroid={'transparent'}
-                autoCapitalize={'none'}
-                autoCompleteType={'off'}
-                maxLength={28}
-                onChangeText={(text) => setNewPinName(text)}
-              />
-            </View>
-          )}
-        </View>
-      )}
-      {!hide && !isDraggingMap && (
+      <View style={styles.createPinContainer}>
+        <Image
+          style={styles.createPinImage}
+          source={require('./icons/map-pin.png')}
+        />
+        {isNamingPin && !isDraggingMap && (
+          <View style={styles.newPinNameContainer}>
+            <TextInput
+              style={styles.newPinNameInput}
+              value={newPinName}
+              placeholder={'Name this pin'}
+              placeholderTextColor={'#ffffff7e'}
+              underlineColorAndroid={'transparent'}
+              autoCapitalize={'none'}
+              autoCompleteType={'off'}
+              maxLength={28}
+              onChangeText={(text) => setNewPinName(text)}
+            />
+          </View>
+        )}
+      </View>
+      {!isDraggingMap && (
         <View style={styles.confirmCancelButtonsContainer}>
           <OptionButton
             onPress={() => onPressCancelButton()}
@@ -78,7 +81,7 @@ const styles = StyleSheet.create({
     height: 30,
     width: '100%',
     backgroundColor: '#000000cf',
-    fontSize: 20,
+    fontSize: 16,
     lineHeight: 30,
     fontWeight: '400',
     textAlign: 'center',
@@ -112,7 +115,7 @@ const styles = StyleSheet.create({
     paddingRight: 6,
     backgroundColor: '#000000cf',
     flex: 1,
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '400',
     color: 'white'
   },
