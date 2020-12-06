@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,21 +6,36 @@ import {
   Image,
   StyleSheet
 } from 'react-native';
+import { getPhotoUrlById } from './server';
 
 const PinCard = (props) => {
 
   const { pin } = props;
   const {
+    photoIds,
     title,
     description,
-    coordinate,
-    photo
+    coordinate
   } = pin;
+
+  const [photoUrl, setPhotoUrl] = useState(null);
+
+  // Fetch pin photo url from photo ID of pin
+  useEffect(() => {
+    const getPhoto = async () => {
+      const photoUrl = await getPhotoUrlById(photoIds)
+      return photoUrl;
+    }
+
+    getPhoto()
+      .then((photoUrl) => { setPhotoUrl(photoUrl) })
+      .catch((error) => { alert(error.message) });
+  }, [photoIds]);
 
   return (
     <Pressable style={styles.container} onPress={() => console.log(title)}>
       <View style={styles.imageContainer}>
-        <Image style={styles.image} source={{ uri: photo }} />
+        <Image style={styles.image} source={{ uri: photoUrl }} />
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.titleText}>{title}</Text>

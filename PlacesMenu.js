@@ -40,7 +40,7 @@ const PlacesMenu = (props) => {
         <Text style={styles.headerText}>Places</Text>
         <FlatList
           style={styles.flatList}
-          keyExtractor={(pin) => pin.key.toString()}
+          keyExtractor={(pin) => pin.id.toString()}
           data={listItems}
           renderItem={({ item }) => renderPin(item)}
         />

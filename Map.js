@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
-import loadPins from './server';
+import { getPins } from './server';
 import AddPinOverlay from './AddPinOverlay';
 import MenuButton from './MenuButton';
 import OptionsMenu from './OptionsMenu';
@@ -45,7 +45,7 @@ const Map = () => {
   // Fetch pins
   useEffect(() => {
     const getPinsData = async () => {
-      const pinsData = await loadPins();
+      const pinsData = await getPins();
       return pinsData;
     }
 
@@ -162,7 +162,7 @@ const Map = () => {
         onClose={() => onCloseMenu()}
       />
       <PinDetail
-        shouldShow={true}
+        shouldShow={false}
         showPreview={true}
         pin={pins[0]}
       />
