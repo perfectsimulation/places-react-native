@@ -29,7 +29,8 @@ const OptionsMenu = (props) => {
           showPosition={{ x: -120, y: -300 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Activity'}
-          iconImageName={require('./icons/activity.png')}
+          iconSource={require('./icons/activity.png')}
+          iconTouchSource={require('./icons/activity-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.activityButtonImage}
         />
@@ -39,7 +40,8 @@ const OptionsMenu = (props) => {
           showPosition={{ x: 120, y: -300 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Explore'}
-          iconImageName={require('./icons/search.png')}
+          iconSource={require('./icons/search.png')}
+          iconTouchSource={require('./icons/search-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.exploreButtonImage}
         />
@@ -49,7 +51,8 @@ const OptionsMenu = (props) => {
           showPosition={{ x: 0, y: -200 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Places'}
-          iconImageName={require('./icons/globe.png')}
+          iconSource={require('./icons/places.png')}
+          iconTouchSource={require('./icons/places-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.placesButtonImage}
         />
@@ -59,7 +62,8 @@ const OptionsMenu = (props) => {
           showPosition={{ x: -120, y: -100 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Saved'}
-          iconImageName={require('./icons/saved.png')}
+          iconSource={require('./icons/bookmark.png')}
+          iconTouchSource={require('./icons/bookmark-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.savedButtonImage}
         />
@@ -69,7 +73,8 @@ const OptionsMenu = (props) => {
           showPosition={{ x: 120, y: -100 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Add'}
-          iconImageName={require('./icons/add.png')}
+          iconSource={require('./icons/add.png')}
+          iconTouchSource={require('./icons/add-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.addButtonImage}
         />
@@ -81,24 +86,26 @@ const OptionsMenu = (props) => {
 const styles = StyleSheet.create({
   optionButtonContainer: {
     position: 'absolute',
-    bottom: 14
+    bottom: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // backgroundColor: 'darkred'
   },
   activityButtonImage: {
-    height: 38,
-    width: 38
+    height: 44,
+    width: 44
   },
   exploreButtonImage: {
     height: 38,
     width: 38
   },
   placesButtonImage: {
-    height: 58,
-    width: 58
+    height: 52,
+    width: 52
   },
   savedButtonImage: {
-    top: 2,
-    height: 46,
-    width: 46
+    height: 36,
+    width: 36
   },
   addButtonImage: {
     height: 40,

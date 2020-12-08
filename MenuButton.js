@@ -40,7 +40,7 @@ const MenuButton = (props) => {
     Animated.timing(
       opacityValue, {
         toValue: 1,
-        duration: 255,
+        duration: 127,
         easing: Easing.circle,
         useNativeDriver: true
       }
@@ -51,7 +51,7 @@ const MenuButton = (props) => {
     Animated.timing(
       scaleValue, {
         toValue: 1,
-        duration: 255,
+        duration: 127,
         easing: Easing.out(Easing.circle),
         useNativeDriver: true
       }

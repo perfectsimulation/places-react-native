@@ -24,24 +24,43 @@ const OptionButton = (props) => {
   const hidePos = hidePosition ?? { x: 0, y: 0 };
   const duration = transitionDuration ?? 0;
 
-  // animate onPress feedback
-  const [isPressing, setIsPressing] = useState(false);
-  const feedbackValue = useRef(new Animated.Value(0)).current;
-  const rotation = feedbackValue.interpolate({
+  // capture onPressIn and onPressOut
+  const [isPressIn, setIsPressIn] = useState(false);
+  const [isPressOut, setIsPressOut] = useState(false);
+
+  // animate onPressIn feedback opacity
+  const opacityValue = useRef(new Animated.Value(0)).current;
+  const opacity = opacityValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '360deg']
+    outputRange: [1, 0]
   });
 
-  const feedbackAnimation = useRef(
-    Animated.loop(
-      Animated.timing(
-        feedbackValue, {
-          toValue: 1,
-          duration: 100,
-          easing: Easing.linear,
-          useNativeDriver: true
-        }
-      )
+  // animate onPressIn feedback scale
+  const scaleValue = useRef(new Animated.Value(0)).current;
+  const scale = scaleValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1]
+  });
+
+  const feedbackOpacityAnimation = useRef(
+    Animated.timing(
+      opacityValue, {
+        toValue: 1,
+        duration: 127,
+        easing: Easing.circle,
+        useNativeDriver: true
+      }
+    )
+  ).current;
+
+  const feedbackScaleAnimation = useRef(
+    Animated.timing(
+      scaleValue, {
+        toValue: 1,
+        duration: 127,
+        easing: Easing.out(Easing.circle),
+        useNativeDriver: true
+      }
     )
   ).current;
 
@@ -65,13 +84,19 @@ const OptionButton = (props) => {
     ).start();
   }, [show, positionValue]);
 
+  // animate touch feedback
   useEffect(() => {
-    if (isPressing) {
-      feedbackAnimation.start();
+    if (isPressOut) {
+      setIsPressIn(false);
+      feedbackOpacityAnimation.start();
+      feedbackScaleAnimation.start(() => {
+        setIsPressOut(false);
+      });
     } else {
-      feedbackAnimation.reset();
+      feedbackOpacityAnimation.reset();
+      feedbackScaleAnimation.reset();
     }
-  }, [isPressing, feedbackValue]);
+  }, [isPressOut, scaleValue, opacityValue]);
 
   useEffect(() => {
     setIsFirstRender(false);
@@ -80,7 +105,8 @@ const OptionButton = (props) => {
   const {
     onPress,
     labelText,
-    iconImageName,
+    iconSource,
+    iconTouchSource,
     containerStyle,
     buttonStyle,
     labelStyle,
@@ -101,27 +127,40 @@ const OptionButton = (props) => {
         ],
       }]}
     >
+      {labelText && (
+        <Text style={label}>{labelText}</Text>
+      )}
       <Pressable
         style={button}
-        onPressIn={() => setIsPressing(true)}
-        onPressOut={() => setIsPressing(false)}
+        onPressIn={() => setIsPressIn(true)}
+        onPressOut={() => setIsPressOut(true)}
         onPress={() => onPress()}
       >
-        {labelText && (
-          <Text style={label}>{labelText}</Text>
+        {iconSource && (
+          <Image
+            style={[{ position: 'absolute' }, icon]}
+            source={iconSource}
+          />
         )}
-        {isPressing && (
+        {(isPressIn || isPressOut) && iconTouchSource && (
           <>
-            <Animated.View
-              style={[styles.feedbackBorder, {
-                transform: [ { rotate: rotation } ]
-              }]}
+            <View style={styles.iconTouchBackground} />
+            <Image
+              style={[{ position: 'absolute' }, icon]}
+              source={iconTouchSource}
             />
-            <View style={styles.feedbackOpacity} />
           </>
         )}
-        {iconImageName && (
-          <Image style={icon} source={iconImageName} />
+        {isPressIn && (
+          <View style={styles.pressInFeedback} />
+        )}
+        {isPressOut && (
+          <Animated.View
+            style={[styles.pressOutFeedback, {
+              transform: [ { scale: scale } ],
+              opacity: opacity
+            }]}
+          />
         )}
       </Pressable>
     </Animated.View>
@@ -138,44 +177,47 @@ const styles = StyleSheet.create({
     borderRadius: 64,
     margin: 12,
     backgroundColor: '#ffffffef',
-    overflow: 'visible',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'
   },
   label: {
     position: 'absolute',
-    bottom: 70,
+    bottom: 84,
+    paddingLeft: 3,
     height: 16,
-    width: 88,
     fontSize: 12,
     textAlign: 'center',
     textTransform: 'uppercase',
     letterSpacing: 2,
-    // backgroundColor: 'darkred',
     color: 'white'
   },
   icon: {
+    position: 'absolute',
     height: 42,
     width: 42
   },
-  feedbackBorder: {
-    position: 'absolute',
-    height: 68,
-    width: 68,
-    borderRadius: 68,
-    borderColor: 'white',
-    borderWidth: 1,
-    borderStyle: 'dashed'
+  iconTouchBackground: {
+    height: 65,
+    width: 65,
+    borderRadius: 65,
+    backgroundColor: '#000000df'
   },
-  feedbackOpacity: {
+  pressInFeedback: {
     position: 'absolute',
-    height: 64,
-    width: 64,
-    borderRadius: 64,
-    margin: 12,
-    backgroundColor: '#000000',
-    opacity: 0.2
+    height: 65,
+    width: 65,
+    borderRadius: 65,
+    borderColor: 'white',
+    borderWidth: 2
+  },
+  pressOutFeedback: {
+    position: 'absolute',
+    height: 80,
+    width: 80,
+    borderRadius: 80,
+    borderColor: 'white',
+    borderWidth: 1
   }
 });
 
