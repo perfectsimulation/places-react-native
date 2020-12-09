@@ -12,19 +12,26 @@ const OptionsMenu = (props) => {
     onPressActivityButton, // top left
     onPressExploreButton,  // top right
     onPressPlacesButton,   // middle
-    onPressSavedButton,    // bottom left
+    onPressUserButton,    // bottom left
     onPressAddButton,      // bottom right
     onCloseOptionsMenu
   } = props;
+
+  const onActivity = onPressActivityButton ?? (() => {});
+  const onExplore = onPressExploreButton ?? (() => {});
+  const onPlaces = onPressPlacesButton ?? (() => {});
+  const onUser = onPressUserButton ?? (() => {});
+  const onAdd = onPressAddButton ?? (() => {});
+  const onClose = onCloseOptionsMenu ?? (() => {});
 
   return (
     <>
       <Menu
         shouldShow={shouldShow}
-        onClose={() => onCloseOptionsMenu()}
+        onClose={() => onClose()}
       >
         <OptionButton
-          onPress={() => onPressActivityButton()}
+          onPress={() => onActivity()}
           shouldShow={shouldShow}
           showPosition={{ x: -120, y: -300 }}
           hidePosition={{ x: 0, y: 0 }}
@@ -35,18 +42,18 @@ const OptionsMenu = (props) => {
           iconStyle={styles.activityButtonImage}
         />
         <OptionButton
-          onPress={() => onPressExploreButton()}
+          onPress={() => onExplore()}
           shouldShow={shouldShow}
           showPosition={{ x: 120, y: -300 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Explore'}
-          iconSource={require('./icons/search.png')}
-          iconTouchSource={require('./icons/search-touch.png')}
+          iconSource={require('./icons/arrows.png')}
+          iconTouchSource={require('./icons/arrows-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.exploreButtonImage}
         />
         <OptionButton
-          onPress={() => onPressPlacesButton()}
+          onPress={() => onPlaces()}
           shouldShow={shouldShow}
           showPosition={{ x: 0, y: -200 }}
           hidePosition={{ x: 0, y: 0 }}
@@ -57,18 +64,18 @@ const OptionsMenu = (props) => {
           iconStyle={styles.placesButtonImage}
         />
         <OptionButton
-          onPress={() => onPressSavedButton()}
+          onPress={() => onUser()}
           shouldShow={shouldShow}
           showPosition={{ x: -120, y: -100 }}
           hidePosition={{ x: 0, y: 0 }}
-          labelText={'Saved'}
-          iconSource={require('./icons/bookmark.png')}
-          iconTouchSource={require('./icons/bookmark-touch.png')}
+          labelText={'User'}
+          iconSource={require('./icons/smile.png')}
+          iconTouchSource={require('./icons/smile-touch.png')}
           containerStyle={styles.optionButtonContainer}
-          iconStyle={styles.savedButtonImage}
+          iconStyle={styles.userButtonImage}
         />
         <OptionButton
-          onPress={() => onPressAddButton()}
+          onPress={() => onAdd()}
           shouldShow={shouldShow}
           showPosition={{ x: 120, y: -100 }}
           hidePosition={{ x: 0, y: 0 }}
@@ -92,20 +99,20 @@ const styles = StyleSheet.create({
     // backgroundColor: 'darkred'
   },
   activityButtonImage: {
-    height: 44,
-    width: 44
+    height: 52,
+    width: 52
   },
   exploreButtonImage: {
-    height: 38,
-    width: 38
+    height: 52,
+    width: 52
   },
   placesButtonImage: {
     height: 52,
     width: 52
   },
-  savedButtonImage: {
-    height: 36,
-    width: 36
+  userButtonImage: {
+    height: 42,
+    width: 42
   },
   addButtonImage: {
     height: 40,

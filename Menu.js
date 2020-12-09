@@ -2,11 +2,15 @@ import React, { useRef, useState, useEffect } from 'react';
 import {
   Animated,
   View,
+  Dimensions,
   StyleSheet
 } from 'react-native';
 import CloseButton from './CloseButton';
 
 const Menu = (props) => {
+
+  const window = Dimensions.get('window');
+  const height = window.height;
 
   const {
     shouldShow,
@@ -21,9 +25,9 @@ const Menu = (props) => {
   const onCloseMenu = onClose ?? (() => {});
   const transitionDuration = animationDuration ?? 300;
 
-  // translate entire menu on/off-screen TODO use window height
-  const beforeShow = show ? 1000 : 0;
-  const afterShow = show ? 0 : 1000;
+  // translate entire menu on/off-screen
+  const beforeShow = show ? height : 0;
+  const afterShow = show ? 0 : height;
 
   // fade entire menu in/out
   const beforeOpacity = show ? 0 : 1;

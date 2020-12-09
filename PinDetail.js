@@ -15,21 +15,19 @@ const PinDetail = (props) => {
   const preview = showPreview ?? true;
   const fullView = !preview;
 
-  if (!show) {
-    return <></>;
-  }
-
   if (!pin) {
     return <></>;
   }
 
   if (preview) {
-    return <PinDetailPreview pin={pin} />
+    return <PinDetailPreview pin={pin} shouldShow={show} />
   }
 
   if (fullView) {
-    return <PinDetailFull pin={pin} />
+    return <PinDetailFull pin={pin} shouldShow={show}/>
   }
+
+  return <></>;
 
 }
 

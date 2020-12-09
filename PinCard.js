@@ -10,12 +10,11 @@ import { getPhotoUrlById } from './server';
 
 const PinCard = (props) => {
 
-  const { pin } = props;
+  const { pin, onSelect } = props;
   const {
     photoIds,
     title,
-    description,
-    coordinate
+    description
   } = pin;
 
   const [photoUrl, setPhotoUrl] = useState(null);
@@ -33,7 +32,7 @@ const PinCard = (props) => {
   }, [photoIds]);
 
   return (
-    <Pressable style={styles.container} onPress={() => console.log(title)}>
+    <Pressable style={styles.container} onPress={() => onSelect(pin)}>
       <View style={styles.imageContainer}>
         <Image style={styles.image} source={{ uri: photoUrl }} />
       </View>

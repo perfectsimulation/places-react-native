@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Image,
   StyleSheet
 } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, Callout } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import { getPins } from './server';
 import AddPinOverlay from './AddPinOverlay';
@@ -15,8 +15,12 @@ import PinDetail from './PinDetail';
 
 const Map = () => {
 
+  const map = useRef();
+
   const [currentRegion, setCurrentRegion] = useState(null);
   const [pins, setPins] = useState([]);
+  const [focusedPin, setFocusedPin] = useState(null);
+  const [showPinDetail, setShowPinDetail] = useState(false);
   const [showAddPinOverlay, setShowAddPinOverlay] = useState(false);
   const [isDraggingMap, setIsDraggingMap] = useState(false);
   const [isNamingNewPin, setIsNamingNewPin] = useState(false);
@@ -56,11 +60,17 @@ const Map = () => {
 
   const onTouchMapStart = () => {
     setIsDraggingMap(true);
+    setShowPinDetail(false);
   }
 
   const onTouchMapEnd = () => {
     setIsDraggingMap(false);
     setIsNamingNewPin(true);
+  }
+
+  const OnPressPin = (pin) => {
+    setFocusedPin(pin);
+    setShowPinDetail(true);
   }
 
   const onPressAddButton = () => {
@@ -83,6 +93,26 @@ const Map = () => {
   const onPressPlacesButton = () => {
     setShowOptionsMenu(false);
     setShowMenu(true);
+  }
+
+  const onSelectPlacesMenuItem = (pin) => {
+    if (!map || !map.current) return;
+    const pinRegion = {
+      latitude: pin.coordinate.latitude,
+      longitude: pin.coordinate.longitude,
+      latitudeDelta: currentRegion.latitudeDelta,
+      longitudeDelta: currentRegion.longitudeDelta
+    };
+
+    // close places menu
+    setShowMenu(false);
+
+    // animate scroll to the pin on map
+    map.current.animateToRegion(pinRegion, 255);
+
+    // set the focused pin and display pin detail
+    setFocusedPin(pin);
+    setShowPinDetail(true);
   }
 
   const onCloseMenu = () => {
@@ -111,6 +141,7 @@ const Map = () => {
   return (
     <View style={styles.container}>
       <MapView
+        ref={map}
         style={styles.map}
         showsUserLocation={true}
         mapType={'hybrid'}
@@ -126,11 +157,14 @@ const Map = () => {
             description={pin.description}
             coordinate={pin.coordinate}
             tracksViewChanges={false}
+            stopPropagation={true}
+            onPress={() => OnPressPin(pin)}
           >
             <Image
               style={styles.pinImage}
               source={require('./icons/map-pin.png')}
             />
+            <Callout tooltip />
           </Marker>
         ))}
       </MapView>
@@ -152,7 +186,7 @@ const Map = () => {
         onPressActivityButton={() => console.log('activity')}
         onPressExploreButton={() => console.log('explore')}
         onPressPlacesButton={() => onPressPlacesButton()}
-        onPressSavedButton={() => console.log('saved')}
+        onPressUserButton={() => console.log('user')}
         onPressAddButton={() => onPressAddButton()}
         onCloseOptionsMenu={() => setShowOptionsMenu(false)}
       />
@@ -160,11 +194,12 @@ const Map = () => {
         shouldShow={showMenu}
         pins={pins}
         onClose={() => onCloseMenu()}
+        onSelectItem={(pin) => onSelectPlacesMenuItem(pin)}
       />
       <PinDetail
-        shouldShow={false}
+        shouldShow={showPinDetail}
         showPreview={true}
-        pin={pins[0]}
+        pin={focusedPin ?? {}}
       />
     </View>
   );

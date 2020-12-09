@@ -113,6 +113,7 @@ const OptionButton = (props) => {
     iconStyle,
   } = props;
 
+  const handlePress = onPress ?? (() => {});
   const container = containerStyle ?? styles.container;
   const button = buttonStyle ?? styles.button;
   const label = labelStyle ?? styles.label;
@@ -134,7 +135,7 @@ const OptionButton = (props) => {
         style={button}
         onPressIn={() => setIsPressIn(true)}
         onPressOut={() => setIsPressOut(true)}
-        onPress={() => onPress()}
+        onPress={() => handlePress()}
       >
         {iconSource && (
           <Image
@@ -169,7 +170,12 @@ const OptionButton = (props) => {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute'
+    position: 'absolute',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
   },
   button: {
     height: 64,

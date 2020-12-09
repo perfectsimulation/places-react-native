@@ -13,12 +13,14 @@ const PlacesMenu = (props) => {
   const {
     shouldShow,
     pins,
-    onClose
+    onClose,
+    onSelectItem
   } = props;
 
   // null checks / default values
   const show = shouldShow ?? true;
   const onClosePlaces = onClose ?? (() => {});
+  const onSelectPlace = onSelectItem ?? (() => {});
 
   // pins
   const [listItems, setListItems] = useState(pins);
@@ -28,7 +30,10 @@ const PlacesMenu = (props) => {
   }, [pins]);
 
   renderPin = (pin) => (
-    <PinCard pin={pin} />
+    <PinCard
+      pin={pin}
+      onSelect={(pin) => onSelectPlace(pin)}
+    />
   );
 
   return (
