@@ -63,21 +63,21 @@ const PinDetailPreview = (props) => {
         <Text style={styles.titleText}>{title}</Text>
         <Text style={styles.subText}>{description}</Text>
         <View style={styles.buttonsContainer}>
-        <OptionButton
-          labelText={'Add'}
-          containerStyle={styles.optionButtonContainer}
-          buttonStyle={styles.optionButton}
-          labelStyle={styles.optionButtonLabel}
-          iconSource={require('./icons/cubes-white.png')}
-        />
-        <OptionButton
-          labelText={'Link'}
-          containerStyle={styles.optionButtonContainer}
-          buttonStyle={styles.optionButton}
-          labelStyle={styles.optionButtonLabel}
-          iconStyle={styles.smallOptionIcon}
-          iconSource={require('./icons/chain-white.png')}
-        />
+          <OptionButton
+            labelText={'Add'}
+            containerStyle={styles.optionButtonContainer}
+            buttonStyle={styles.optionButton}
+            labelStyle={styles.optionButtonLabel}
+            iconSource={require('./icons/cubes-white.png')}
+          />
+          <OptionButton
+            labelText={'Link'}
+            containerStyle={styles.optionButtonContainer}
+            buttonStyle={styles.optionButton}
+            labelStyle={styles.optionButtonLabel}
+            iconStyle={styles.smallOptionIcon}
+            iconSource={require('./icons/chain-white.png')}
+          />
         </View>
       </View>
     </Animated.View>

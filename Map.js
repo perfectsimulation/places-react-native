@@ -7,7 +7,7 @@ import {
 import MapView, { Marker, Callout } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import { getPins } from './server';
-import AddPinOverlay from './AddPinOverlay';
+import CreatePinView from './CreatePinView';
 import MenuButton from './MenuButton';
 import OptionsMenu from './OptionsMenu';
 import PlacesMenu from './PlacesMenu';
@@ -23,8 +23,6 @@ const Map = () => {
   const [showPinDetail, setShowPinDetail] = useState(false);
   const [showAddPinOverlay, setShowAddPinOverlay] = useState(false);
   const [isDraggingMap, setIsDraggingMap] = useState(false);
-  const [isNamingNewPin, setIsNamingNewPin] = useState(false);
-  const [newPinName, setNewPinName] = useState(null);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -65,7 +63,6 @@ const Map = () => {
 
   const onTouchMapEnd = () => {
     setIsDraggingMap(false);
-    setIsNamingNewPin(true);
   }
 
   const OnPressPin = (pin) => {
@@ -75,7 +72,6 @@ const Map = () => {
 
   const onPressAddButton = () => {
     setShowAddPinOverlay(true);
-    setIsNamingNewPin(true);
     setShowOptionsMenu(false);
   }
 
@@ -84,10 +80,9 @@ const Map = () => {
   }
 
   const onPressConfirmButton = () => {
-    createPin();
+    // createPin();
+    console.log(currentRegion);
     setShowAddPinOverlay(false);
-    setIsNamingNewPin(false);
-    setNewPinName(null);
   }
 
   const onPressPlacesButton = () => {
@@ -119,19 +114,19 @@ const Map = () => {
     setShowMenu(false);
   }
 
-  const createPin = () => {
+  const createPin = (pin) => {
     const pinCoordinate = {
-      latitude: currentRegion.latitude,
-      longitude: currentRegion.longitude
+      latitude: pin.coordinate.latitude,
+      longitude: pin.coordinate.longitude
     };
 
-    const pin = {
-      key: pins.length + 1,
-      title: newPinName,
+    const newPin = {
+      key: pins.length,
+      title: pin.title,
       coordinate: pinCoordinate,
     };
 
-    pins.push(pin);
+    pins.push(newPin);
   }
 
   if (!currentRegion) {
@@ -172,14 +167,11 @@ const Map = () => {
         shouldShow={!showAddPinOverlay}
         onPress={() => setShowOptionsMenu(true)}
       />
-      <AddPinOverlay
+      <CreatePinView
         shouldShow={showAddPinOverlay}
         isDraggingMap={isDraggingMap}
-        isNamingPin={isNamingNewPin}
         onPressCancelButton={() => onPressCancelButton()}
         onPressConfirmButton={() => onPressConfirmButton()}
-        newPinName={newPinName}
-        setNewPinName={(text) => setNewPinName(text)}
       />
       <OptionsMenu
         shouldShow={showOptionsMenu}

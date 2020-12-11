@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  TextInput,
   Image,
   StyleSheet
 } from 'react-native';
@@ -13,13 +12,11 @@ const AddPinOverlay = (props) => {
   const {
     shouldShow,
     isDraggingMap,
-    isNamingPin,
-    newPinName,
-    setNewPinName,
     onPressCancelButton,
     onPressConfirmButton,
   } = props;
 
+  // TODO maybe add fade in/out
   if (!shouldShow) {
     return <></>;
   }
@@ -27,45 +24,38 @@ const AddPinOverlay = (props) => {
   return (
     <>
       {!isDraggingMap && (
-        <Text style={styles.dragMapText}>
-          Drag map to position new pin
-        </Text>
-      )}
-      <View style={styles.createPinContainer}>
-        <Image
-          style={styles.createPinImage}
-          source={require('./icons/map-pin.png')}
-        />
-        {isNamingPin && !isDraggingMap && (
-          <View style={styles.newPinNameContainer}>
-            <TextInput
-              style={styles.newPinNameInput}
-              value={newPinName}
-              placeholder={'Name this pin'}
-              placeholderTextColor={'#ffffff7e'}
-              underlineColorAndroid={'transparent'}
-              autoCapitalize={'none'}
-              autoCompleteType={'off'}
-              maxLength={28}
-              onChangeText={(text) => setNewPinName(text)}
-            />
-          </View>
-        )}
-      </View>
-      {!isDraggingMap && (
-        <View style={styles.confirmCancelButtonsContainer}>
+        <View style={styles.topOverlay}>
+          <Text style={styles.topText}>
+            Drop a spot
+          </Text>
           <OptionButton
             onPress={() => onPressCancelButton()}
-            iconImageName={require('./icons/cancel.png')}
             containerStyle={styles.cancelButtonContainer}
             buttonStyle={styles.cancelButton}
-            iconStyle={styles.largeButtonImage}
+            iconStyle={styles.cancelIcon}
+            iconSource={require('./icons/cancel.png')}
           />
+        </View>
+      )}
+      <View style={styles.pin}>
+        <View style={styles.pinFill}>
+          <View style={styles.pinFillCircle} />
+          <View style={styles.pinFillTriangle} />
+        </View>
+        <Image
+          style={styles.pinImage}
+          source={require('./icons/pin.png')}
+        />
+      </View>
+      {!isDraggingMap && (
+        <View style={styles.bottomOverlay}>
+          <View style={styles.swipeTab} />
           <OptionButton
             onPress={() => onPressConfirmButton()}
-            iconImageName={require('./icons/confirm.png')}
+            innerLabelText={'Confirm Location'}
             containerStyle={styles.confirmButtonContainer}
             buttonStyle={styles.confirmButton}
+            labelStyle={styles.confirmButtonLabel}
             iconStyle={styles.largeButtonImage}
           />
         </View>
@@ -75,83 +65,120 @@ const AddPinOverlay = (props) => {
 }
 
 const styles = StyleSheet.create({
-  dragMapText: {
+  topOverlay: {
     position: 'absolute',
-    top: 64,
-    height: 30,
+    top: 0,
+    paddingTop: 60,
+    paddingBottom: 16,
     width: '100%',
-    backgroundColor: '#000000cf',
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: '#151515c3'
+  },
+  topText: {
+    paddingLeft: 3,
+    height: 16,
+    width: '100%',
     fontSize: 16,
-    lineHeight: 30,
-    fontWeight: '400',
+    lineHeight: 16,
+    fontSize: 12,
     textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
     color: 'white'
   },
-  createPinContainer: {
+  cancelButtonContainer: {
+    position: 'absolute',
+    alignSelf: 'center',
+    bottom: 12,
+    left: 12
+  },
+  cancelButton: {
+    height: 24,
+    width: 24,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  cancelIcon: {
+    height: 32,
+    width: 32
+  },
+  pin: {},
+  pinFill: {
+    alignSelf: 'center',
     position: 'absolute',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'
   },
-  createPinImage: {
-    position: 'relative',
-    top: 6.4,
+  pinFillCircle: {
+    position: 'absolute',
+    top: 1,
+    height: 24,
+    width: 24,
+    borderRadius: 24,
+    backgroundColor: 'ghostwhite',
+  },
+  pinFillTriangle: {
+    position: 'absolute',
+    top: 18,
+    borderTopWidth: 19,
+    borderRightWidth: 11,
+    borderBottomWidth: 0,
+    borderLeftWidth: 11,
+    borderColor: 'transparent',
+    borderTopColor: 'ghostwhite'
+  },
+  pinImage: {
     height: 40,
     width: 40
   },
-  newPinNameContainer: {
+  bottomOverlay: {
     position: 'absolute',
-    bottom: 40,
-    minWidth: 132,
-    maxWidth: 400,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'stretch'
-  },
-  newPinNameInput: {
-    height: 30,
+    bottom: 0,
     width: '100%',
-    paddingLeft: 6,
-    paddingRight: 6,
-    backgroundColor: '#000000cf',
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '400',
-    color: 'white'
-  },
-  confirmCancelButtonsContainer: {
-    position: 'absolute',
-    bottom: 32,
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'column',
+    backgroundColor: '#151515c3',
   },
-  cancelButtonContainer: {
-    marginRight: 32
+  swipeTab: {
+    position: 'absolute',
+    alignSelf: 'center',
+    height: 2,
+    width: '7%',
+    marginTop: 10,
+    marginBottom: 10,
+    borderWidth: 2,
+    borderRadius: 2,
+    borderColor: '#ffffff27'
   },
   confirmButtonContainer: {
-    marginLeft: 32
-  },
-  cancelButton: {
-    height: 64,
-    width: 64,
-    borderRadius: 64,
-    backgroundColor: '#be0000cf',
-    display: 'flex',
+    margin: 16,
+    marginTop: 32,
+    marginBottom: 32,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   confirmButton: {
     height: 64,
-    width: 64,
-    borderRadius: 64,
-    backgroundColor: '#008800cf',
+    height: 48,
+    width: '88%',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#000000bb'
   },
-  largeButtonImage: {
-    height: 42,
-    width: 42
+  confirmButtonLabel: {
+    position: 'absolute',
+    alignSelf: 'center',
+    paddingLeft: 3,
+    height: 16,
+    fontSize: 13,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    color: 'white'
   }
 });
 

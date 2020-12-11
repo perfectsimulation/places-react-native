@@ -69,8 +69,8 @@ const OptionsMenu = (props) => {
           showPosition={{ x: -120, y: -100 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'User'}
-          iconSource={require('./icons/smile.png')}
-          iconTouchSource={require('./icons/smile-touch.png')}
+          iconSource={require('./icons/person.png')}
+          iconTouchSource={require('./icons/person-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.userButtonImage}
         />
@@ -80,8 +80,8 @@ const OptionsMenu = (props) => {
           showPosition={{ x: 120, y: -100 }}
           hidePosition={{ x: 0, y: 0 }}
           labelText={'Add'}
-          iconSource={require('./icons/add.png')}
-          iconTouchSource={require('./icons/add-touch.png')}
+          iconSource={require('./icons/pin-glyph.png')}
+          iconTouchSource={require('./icons/pin-glyph-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.addButtonImage}
         />
@@ -111,12 +111,14 @@ const styles = StyleSheet.create({
     width: 52
   },
   userButtonImage: {
-    height: 42,
-    width: 42
+    height: 46,
+    width: 46
   },
   addButtonImage: {
     height: 40,
-    width: 40
+    width: 40,
+    height: 48,
+    width: 48
   }
 });
 

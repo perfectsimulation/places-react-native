@@ -105,6 +105,7 @@ const OptionButton = (props) => {
   const {
     onPress,
     labelText,
+    innerLabelText,
     iconSource,
     iconTouchSource,
     containerStyle,
@@ -162,6 +163,9 @@ const OptionButton = (props) => {
               opacity: opacity
             }]}
           />
+        )}
+        {innerLabelText && (
+          <Text style={label}>{innerLabelText}</Text>
         )}
       </Pressable>
     </Animated.View>
