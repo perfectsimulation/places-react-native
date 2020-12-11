@@ -138,7 +138,7 @@ const Map = () => {
       <MapView
         ref={map}
         style={styles.map}
-        showsUserLocation={true}
+        showsUserLocation={true} // TODO handle false case
         mapType={'hybrid'}
         initialRegion={currentRegion}
         onRegionChangeComplete={(region) => setCurrentRegion(region)}

@@ -33,7 +33,12 @@ const AddPinOverlay = (props) => {
             containerStyle={styles.cancelButtonContainer}
             buttonStyle={styles.cancelButton}
             iconStyle={styles.cancelIcon}
+            iconTouchStyle={styles.cancelIconTouch}
             iconSource={require('./icons/cancel.png')}
+            iconTouchSource={require('./icons/cancel-touch.png')}
+            iconTouchBackgroundStyle={styles.cancelIconTouchContainer}
+            touchDownFeedbackStyle={{}}
+            touchUpFeedbackStyle={{}}
           />
         </View>
       )}
@@ -57,6 +62,8 @@ const AddPinOverlay = (props) => {
             buttonStyle={styles.confirmButton}
             labelStyle={styles.confirmButtonLabel}
             iconStyle={styles.largeButtonImage}
+            touchDownFeedbackStyle={styles.confirmButtonPressInFeedback}
+            touchUpFeedbackStyle={{}}
           />
         </View>
       )}
@@ -90,17 +97,25 @@ const styles = StyleSheet.create({
   cancelButtonContainer: {
     position: 'absolute',
     alignSelf: 'center',
-    bottom: 12,
-    left: 12
+    bottom: 1,
+    left: 3
   },
   cancelButton: {
-    height: 24,
-    width: 24,
+    height: 46,
+    width: 46,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'
   },
   cancelIcon: {
+    height: 16,
+    width: 16
+  },
+  cancelIconTouchContainer: {
+    height: 26,
+    width: 26
+  },
+  cancelIconTouch: {
     height: 32,
     width: 32
   },
@@ -158,12 +173,11 @@ const styles = StyleSheet.create({
     marginTop: 32,
     marginBottom: 32,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   confirmButton: {
-    height: 64,
     height: 48,
-    width: '88%',
+    width: '90%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -179,6 +193,11 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 2,
     color: 'white'
+  },
+  confirmButtonPressInFeedback: {
+    height: '120%',
+    width: '108%',
+    backgroundColor: 'black',
   }
 });
 

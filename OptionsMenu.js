@@ -32,58 +32,68 @@ const OptionsMenu = (props) => {
       >
         <OptionButton
           onPress={() => onActivity()}
-          shouldShow={shouldShow}
-          showPosition={{ x: -120, y: -300 }}
-          hidePosition={{ x: 0, y: 0 }}
           labelText={'Activity'}
           iconSource={require('./icons/activity.png')}
           iconTouchSource={require('./icons/activity-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.activityButtonImage}
+          shouldShow={shouldShow}
+          showPosition={{ x: -120, y: -300 }}
+          hidePosition={{ x: 0, y: 0 }}
+          shouldAnimateOnPressOutOpacity
+          shouldAnimateOnPressOutScale
         />
         <OptionButton
           onPress={() => onExplore()}
-          shouldShow={shouldShow}
-          showPosition={{ x: 120, y: -300 }}
-          hidePosition={{ x: 0, y: 0 }}
           labelText={'Explore'}
           iconSource={require('./icons/arrows.png')}
           iconTouchSource={require('./icons/arrows-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.exploreButtonImage}
+          shouldShow={shouldShow}
+          showPosition={{ x: 120, y: -300 }}
+          hidePosition={{ x: 0, y: 0 }}
+          shouldAnimateOnPressOutOpacity
+          shouldAnimateOnPressOutScale
         />
         <OptionButton
           onPress={() => onPlaces()}
-          shouldShow={shouldShow}
-          showPosition={{ x: 0, y: -200 }}
-          hidePosition={{ x: 0, y: 0 }}
           labelText={'Places'}
           iconSource={require('./icons/places.png')}
           iconTouchSource={require('./icons/places-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.placesButtonImage}
+          shouldShow={shouldShow}
+          showPosition={{ x: 0, y: -200 }}
+          hidePosition={{ x: 0, y: 0 }}
+          shouldAnimateOnPressOutOpacity
+          shouldAnimateOnPressOutScale
         />
         <OptionButton
           onPress={() => onUser()}
-          shouldShow={shouldShow}
-          showPosition={{ x: -120, y: -100 }}
-          hidePosition={{ x: 0, y: 0 }}
           labelText={'User'}
           iconSource={require('./icons/person.png')}
           iconTouchSource={require('./icons/person-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.userButtonImage}
+          shouldShow={shouldShow}
+          showPosition={{ x: -120, y: -100 }}
+          hidePosition={{ x: 0, y: 0 }}
+          shouldAnimateOnPressOutOpacity
+          shouldAnimateOnPressOutScale
         />
         <OptionButton
           onPress={() => onAdd()}
-          shouldShow={shouldShow}
-          showPosition={{ x: 120, y: -100 }}
-          hidePosition={{ x: 0, y: 0 }}
           labelText={'Add'}
           iconSource={require('./icons/pin-glyph.png')}
           iconTouchSource={require('./icons/pin-glyph-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.addButtonImage}
+          shouldShow={shouldShow}
+          showPosition={{ x: 120, y: -100 }}
+          hidePosition={{ x: 0, y: 0 }}
+          shouldAnimateOnPressOutOpacity
+          shouldAnimateOnPressOutScale
         />
       </Menu>
     </>
@@ -95,8 +105,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 14,
     justifyContent: 'center',
-    alignItems: 'center',
-    // backgroundColor: 'darkred'
+    alignItems: 'center'
   },
   activityButtonImage: {
     height: 52,

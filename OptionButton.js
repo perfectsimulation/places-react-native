@@ -15,33 +15,49 @@ const OptionButton = (props) => {
     shouldShow,
     showPosition,
     hidePosition,
-    transitionDuration
+    transitionDuration,
+    shouldAnimateOnPressOutOpacity,
+    shouldAnimateOnPressOutScale,
+    beforePressOutOpacity,
+    afterPressOutOpacity,
+    beforePressOutScale,
+    afterPressOutScale,
   } = props;
 
-  // null checks / default values
+  // null checks
+  // defaults for animating translation
   const show = shouldShow ?? true;
   const showPos = showPosition ?? { x: 0, y: 0 };
   const hidePos = hidePosition ?? { x: 0, y: 0 };
   const duration = transitionDuration ?? 0;
 
-  // capture onPressIn and onPressOut
+  // defaults for animating touch feedback
+  const animateTouchOpacity = shouldAnimateOnPressOutOpacity ?? false;
+  const animateTouchScale = shouldAnimateOnPressOutScale ?? false;
+  const beforeOpacity = beforePressOutOpacity ?? 1;
+  const afterOpacity = afterPressOutOpacity ?? 0;
+  const beforeScale = beforePressOutScale ?? 0.8;
+  const afterScale = afterPressOutScale ?? 1;
+
+  // capture onPressIn and onPressOut events
   const [isPressIn, setIsPressIn] = useState(false);
   const [isPressOut, setIsPressOut] = useState(false);
 
-  // animate onPressIn feedback opacity
+  // cache values to animate touch feedback opacity
   const opacityValue = useRef(new Animated.Value(0)).current;
   const opacity = opacityValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 0]
+    outputRange: [beforeOpacity, afterOpacity]
   });
 
-  // animate onPressIn feedback scale
+  // cache values to animate touch feedback scale
   const scaleValue = useRef(new Animated.Value(0)).current;
   const scale = scaleValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.8, 1]
+    outputRange: [beforeScale, afterScale]
   });
 
+  // cache touch feedback opacity animation
   const feedbackOpacityAnimation = useRef(
     Animated.timing(
       opacityValue, {
@@ -53,6 +69,7 @@ const OptionButton = (props) => {
     )
   ).current;
 
+  // cache touch feedback scale animation
   const feedbackScaleAnimation = useRef(
     Animated.timing(
       scaleValue, {
@@ -64,7 +81,7 @@ const OptionButton = (props) => {
     )
   ).current;
 
-   // animate transform position
+   // cache values to animate position
    const initialPosition = show ? hidePos : showPos;
    const finalPosition = show ? showPos : hidePos;
    const positionValue = useRef(new Animated.ValueXY(initialPosition)).current;
@@ -86,15 +103,43 @@ const OptionButton = (props) => {
 
   // animate touch feedback
   useEffect(() => {
+    // process new onPressOut event
     if (isPressOut) {
+      // disable press-in state immediately
       setIsPressIn(false);
-      feedbackOpacityAnimation.start();
-      feedbackScaleAnimation.start(() => {
-        setIsPressOut(false);
-      });
-    } else {
-      feedbackOpacityAnimation.reset();
-      feedbackScaleAnimation.reset();
+    }
+
+    // disable press-out state immediately if no animation needed
+    if (!animateTouchOpacity && !animateTouchScale) {
+      setIsPressOut(false);
+    }
+
+    // animate touch feedback opacity
+    if (animateTouchOpacity) {
+      if (isPressOut) {
+        // start press-out opacity animation upon new press-out event
+        feedbackOpacityAnimation.start(() => {
+          // disable press-out state upon animation completion
+          setIsPressOut(false);
+        });
+      } else {
+        // reset animation if press-out state is newly disabled
+        feedbackOpacityAnimation.reset();
+      }
+    }
+
+    // animate touch feedback scale
+    if (animateTouchScale) {
+      if (isPressOut) {
+        // start press-out scale animation upon new press-out event
+        feedbackScaleAnimation.start(() => {
+          // disable press-out state upon animation completion
+          setIsPressOut(false);
+        });
+      } else {
+        // reset animation if press-out state is newly disabled
+        feedbackScaleAnimation.reset();
+      }
     }
   }, [isPressOut, scaleValue, opacityValue]);
 
@@ -112,6 +157,10 @@ const OptionButton = (props) => {
     buttonStyle,
     labelStyle,
     iconStyle,
+    iconTouchStyle,
+    iconTouchBackgroundStyle,
+    touchDownFeedbackStyle,
+    touchUpFeedbackStyle
   } = props;
 
   const handlePress = onPress ?? (() => {});
@@ -119,6 +168,10 @@ const OptionButton = (props) => {
   const button = buttonStyle ?? styles.button;
   const label = labelStyle ?? styles.label;
   const icon = iconStyle ?? styles.icon;
+  const iconTouch = iconTouchStyle ?? styles.icon;
+  const iconTouchBackground = iconTouchBackgroundStyle ?? styles.iconTouchBackground;
+  const touchDownFeedback = touchDownFeedbackStyle ?? styles.pressInFeedback;
+  const touchUpFeedback = touchUpFeedbackStyle ?? styles.pressOutFeedback;
 
   return (
     <Animated.View
@@ -146,19 +199,19 @@ const OptionButton = (props) => {
         )}
         {(isPressIn || isPressOut) && iconTouchSource && (
           <>
-            <View style={styles.iconTouchBackground} />
+            <View style={iconTouchBackground} />
             <Image
-              style={[{ position: 'absolute' }, icon]}
+              style={[{ position: 'absolute' }, iconTouch]}
               source={iconTouchSource}
             />
           </>
         )}
         {isPressIn && (
-          <View style={styles.pressInFeedback} />
+          <View style={touchDownFeedback} />
         )}
         {isPressOut && (
           <Animated.View
-            style={[styles.pressOutFeedback, {
+            style={[touchUpFeedback, {
               transform: [ { scale: scale } ],
               opacity: opacity
             }]}
