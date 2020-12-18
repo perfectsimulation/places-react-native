@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
-  Image,
   StyleSheet
 } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import { getPins } from './server';
+import Pin from './Pin';
 import CreatePinView from './CreatePinView';
 import MenuButton from './MenuButton';
 import OptionsMenu from './OptionsMenu';
@@ -52,8 +52,8 @@ const Map = () => {
     }
 
     getPinsData()
-      .then((pinsData) => { setPins(pinsData) })
-      .catch((error) => { alert(error.message) });
+      .then((pinsData) => setPins(pinsData))
+      .catch((error) => alert(error.message));
   }, []);
 
   const onTouchMapStart = () => {
@@ -80,8 +80,8 @@ const Map = () => {
   }
 
   const onPressConfirmButton = () => {
-    // createPin();
-    console.log(currentRegion);
+    createPin();
+    // console.log(currentRegion);
     setShowAddPinOverlay(false);
   }
 
@@ -95,8 +95,8 @@ const Map = () => {
     const pinRegion = {
       latitude: pin.coordinate.latitude,
       longitude: pin.coordinate.longitude,
-      latitudeDelta: currentRegion.latitudeDelta,
-      longitudeDelta: currentRegion.longitudeDelta
+      latitudeDelta: pin.coordinate.latitudeDelta,
+      longitudeDelta: pin.coordinate.longitudeDelta
     };
 
     // close places menu
@@ -114,19 +114,21 @@ const Map = () => {
     setShowMenu(false);
   }
 
-  const createPin = (pin) => {
+  const createPin = () => {
     const pinCoordinate = {
-      latitude: pin.coordinate.latitude,
-      longitude: pin.coordinate.longitude
+      latitude: currentRegion.latitude,
+      longitude: currentRegion.longitude,
+      latitudeDelta: currentRegion.latitudeDelta,
+      longitudeDelta: currentRegion.longitudeDelta
     };
 
-    const newPin = {
-      key: pins.length,
-      title: pin.title,
+    const pin = {
+      id: pins.length,
       coordinate: pinCoordinate,
     };
 
-    pins.push(newPin);
+    pins.push(pin);
+    // TODO POST new pin
   }
 
   if (!currentRegion) {
@@ -155,10 +157,7 @@ const Map = () => {
             stopPropagation={true}
             onPress={() => OnPressPin(pin)}
           >
-            <Image
-              style={styles.pinImage}
-              source={require('./icons/map-pin.png')}
-            />
+            <Pin color={pin.pinColor} />
             <Callout tooltip />
           </Marker>
         ))}
@@ -207,11 +206,6 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject
-  },
-  pinImage: {
-    position: 'relative',
-    height: 40,
-    width: 40
   }
 });
 

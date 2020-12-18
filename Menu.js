@@ -103,7 +103,7 @@ const Menu = (props) => {
     <Animated.View
       onTouchEnd={(e) => {
         if (e.target == e.currentTarget)
-          setShouldClose(true)
+          setShouldClose(true);
       }}
       style={[styles.container, {
         transform: [{ translateY: translateAnim }],

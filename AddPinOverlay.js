@@ -2,9 +2,9 @@ import React from 'react';
 import {
   View,
   Text,
-  Image,
   StyleSheet
 } from 'react-native';
+import Pin from './Pin';
 import OptionButton from './OptionButton';
 
 const AddPinOverlay = (props) => {
@@ -23,49 +23,46 @@ const AddPinOverlay = (props) => {
 
   return (
     <>
+      <Pin
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center'
+        }}
+      />
       {!isDraggingMap && (
-        <View style={styles.topOverlay}>
-          <Text style={styles.topText}>
-            Drop a spot
-          </Text>
-          <OptionButton
-            onPress={() => onPressCancelButton()}
-            containerStyle={styles.cancelButtonContainer}
-            buttonStyle={styles.cancelButton}
-            iconStyle={styles.cancelIcon}
-            iconTouchStyle={styles.cancelIconTouch}
-            iconSource={require('./icons/cancel.png')}
-            iconTouchSource={require('./icons/cancel-touch.png')}
-            iconTouchBackgroundStyle={styles.cancelIconTouchContainer}
-            touchDownFeedbackStyle={{}}
-            touchUpFeedbackStyle={{}}
-          />
-        </View>
-      )}
-      <View style={styles.pin}>
-        <View style={styles.pinFill}>
-          <View style={styles.pinFillCircle} />
-          <View style={styles.pinFillTriangle} />
-        </View>
-        <Image
-          style={styles.pinImage}
-          source={require('./icons/pin.png')}
-        />
-      </View>
-      {!isDraggingMap && (
-        <View style={styles.bottomOverlay}>
-          <View style={styles.swipeTab} />
-          <OptionButton
-            onPress={() => onPressConfirmButton()}
-            innerLabelText={'Confirm Location'}
-            containerStyle={styles.confirmButtonContainer}
-            buttonStyle={styles.confirmButton}
-            labelStyle={styles.confirmButtonLabel}
-            iconStyle={styles.largeButtonImage}
-            touchDownFeedbackStyle={styles.confirmButtonPressInFeedback}
-            touchUpFeedbackStyle={{}}
-          />
-        </View>
+        <>
+          <View style={styles.topOverlay}>
+            <Text style={styles.topText}>
+              Drop a spot
+            </Text>
+            <OptionButton
+              onPress={() => onPressCancelButton()}
+              containerStyle={styles.cancelButtonContainer}
+              buttonStyle={styles.cancelButton}
+              iconStyle={styles.cancelIcon}
+              iconTouchStyle={styles.cancelIconTouch}
+              iconSource={require('./icons/cancel.png')}
+              iconTouchSource={require('./icons/cancel-touch.png')}
+              iconTouchBackgroundStyle={styles.cancelIconTouchContainer}
+              touchDownFeedbackStyle={{}}
+              touchUpFeedbackStyle={{}}
+            />
+          </View>
+          <View style={styles.bottomOverlay}>
+            <View style={styles.swipeTab} />
+            <OptionButton
+              onPress={() => onPressConfirmButton()}
+              innerLabelText={'Confirm Location'}
+              containerStyle={styles.confirmButtonContainer}
+              buttonStyle={styles.confirmButton}
+              labelStyle={styles.confirmButtonLabel}
+              iconStyle={styles.largeButtonImage}
+              touchDownFeedbackStyle={styles.confirmButtonPressInFeedback}
+              touchUpFeedbackStyle={{}}
+            />
+          </View>
+        </>
       )}
     </>
   );
@@ -118,36 +115,6 @@ const styles = StyleSheet.create({
   cancelIconTouch: {
     height: 32,
     width: 32
-  },
-  pin: {},
-  pinFill: {
-    alignSelf: 'center',
-    position: 'absolute',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  pinFillCircle: {
-    position: 'absolute',
-    top: 1,
-    height: 24,
-    width: 24,
-    borderRadius: 24,
-    backgroundColor: 'ghostwhite',
-  },
-  pinFillTriangle: {
-    position: 'absolute',
-    top: 18,
-    borderTopWidth: 19,
-    borderRightWidth: 11,
-    borderBottomWidth: 0,
-    borderLeftWidth: 11,
-    borderColor: 'transparent',
-    borderTopColor: 'ghostwhite'
-  },
-  pinImage: {
-    height: 40,
-    width: 40
   },
   bottomOverlay: {
     position: 'absolute',

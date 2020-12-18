@@ -37,6 +37,7 @@ const OptionsMenu = (props) => {
           iconTouchSource={require('./icons/activity-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.activityButtonImage}
+          iconTouchStyle={styles.activityButtonImage}
           shouldShow={shouldShow}
           showPosition={{ x: -120, y: -300 }}
           hidePosition={{ x: 0, y: 0 }}
@@ -50,6 +51,7 @@ const OptionsMenu = (props) => {
           iconTouchSource={require('./icons/arrows-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.exploreButtonImage}
+          iconTouchStyle={styles.exploreButtonImage}
           shouldShow={shouldShow}
           showPosition={{ x: 120, y: -300 }}
           hidePosition={{ x: 0, y: 0 }}
@@ -63,6 +65,7 @@ const OptionsMenu = (props) => {
           iconTouchSource={require('./icons/places-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.placesButtonImage}
+          iconTouchStyle={styles.placesButtonImage}
           shouldShow={shouldShow}
           showPosition={{ x: 0, y: -200 }}
           hidePosition={{ x: 0, y: 0 }}
@@ -76,6 +79,7 @@ const OptionsMenu = (props) => {
           iconTouchSource={require('./icons/person-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.userButtonImage}
+          iconTouchStyle={styles.userButtonImage}
           shouldShow={shouldShow}
           showPosition={{ x: -120, y: -100 }}
           hidePosition={{ x: 0, y: 0 }}
@@ -89,6 +93,7 @@ const OptionsMenu = (props) => {
           iconTouchSource={require('./icons/pin-glyph-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.addButtonImage}
+          iconTouchStyle={styles.addButtonImage}
           shouldShow={shouldShow}
           showPosition={{ x: 120, y: -100 }}
           hidePosition={{ x: 0, y: 0 }}

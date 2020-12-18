@@ -5,7 +5,7 @@ export const getPins = async () => {
 }
 
 export const getPhotoUrlById = async (photoId) => {
-  if (!photoId[0] || !parseFloat(photoId)) {
+  if (!photoId || !photoId[0] || !parseFloat(photoId[0])) {
     return 'https://vtskiandride.com/wp-content/uploads/2015/08/placeholder.jpg';
   }
   const photo = await fetchPhotoById(photoId[0]);
@@ -34,15 +34,20 @@ const fetchPhotoById = async (photoId) => {
 const parsePin = (pinData) => {
   const pin = {
     'id': pinData.id,
-    'userId': pinData.userId,
-    'publishTime': pinData.publishTime,
+    'authorUserId': pinData.authorUserId,
+    'privateUserIds': pinData.privateUserIds,
     'photoIds': pinData.photoIds,
+    'eventIds': pinData.eventIds,
+    'publishTime': pinData.publishTime,
+    'pinColor': pinData.pinColor,
     'title': pinData.title,
     'description': pinData.description,
-    'access': pinData.access,
+    'isPublic': pinData.isPublic,
     'coordinate': {
       'latitude': pinData.latitude,
-      'longitude': pinData.longitude
+      'longitude': pinData.longitude,
+      'latitudeDelta': pinData.latitudeDelta,
+      'longitudeDelta': pinData.longitudeDelta,
     }
   };
 

@@ -11,13 +11,12 @@ import {
   View,
   StyleSheet
 } from 'react-native';
-
 import Map from './Map';
 
 const App = () => {
   return (
     <>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={'light-content'} />
       <View style={styles.container}>
         <Map />
       </View>

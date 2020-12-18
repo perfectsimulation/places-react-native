@@ -26,7 +26,7 @@ const PinDetailPreview = (props) => {
 
   // do not animate on first render
   const [isFirstRender, setIsFirstRender] = useState(true);
-  const duration = 511;
+  const duration = 500;
 
   // translate on/off-screen
   useEffect(() => {
@@ -90,7 +90,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     height: '25%',
     width: '100%',
-    borderRadius: 10,
     backgroundColor: '#151515c3',
     backgroundColor: 'black'
   },
@@ -121,7 +120,6 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     height: '60%',
     width: '100%',
-    // backgroundColor: 'palevioletred',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'flex-start',
