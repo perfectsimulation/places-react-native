@@ -57,7 +57,6 @@ const AddPinOverlay = (props) => {
               containerStyle={styles.confirmButtonContainer}
               buttonStyle={styles.confirmButton}
               labelStyle={styles.confirmButtonLabel}
-              iconStyle={styles.largeButtonImage}
               touchDownFeedbackStyle={styles.confirmButtonPressInFeedback}
               touchUpFeedbackStyle={{}}
             />
@@ -83,7 +82,6 @@ const styles = StyleSheet.create({
     paddingLeft: 3,
     height: 16,
     width: '100%',
-    fontSize: 16,
     lineHeight: 16,
     fontSize: 12,
     textAlign: 'center',
@@ -129,16 +127,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     height: 2,
     width: '7%',
-    marginTop: 10,
-    marginBottom: 10,
+    marginVertical: 10,
     borderWidth: 2,
     borderRadius: 2,
     borderColor: '#ffffff27'
   },
   confirmButtonContainer: {
-    margin: 16,
-    marginTop: 32,
-    marginBottom: 32,
+    marginHorizontal: 16,
+    marginVertical: 32,
     justifyContent: 'center',
     alignItems: 'center'
   },

@@ -65,7 +65,7 @@ const Map = () => {
     setIsDraggingMap(false);
   }
 
-  const OnPressPin = (pin) => {
+  const onPressPin = (pin) => {
     setFocusedPin(pin);
     setShowPinDetail(true);
   }
@@ -155,7 +155,7 @@ const Map = () => {
             coordinate={pin.coordinate}
             tracksViewChanges={false}
             stopPropagation={true}
-            onPress={() => OnPressPin(pin)}
+            onPress={() => onPressPin(pin)}
           >
             <Pin color={pin.pinColor} />
             <Callout tooltip />
@@ -169,6 +169,7 @@ const Map = () => {
       <CreatePinView
         shouldShow={showAddPinOverlay}
         isDraggingMap={isDraggingMap}
+        currentRegion={currentRegion}
         onPressCancelButton={() => onPressCancelButton()}
         onPressConfirmButton={() => onPressConfirmButton()}
       />

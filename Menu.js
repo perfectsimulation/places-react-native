@@ -9,6 +9,7 @@ import CloseButton from './CloseButton';
 
 const Menu = (props) => {
 
+  // TODO useWindowDimensions instead
   const window = Dimensions.get('window');
   const height = window.height;
 
@@ -16,6 +17,7 @@ const Menu = (props) => {
     shouldShow,
     children,
     onClose,
+    showDefaultCloseButton,
     animationDuration
   } = props;
 
@@ -23,6 +25,7 @@ const Menu = (props) => {
   const show = shouldShow ?? true;
   const content = children ?? <></>;
   const onCloseMenu = onClose ?? (() => {});
+  const showCloseButton = showDefaultCloseButton ?? true;
   const transitionDuration = animationDuration ?? 300;
 
   // translate entire menu on/off-screen
@@ -111,9 +114,11 @@ const Menu = (props) => {
       }]}
     >
       {content}
-      <CloseButton
-        onClose={() => setShouldClose(true)}
-      />
+      {showCloseButton && (
+        <CloseButton
+          onClose={() => setShouldClose(true)}
+        />
+      )}
     </Animated.View>
   );
 }

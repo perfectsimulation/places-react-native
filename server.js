@@ -6,7 +6,7 @@ export const getPins = async () => {
 
 export const getPhotoUrlById = async (photoId) => {
   if (!photoId || !photoId[0] || !parseFloat(photoId[0])) {
-    return 'https://vtskiandride.com/wp-content/uploads/2015/08/placeholder.jpg';
+    return getPlaceholderPhotoUrl();
   }
   const photo = await fetchPhotoById(photoId[0]);
   const photoUrl = photo.url;
@@ -28,6 +28,11 @@ const fetchPhotoById = async (photoId) => {
   return fetch(`${rootUrl}/photos/${photoId}`)
     .then((response) => response.json())
     .then((json) => json);
+}
+
+// use placeholder image url for pins without any uploaded photos
+const getPlaceholderPhotoUrl = () => {
+  return 'https://vtskiandride.com/wp-content/uploads/2015/08/placeholder.jpg';
 }
 
 // construct pin object from response
