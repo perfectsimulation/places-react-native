@@ -81,7 +81,7 @@ const CloseButton = (props) => {
       {isPressOut && (
         <Animated.View
           style={[styles.feedback, {
-            transform: [ { scale: scale } ],
+            transform: [{ scale: scale }],
             opacity: opacity
           }]}
         />

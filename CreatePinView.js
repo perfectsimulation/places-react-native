@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
+  Animated,
   View,
   Pressable,
   Image,
   Text,
   TextInput,
+  PanResponder,
+  Keyboard,
   StyleSheet
 } from 'react-native';
 import AddPinOverlay from './AddPinOverlay';
@@ -13,21 +16,31 @@ import OptionButton from './OptionButton';
 
 const CreatePinView = (props) => {
 
-  const [isLocationConfirmed, setIsLocationConfirmed] = useState(true);
+  // toggle overlay for positioning new pin
+  const [isLocationConfirmed, setIsLocationConfirmed] = useState(false);
+
+  // title input value
   const [title, setTitle] = useState('Moonsugar Outpost');
-  const [description, setDescription] = useState('Leverage agile frameworks to provide a robust synopsis for high level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition. Organically grow the holistic world view of disruptive innovation via workplace div.');
+
+  // description input value
+  const [description, setDescription] = useState(
+    'Unbearably refreshing to visit. ' +
+    'Untold indulgences lie hidden within this divine oasis. ' +
+    'Something endless to while away the harrowing rapture of time.'
+  );
+
+  // selected segment of public access toggle
   const [isPublic, setIsPublic] = useState(false);
 
-  const onPressPublic = () => { setIsPublic(true) }
-  const onPressPrivate = () => { setIsPublic(false) }
-
+  // dynamic styles of public access segments
   const [publicStyle, setPublicStyle] = useState([styles.publicAccessSegment]);
   const [privateStyle, setPrivateStyle] = useState([styles.publicAccessSegmentSelected]);
 
+  // dynamic styles of public access segment labels
   const [publicLabelStyle, setPublicLabelStyle] = useState([styles.publicAccessLabel]);
   const [privateLabelStyle, setPrivateLabelStyle] = useState([styles.publicAccessLabelSelected]);
 
-  // set segmented control styles
+  // set styles of public access toggle
   useEffect(() => {
     const publicSegment = isPublic ?
       styles.publicAccessSegmentSelected :
@@ -51,6 +64,66 @@ const CreatePinView = (props) => {
       setPrivateLabelStyle(privateLabel);
 
   }), [isPublic];
+
+  // drag confirmation pin
+  const pan = useRef(new Animated.ValueXY()).current;
+
+  // clamp vertical translation of pin, interpolated from gesture
+  const dragValue = pan.y.interpolate({
+    inputRange: [0, 60, Infinity],
+    outputRange: [0, 60, 60]
+  });
+
+  // allow vertical drag of confirmation pin
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        pan.setOffset({
+          x: 0,
+          y: pan.y._value
+        });
+      },
+      onPanResponderMove: (event, gesture) => {
+        if (gesture.dy > 0) {
+          return Animated.event(
+            [
+              null,
+              { dy: pan.y }
+            ],
+            { useNativeDriver: false }
+            )(event, gesture)
+        }
+      },
+      onPanResponderRelease: () => {
+        pan.flattenOffset();
+        Animated.spring(
+          pan, {
+            toValue: { x: 0, y: 0 },
+            useNativeDriver: false
+          }
+        ).start();
+      }
+    })
+  ).current;
+
+  // handle press on back button in top left corner
+  const onPressBack = () => {
+    Keyboard.dismiss();
+    setIsLocationConfirmed(false);
+  }
+
+  // handle press on public segment of access toggle
+  const onPressPublic = () => {
+    Keyboard.dismiss();
+    setIsPublic(true);
+  }
+
+  // handle press on private segment of access toggle
+  const onPressPrivate = () => {
+    Keyboard.dismiss();
+    setIsPublic(false)
+  }
 
   const {
     shouldShow,
@@ -76,13 +149,15 @@ const CreatePinView = (props) => {
         shouldShow={shouldShow && isLocationConfirmed}
         showDefaultCloseButton={false}
       >
-        <View style={styles.menuContent}>
+        <Pressable style={styles.menuContent}
+          onPress={() => Keyboard.dismiss()}
+        >
           <View style={styles.topOverlay}>
             <Text style={styles.topText}>
               Create
             </Text>
             <OptionButton
-              onPress={() => setIsLocationConfirmed(false)}
+              onPress={() => onPressBack()}
               containerStyle={styles.backButtonContainer}
               buttonStyle={styles.backButton}
               iconStyle={styles.backIcon}
@@ -132,6 +207,7 @@ const CreatePinView = (props) => {
                 value={description}
                 onChangeText={(text) => setDescription(text)}
                 multiline={true}
+                scrollEnabled={false}
                 maxLength={280}
                 autoCorrect={false}
                 autoCapitalize={'none'}
@@ -156,17 +232,30 @@ const CreatePinView = (props) => {
               </Pressable>
             </View>
           </View>
-          <View style={styles.bottomOverlay}>
-            <OptionButton
-              onPress={() => onPressConfirmButton()}
-              innerLabelText={'Confirm'}
-              containerStyle={styles.confirmButtonContainer}
-              buttonStyle={styles.confirmButton}
-              labelStyle={styles.confirmButtonLabel}
-              touchDownFeedbackStyle={styles.confirmButtonPressInFeedback}
-              touchUpFeedbackStyle={{}}
-            />
-          </View>
+        </Pressable>
+        <View style={styles.bottomOverlay}>
+          <Animated.View
+            style={{
+              transform: [{ translateY: dragValue }]
+            }}
+            {...panResponder.panHandlers}
+          >
+            <View style={styles.confirmPin}>
+              <View style={styles.pinFill}>
+                <View style={[styles.pinUpperColor, {
+                  'backgroundColor': 'ghostwhite'
+                }]}/>
+                <View style={[styles.pinLowerColor, {
+                  'borderTopColor': 'ghostwhite'
+                }]}/>
+              </View>
+              <Image
+                style={styles.pinImage}
+                source={require('./icons/pin.png')}
+              />
+            </View>
+          </Animated.View>
+          <Text style={styles.confirmText}>Drag down to confirm</Text>
         </View>
       </Menu>
     </>
@@ -329,12 +418,12 @@ const styles = StyleSheet.create({
   textInputsContainer: {
     marginHorizontal: 12,
     marginTop: 0,
-    padding: 12,
+    paddingHorizontal: 12,
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
     flexWrap: 'wrap',
-    backgroundColor: '#88004433'
+    // backgroundColor: '#88004433'
   },
   textInputContainer: {
     padding: 12,
@@ -354,31 +443,31 @@ const styles = StyleSheet.create({
   textInput: {
     marginTop: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#ffffff33',
+    borderBottomColor: '#ffffff22',
     textAlignVertical: 'top',
     color: 'white',
-    backgroundColor: '#66334499'
+    // backgroundColor: '#66334499'
   },
   publicAccessToggleContainer: {
     margin: 12,
     paddingVertical: 12,
     paddingHorizontal: 24,
     width: '100%',
-    backgroundColor: '#11339933'
+    // backgroundColor: '#11339933'
   },
   publicAccessToggle: {
     borderWidth: 1,
-    borderColor: '#aeaeae',
+    borderColor: 'white',
+    borderColor: '#ffffff88',
     display: 'flex',
     flexDirection: 'row',
   },
   publicAccessSegmentSelected: {
     width: '50%',
-    backgroundColor: '#aeaeae'
+    backgroundColor: '#ffffff88',
   },
   publicAccessSegment: {
     width: '50%',
-    borderColor: 'white',
   },
   publicAccessLabelSelected: {
     height: 24,
@@ -387,6 +476,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 2,
+    fontWeight: '500',
     textAlign: 'center',
     textAlignVertical: 'center',
     color: 'black'
@@ -404,41 +494,59 @@ const styles = StyleSheet.create({
   },
   bottomOverlay: {
     marginTop: 'auto',
+    paddingBottom: 42,
     bottom: 0,
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
     // backgroundColor: '#151515c3',
   },
-  confirmButtonContainer: {
-    marginHorizontal: 16,
-    marginVertical: 32,
+  confirmPin: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center'
+  },
+  pinFill: {
+    position: 'absolute',
+    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'
   },
-  confirmButton: {
-    height: 48,
-    width: '90%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000000bb'
-  },
-  confirmButtonLabel: {
-    position: 'absolute',
+  pinUpperColor: {
     alignSelf: 'center',
-    paddingLeft: 3,
-    height: 16,
-    fontSize: 13,
-    textAlign: 'center',
+    position: 'absolute',
+    top: 1.5,
+    height: 36,
+    width: 36,
+    borderRadius: 36,
+    backgroundColor: 'ghostwhite',
+  },
+  pinLowerColor: {
+    alignSelf: 'center',
+    position: 'absolute',
+    top: 27,
+    borderTopWidth: 28.5,
+    borderRightWidth: 16.5,
+    borderBottomWidth: 0,
+    borderLeftWidth: 16.5,
+    borderColor: 'transparent',
+    borderTopColor: 'ghostwhite'
+  },
+  pinImage: {
+    height: 60,
+    width: 60
+  },
+  confirmText: {
+    marginTop: 44,
+    height: 24,
+    width: '100%',
+    lineHeight: 24,
+    fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 2,
-    color: 'white'
-  },
-  confirmButtonPressInFeedback: {
-    height: '120%',
-    width: '108%',
-    backgroundColor: 'black',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    color: '#ffffffaa'
   }
 });
 
