@@ -10,11 +10,24 @@ import {
   Keyboard,
   StyleSheet
 } from 'react-native';
-import AddPinOverlay from './AddPinOverlay';
-import Menu from './Menu';
+import Pin from './Pin';
 import OptionButton from './OptionButton';
 
 const CreatePinView = (props) => {
+
+  const {
+    shouldShow,
+    isDraggingMap,
+    currentRegion,
+    onConfirmLocation,
+    onRepositionPin,
+    onPressCancelButton,
+    onPressConfirmButton
+  } = props;
+
+  const region = currentRegion ?? { latitude: 0, longitude: 0 };
+  const latitude = region.latitude.toFixed(6);
+  const longitude = region.longitude.toFixed(6);
 
   // toggle overlay for positioning new pin
   const [isLocationConfirmed, setIsLocationConfirmed] = useState(false);
@@ -111,6 +124,7 @@ const CreatePinView = (props) => {
   const onPressBack = () => {
     Keyboard.dismiss();
     setIsLocationConfirmed(false);
+    onRepositionPin();
   }
 
   // handle press on public segment of access toggle
@@ -125,39 +139,37 @@ const CreatePinView = (props) => {
     setIsPublic(false)
   }
 
-  const {
-    shouldShow,
-    isDraggingMap,
-    currentRegion,
-    onPressCancelButton,
-    onPressConfirmButton
-  } = props;
+  const confirmLocation = () => {
+    Keyboard.dismiss();
+    setIsLocationConfirmed(true);
+    onConfirmLocation();
+  }
 
-  const region = currentRegion ?? { latitude: 0, longitude: 0 };
-  const latitude = region.latitude.toFixed(6);
-  const longitude = region.longitude.toFixed(6);
+  const headerText = isLocationConfirmed ? 'Create' : 'Drop a spot';
+
+  const onPressHeaderButton = isLocationConfirmed ?
+    () => onPressBack() :
+    () => onPressCancelButton();
+
+  const onPressFooterButton = isLocationConfirmed ?
+    () => onPressBack() :
+    () => confirmLocation();
+
+  const shouldShowOverlay = () => {
+    if (!shouldShow) return false;
+    if (isLocationConfirmed) return true;
+    if (!isDraggingMap) return true;
+    return false;
+  }
 
   return (
     <>
-      <AddPinOverlay
-        shouldShow={shouldShow && !isLocationConfirmed}
-        isDraggingMap={isDraggingMap}
-        onPressCancelButton={() => onPressCancelButton()}
-        onPressConfirmButton={() => setIsLocationConfirmed(true)}
-      />
-      <Menu
-        shouldShow={shouldShow && isLocationConfirmed}
-        showDefaultCloseButton={false}
-      >
-        <Pressable style={styles.menuContent}
-          onPress={() => Keyboard.dismiss()}
-        >
+      {shouldShowOverlay() && (
+        <>
           <View style={styles.topOverlay}>
-            <Text style={styles.topText}>
-              Create
-            </Text>
+            <Text style={styles.topText}>{headerText}</Text>
             <OptionButton
-              onPress={() => onPressBack()}
+              onPress={() => onPressHeaderButton()}
               containerStyle={styles.backButtonContainer}
               buttonStyle={styles.backButton}
               iconStyle={styles.backIcon}
@@ -168,116 +180,113 @@ const CreatePinView = (props) => {
               touchDownFeedbackStyle={{}}
               touchUpFeedbackStyle={{}}
             />
+            {isLocationConfirmed && (
+              <>
+                <View style={styles.coordinateContainer}>
+                  <Text style={styles.leftAlignCoordinateLabelText}>{'Latitude'}</Text>
+                  <Text style={styles.rightAlignCoordinateLabelText}>{'Longitude'}</Text>
+                  <Text style={styles.leftAlignCoordinateValueText}>{latitude}</Text>
+                  <Text style={styles.rightAlignCoordinateValueText}>{longitude}</Text>
+                </View>
+                <View style={styles.emptyPhotosContainer}>
+                  <View style={styles.photoContainer}>
+                    <Text style={styles.photoAddText}>Add a photo</Text>
+                    <View style={styles.photoIconContainer}>
+                      <Image
+                        style={styles.photoIcon}
+                        source={require('./icons/add-photo.png')}
+                      />
+                    </View>
+                  </View>
+                </View>
+              </>
+            )}
           </View>
-          <View style={styles.coordinateContainer}>
-            <Text style={styles.leftAlignCoordinateLabelText}>{'Latitude'}</Text>
-            <Text style={styles.rightAlignCoordinateLabelText}>{'Longitude'}</Text>
-            <Text style={styles.leftAlignCoordinateValueText}>{latitude}</Text>
-            <Text style={styles.rightAlignCoordinateValueText}>{longitude}</Text>
-          </View>
-          <View style={styles.emptyPhotosContainer}>
-            <View style={styles.photoContainer}>
-              <Text style={styles.photoAddText}>Add a photo</Text>
-              <View style={styles.photoIconContainer}>
-                <Image
-                  style={styles.photoIcon}
-                  source={require('./icons/add-photo.png')}
-                />
-              </View>
-            </View>
-          </View>
-          <View style={styles.textInputsContainer}>
-            <View style={styles.textInputContainer}>
-              <Text style={styles.textInputLabel}>Title</Text>
-              <TextInput
-                style={styles.textInput}
-                value={title}
-                onChangeText={(text) => setTitle(text)}
-                maxLength={44}
-                autoCorrect={false}
-                autoCapitalize={'none'}
-                autoCompleteType={'off'}
-                underlineColorAndroid={'transparent'}
-              />
-            </View>
-            <View style={styles.textInputContainer}>
-              <Text style={styles.textInputLabel}>Description</Text>
-              <TextInput
-                style={styles.textInput}
-                value={description}
-                onChangeText={(text) => setDescription(text)}
-                multiline={true}
-                scrollEnabled={false}
-                maxLength={280}
-                autoCorrect={false}
-                autoCapitalize={'none'}
-                autoCompleteType={'off'}
-                underlineColorAndroid={'transparent'}
-              />
-            </View>
-          </View>
-          <View style={styles.publicAccessToggleContainer}>
-            <View style={styles.publicAccessToggle}>
+          <View style={styles.bottomOverlay}>
+            {isLocationConfirmed && (
+              <>
+                <View style={styles.textInputsContainer}>
+                  <View style={styles.textInputContainer}>
+                    <Text style={styles.textInputLabel}>Title</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={title}
+                      onChangeText={(text) => setTitle(text)}
+                      maxLength={44}
+                      autoCorrect={false}
+                      autoCapitalize={'none'}
+                      autoCompleteType={'off'}
+                      underlineColorAndroid={'transparent'}
+                    />
+                  </View>
+                  <View style={styles.textInputContainer}>
+                    <Text style={styles.textInputLabel}>Description</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={description}
+                      onChangeText={(text) => setDescription(text)}
+                      multiline={true}
+                      scrollEnabled={false}
+                      maxLength={280}
+                      autoCorrect={false}
+                      autoCapitalize={'none'}
+                      autoCompleteType={'off'}
+                      underlineColorAndroid={'transparent'}
+                    />
+                  </View>
+                </View>
+                <View style={styles.publicAccessToggleContainer}>
+                  <View style={styles.publicAccessToggle}>
+                    <Pressable
+                      style={publicStyle}
+                      onPress={() => onPressPublic()}
+                    >
+                      <Text style={publicLabelStyle}>Public</Text>
+                    </Pressable>
+                    <Pressable
+                      style={privateStyle}
+                      onPress={() => onPressPrivate()}
+                    >
+                      <Text style={privateLabelStyle}>Private</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </>
+            )}
+            <View style={styles.confirmButtonContainer}>
               <Pressable
-                style={publicStyle}
-                onPress={() => onPressPublic()}
+                style={styles.confirmButton}
+                onPress={() => onPressFooterButton()}
               >
-                <Text style={publicLabelStyle}>Public</Text>
-              </Pressable>
-              <Pressable
-                style={privateStyle}
-                onPress={() => onPressPrivate()}
-              >
-                <Text style={privateLabelStyle}>Private</Text>
+                <Text style={styles.confirmButtonLabel}>Confirm Location</Text>
               </Pressable>
             </View>
           </View>
-        </Pressable>
-        <View style={styles.bottomOverlay}>
-          <Animated.View
-            style={{
-              transform: [{ translateY: dragValue }]
-            }}
-            {...panResponder.panHandlers}
-          >
-            <View style={styles.confirmPin}>
-              <View style={styles.pinFill}>
-                <View style={[styles.pinUpperColor, {
-                  'backgroundColor': 'ghostwhite'
-                }]}/>
-                <View style={[styles.pinLowerColor, {
-                  'borderTopColor': 'ghostwhite'
-                }]}/>
-              </View>
-              <Image
-                style={styles.pinImage}
-                source={require('./icons/pin.png')}
-              />
-            </View>
-          </Animated.View>
-          <Text style={styles.confirmText}>Drag down to confirm</Text>
-        </View>
-      </Menu>
+        </>
+      )}
+      {shouldShow && (
+        <Pin style={styles.pin} />
+      )}
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  menuContent: {
-    height: '100%',
-    width: '100%',
+  pin: {
+    position: 'absolute',
     display: 'flex',
-    justifyContent: 'flex-start',
-    alignItems: 'center'
+    flexDirection: 'row',
+    justifyContent: 'center'
   },
   topOverlay: {
     top: 0,
     paddingTop: 60,
     paddingBottom: 16,
+    maxHeight: '45%',
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
-    // backgroundColor: '#151515c3',
+    backgroundColor: '#151515c3',
   },
   topText: {
     paddingLeft: 3,
@@ -293,7 +302,7 @@ const styles = StyleSheet.create({
   backButtonContainer: {
     position: 'absolute',
     alignSelf: 'center',
-    bottom: 1,
+    top: 45,
     left: 3
   },
   backButton: {
@@ -368,6 +377,7 @@ const styles = StyleSheet.create({
   },
   emptyPhotosContainer: {
     marginVertical: 12,
+    marginBottom: -16,
     height: 140,
     width: '100%',
     display: 'flex',
@@ -416,9 +426,8 @@ const styles = StyleSheet.create({
     // backgroundColor: 'green'
   },
   textInputsContainer: {
-    marginHorizontal: 12,
-    marginTop: 0,
     paddingHorizontal: 12,
+    paddingTop: 12,
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -448,8 +457,17 @@ const styles = StyleSheet.create({
     color: 'white',
     // backgroundColor: '#66334499'
   },
+  bottomOverlay: {
+    marginTop: 'auto',
+    bottom: 0,
+    maxHeight: '45%',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    backgroundColor: '#151515c3',
+  },
   publicAccessToggleContainer: {
-    margin: 12,
     paddingVertical: 12,
     paddingHorizontal: 24,
     width: '100%',
@@ -461,6 +479,7 @@ const styles = StyleSheet.create({
     borderColor: '#ffffff88',
     display: 'flex',
     flexDirection: 'row',
+    backgroundColor: '#00000055',
   },
   publicAccessSegmentSelected: {
     width: '50%',
@@ -492,61 +511,34 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     color: 'white'
   },
-  bottomOverlay: {
-    marginTop: 'auto',
-    paddingBottom: 42,
-    bottom: 0,
+  confirmButtonContainer: {
     width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    // backgroundColor: '#151515c3',
+    paddingTop: 16,
+    paddingBottom: 12,
+    paddingHorizontal: 24,
+    marginBottom: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // backgroundColor: '#77771133'
   },
-  confirmPin: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center'
-  },
-  pinFill: {
-    position: 'absolute',
+  confirmButton: {
+    height: 48,
+    width: '100%',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#000000bb'
   },
-  pinUpperColor: {
-    alignSelf: 'center',
+  confirmButtonLabel: {
     position: 'absolute',
-    top: 1.5,
-    height: 36,
-    width: 36,
-    borderRadius: 36,
-    backgroundColor: 'ghostwhite',
-  },
-  pinLowerColor: {
     alignSelf: 'center',
-    position: 'absolute',
-    top: 27,
-    borderTopWidth: 28.5,
-    borderRightWidth: 16.5,
-    borderBottomWidth: 0,
-    borderLeftWidth: 16.5,
-    borderColor: 'transparent',
-    borderTopColor: 'ghostwhite'
-  },
-  pinImage: {
-    height: 60,
-    width: 60
-  },
-  confirmText: {
-    marginTop: 44,
-    height: 24,
-    width: '100%',
-    lineHeight: 24,
-    fontSize: 10,
+    paddingLeft: 3,
+    height: 16,
+    fontSize: 13,
+    textAlign: 'center',
     textTransform: 'uppercase',
     letterSpacing: 2,
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    color: '#ffffffaa'
+    color: 'white'
   }
 });
 

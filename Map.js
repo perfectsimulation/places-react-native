@@ -23,6 +23,7 @@ const Map = () => {
   const [showPinDetail, setShowPinDetail] = useState(false);
   const [showAddPinOverlay, setShowAddPinOverlay] = useState(false);
   const [isDraggingMap, setIsDraggingMap] = useState(false);
+  const [allowRegionChange, setAllowRegionChange] = useState(true);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -76,12 +77,14 @@ const Map = () => {
   }
 
   const onPressCancelButton = () => {
+    setAllowRegionChange(true);
     setShowAddPinOverlay(false);
   }
 
   const onPressConfirmButton = () => {
     createPin();
     // console.log(currentRegion);
+    setAllowRegionChange(true);
     setShowAddPinOverlay(false);
   }
 
@@ -144,6 +147,10 @@ const Map = () => {
         mapType={'hybrid'}
         initialRegion={currentRegion}
         onRegionChangeComplete={(region) => setCurrentRegion(region)}
+        scrollEnabled={allowRegionChange}
+        zoomEnabled={allowRegionChange}
+        rotateEnabled={allowRegionChange}
+        pitchEnabled={allowRegionChange}
         onTouchStart={() => onTouchMapStart()}
         onTouchEnd={() => onTouchMapEnd()}
       >
@@ -170,6 +177,8 @@ const Map = () => {
         shouldShow={showAddPinOverlay}
         isDraggingMap={isDraggingMap}
         currentRegion={currentRegion}
+        onConfirmLocation={() => setAllowRegionChange(false)}
+        onRepositionPin={() => setAllowRegionChange(true)}
         onPressCancelButton={() => onPressCancelButton()}
         onPressConfirmButton={() => onPressConfirmButton()}
       />
