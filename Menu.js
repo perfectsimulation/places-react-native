@@ -9,10 +9,6 @@ import CloseButton from './CloseButton';
 
 const Menu = (props) => {
 
-  // TODO useWindowDimensions instead
-  const window = Dimensions.get('window');
-  const height = window.height;
-
   const {
     shouldShow,
     children,
@@ -27,6 +23,10 @@ const Menu = (props) => {
   const onCloseMenu = onClose ?? (() => {});
   const showCloseButton = showDefaultCloseButton ?? true;
   const transitionDuration = animationDuration ?? 300;
+
+  // TODO useWindowDimensions instead
+  const window = Dimensions.get('window');
+  const height = window.height;
 
   // translate entire menu on/off-screen
   const beforeShow = show ? height : 0;

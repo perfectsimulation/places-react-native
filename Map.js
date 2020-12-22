@@ -18,14 +18,14 @@ const Map = () => {
   const map = useRef();
 
   const [currentRegion, setCurrentRegion] = useState(null);
+  const [allowRegionChange, setAllowRegionChange] = useState(true);
+  const [isDraggingMap, setIsDraggingMap] = useState(false);
   const [pins, setPins] = useState([]);
   const [focusedPin, setFocusedPin] = useState(null);
   const [showPinDetail, setShowPinDetail] = useState(false);
-  const [showAddPinOverlay, setShowAddPinOverlay] = useState(false);
-  const [isDraggingMap, setIsDraggingMap] = useState(false);
-  const [allowRegionChange, setAllowRegionChange] = useState(true);
+  const [showCreateView, setShowCreateView] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
+  const [showPlacesMenu, setShowPlacesMenu] = useState(false);
 
   // Use user position to set initial map region
   useEffect(() => {
@@ -57,8 +57,9 @@ const Map = () => {
       .catch((error) => alert(error.message));
   }, []);
 
+  // hide create view and pin detail
   const onTouchMapStart = () => {
-    setIsDraggingMap(true);
+    setIsDraggingMap(allowRegionChange);
     setShowPinDetail(false);
   }
 
@@ -66,33 +67,39 @@ const Map = () => {
     setIsDraggingMap(false);
   }
 
+  // open pin detail with selected pin
   const onPressPin = (pin) => {
     setFocusedPin(pin);
     setShowPinDetail(true);
   }
 
+  // begin pin creation flow
   const onPressAddButton = () => {
-    setShowAddPinOverlay(true);
+    setShowCreateView(true);
     setShowOptionsMenu(false);
   }
 
+  // cancel pin creation flow
   const onPressCancelButton = () => {
     setAllowRegionChange(true);
-    setShowAddPinOverlay(false);
+    setShowCreateView(false);
   }
 
+  // finalize new pin creation
   const onPressConfirmButton = () => {
     createPin();
     // console.log(currentRegion);
     setAllowRegionChange(true);
-    setShowAddPinOverlay(false);
+    setShowCreateView(false);
   }
 
+  // open places menu
   const onPressPlacesButton = () => {
     setShowOptionsMenu(false);
-    setShowMenu(true);
+    setShowPlacesMenu(true);
   }
 
+  // close places menu and scroll map to selected pin
   const onSelectPlacesMenuItem = (pin) => {
     if (!map || !map.current) return;
     const pinRegion = {
@@ -103,7 +110,7 @@ const Map = () => {
     };
 
     // close places menu
-    setShowMenu(false);
+    setShowPlacesMenu(false);
 
     // animate scroll to the pin on map
     map.current.animateToRegion(pinRegion, 255);
@@ -113,8 +120,8 @@ const Map = () => {
     setShowPinDetail(true);
   }
 
-  const onCloseMenu = () => {
-    setShowMenu(false);
+  const onClosePlacesMenu = () => {
+    setShowPlacesMenu(false);
   }
 
   const createPin = () => {
@@ -170,11 +177,11 @@ const Map = () => {
         ))}
       </MapView>
       <MenuButton
-        shouldShow={!showAddPinOverlay}
+        shouldShow={!showCreateView}
         onPress={() => setShowOptionsMenu(true)}
       />
       <CreatePinView
-        shouldShow={showAddPinOverlay}
+        shouldShow={showCreateView}
         isDraggingMap={isDraggingMap}
         currentRegion={currentRegion}
         onConfirmLocation={() => setAllowRegionChange(false)}
@@ -192,9 +199,9 @@ const Map = () => {
         onCloseOptionsMenu={() => setShowOptionsMenu(false)}
       />
       <PlacesMenu
-        shouldShow={showMenu}
+        shouldShow={showPlacesMenu}
         pins={pins}
-        onClose={() => onCloseMenu()}
+        onClose={() => onClosePlacesMenu()}
         onSelectItem={(pin) => onSelectPlacesMenuItem(pin)}
       />
       <PinDetail

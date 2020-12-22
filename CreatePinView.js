@@ -6,8 +6,8 @@ import {
   Image,
   Text,
   TextInput,
-  PanResponder,
   Keyboard,
+  Dimensions,
   StyleSheet
 } from 'react-native';
 import Pin from './Pin';
@@ -25,11 +25,7 @@ const CreatePinView = (props) => {
     onPressConfirmButton
   } = props;
 
-  const region = currentRegion ?? { latitude: 0, longitude: 0 };
-  const latitude = region.latitude.toFixed(6);
-  const longitude = region.longitude.toFixed(6);
-
-  // toggle overlay for positioning new pin
+  // toggle overlay components for positioning new pin
   const [isLocationConfirmed, setIsLocationConfirmed] = useState(false);
 
   // title input value
@@ -38,7 +34,7 @@ const CreatePinView = (props) => {
   // description input value
   const [description, setDescription] = useState(
     'Unbearably refreshing to visit. ' +
-    'Untold indulgences lie hidden within this divine oasis. ' +
+    'Untold indulgences await within this divine oasis. ' +
     'Something endless to while away the harrowing rapture of time.'
   );
 
@@ -52,6 +48,50 @@ const CreatePinView = (props) => {
   // dynamic styles of public access segment labels
   const [publicLabelStyle, setPublicLabelStyle] = useState([styles.publicAccessLabel]);
   const [privateLabelStyle, setPrivateLabelStyle] = useState([styles.publicAccessLabelSelected]);
+
+  // TODO useWindowDimensions instead
+  const window = Dimensions.get('window');
+  const overlayHeight = window.height * 0.45;
+
+  // initial/final positions of overlay animations
+  const beforeShowTop = shouldShow ? -overlayHeight : 0;
+  const afterShowTop = shouldShow ? 0 : -overlayHeight;
+  const beforeShowBottom = shouldShow ? overlayHeight : 0;
+  const afterShowBottom = shouldShow ? 0 : overlayHeight;
+
+  // translation animation ref values
+  const translateTopAnim = useRef(new Animated.Value(beforeShowTop)).current;
+  const translateBottomAnim = useRef(new Animated.Value(beforeShowBottom)).current;
+  const transitionDuration = 300;
+
+  // trigger overlay translations
+  const [shouldClose, setShouldClose] = useState(false);
+
+  // translate overlays on/off-screen
+  useEffect(() => {
+      // translate top overlay into or out of view
+      Animated.timing(
+        translateTopAnim, {
+          toValue: afterShowTop,
+          duration: transitionDuration,
+          useNativeDriver: true,
+        }
+      ).start();
+      // translate bottom overlay into or out of view
+      Animated.timing(
+        translateBottomAnim, {
+          toValue: afterShowBottom,
+          duration: transitionDuration,
+          useNativeDriver: true,
+        }
+      ).start();
+
+  }, [shouldClose, afterShowBottom, translateBottomAnim]);
+
+  // close this menu from this close button
+  useEffect(() => {
+    setShouldClose(!shouldShow);
+  }, [shouldShow]);
 
   // set styles of public access toggle
   useEffect(() => {
@@ -78,47 +118,12 @@ const CreatePinView = (props) => {
 
   }), [isPublic];
 
-  // drag confirmation pin
-  const pan = useRef(new Animated.ValueXY()).current;
-
-  // clamp vertical translation of pin, interpolated from gesture
-  const dragValue = pan.y.interpolate({
-    inputRange: [0, 60, Infinity],
-    outputRange: [0, 60, 60]
-  });
-
-  // allow vertical drag of confirmation pin
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        pan.setOffset({
-          x: 0,
-          y: pan.y._value
-        });
-      },
-      onPanResponderMove: (event, gesture) => {
-        if (gesture.dy > 0) {
-          return Animated.event(
-            [
-              null,
-              { dy: pan.y }
-            ],
-            { useNativeDriver: false }
-            )(event, gesture)
-        }
-      },
-      onPanResponderRelease: () => {
-        pan.flattenOffset();
-        Animated.spring(
-          pan, {
-            toValue: { x: 0, y: 0 },
-            useNativeDriver: false
-          }
-        ).start();
-      }
-    })
-  ).current;
+  // handle press on cancel button
+  const onPressCancel = () => {
+    Keyboard.dismiss();
+    setShouldClose(true);
+    onPressCancelButton();
+  }
 
   // handle press on back button in top left corner
   const onPressBack = () => {
@@ -126,6 +131,20 @@ const CreatePinView = (props) => {
     setIsLocationConfirmed(false);
     onRepositionPin();
   }
+
+  const confirmLocation = () => {
+    Keyboard.dismiss();
+    setIsLocationConfirmed(true);
+    onConfirmLocation();
+  }
+
+  const onPressHeaderButton = isLocationConfirmed ?
+    () => onPressBack() :
+    () => onPressCancel();
+
+  const onPressFooterButton = isLocationConfirmed ?
+    () => onPressBack() :
+    () => confirmLocation();
 
   // handle press on public segment of access toggle
   const onPressPublic = () => {
@@ -136,142 +155,133 @@ const CreatePinView = (props) => {
   // handle press on private segment of access toggle
   const onPressPrivate = () => {
     Keyboard.dismiss();
-    setIsPublic(false)
+    setIsPublic(false);
   }
 
-  const confirmLocation = () => {
-    Keyboard.dismiss();
-    setIsLocationConfirmed(true);
-    onConfirmLocation();
-  }
+  const region = currentRegion ?? { latitude: 0, longitude: 0 };
+  const latitude = region.latitude.toFixed(6);
+  const longitude = region.longitude.toFixed(6);
 
   const headerText = isLocationConfirmed ? 'Create' : 'Drop a spot';
-
-  const onPressHeaderButton = isLocationConfirmed ?
-    () => onPressBack() :
-    () => onPressCancelButton();
-
-  const onPressFooterButton = isLocationConfirmed ?
-    () => onPressBack() :
-    () => confirmLocation();
-
-  const shouldShowOverlay = () => {
-    if (!shouldShow) return false;
-    if (isLocationConfirmed) return true;
-    if (!isDraggingMap) return true;
-    return false;
-  }
+  const confirmText = isLocationConfirmed ? 'Confirm' : 'Confirm location';
+  const topOverlay = isDraggingMap ? styles.hidden : styles.topOverlay;
+  const bottomOverlay = isDraggingMap ? styles.hidden : styles.bottomOverlay;
+  const pin = shouldShow ? styles.pin : styles.hidden;
 
   return (
     <>
-      {shouldShowOverlay() && (
-        <>
-          <View style={styles.topOverlay}>
-            <Text style={styles.topText}>{headerText}</Text>
-            <OptionButton
-              onPress={() => onPressHeaderButton()}
-              containerStyle={styles.backButtonContainer}
-              buttonStyle={styles.backButton}
-              iconStyle={styles.backIcon}
-              iconTouchStyle={styles.backIconTouch}
-              iconSource={require('./icons/cancel.png')}
-              iconTouchSource={require('./icons/cancel-touch.png')}
-              iconTouchBackgroundStyle={styles.backIconTouchContainer}
-              touchDownFeedbackStyle={{}}
-              touchUpFeedbackStyle={{}}
-            />
-            {isLocationConfirmed && (
-              <>
-                <View style={styles.coordinateContainer}>
-                  <Text style={styles.leftAlignCoordinateLabelText}>{'Latitude'}</Text>
-                  <Text style={styles.rightAlignCoordinateLabelText}>{'Longitude'}</Text>
-                  <Text style={styles.leftAlignCoordinateValueText}>{latitude}</Text>
-                  <Text style={styles.rightAlignCoordinateValueText}>{longitude}</Text>
-                </View>
-                <View style={styles.emptyPhotosContainer}>
-                  <View style={styles.photoContainer}>
-                    <Text style={styles.photoAddText}>Add a photo</Text>
-                    <View style={styles.photoIconContainer}>
-                      <Image
-                        style={styles.photoIcon}
-                        source={require('./icons/add-photo.png')}
-                      />
-                    </View>
-                  </View>
-                </View>
-              </>
-            )}
-          </View>
-          <View style={styles.bottomOverlay}>
-            {isLocationConfirmed && (
-              <>
-                <View style={styles.textInputsContainer}>
-                  <View style={styles.textInputContainer}>
-                    <Text style={styles.textInputLabel}>Title</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={title}
-                      onChangeText={(text) => setTitle(text)}
-                      maxLength={44}
-                      autoCorrect={false}
-                      autoCapitalize={'none'}
-                      autoCompleteType={'off'}
-                      underlineColorAndroid={'transparent'}
-                    />
-                  </View>
-                  <View style={styles.textInputContainer}>
-                    <Text style={styles.textInputLabel}>Description</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={description}
-                      onChangeText={(text) => setDescription(text)}
-                      multiline={true}
-                      scrollEnabled={false}
-                      maxLength={280}
-                      autoCorrect={false}
-                      autoCapitalize={'none'}
-                      autoCompleteType={'off'}
-                      underlineColorAndroid={'transparent'}
-                    />
-                  </View>
-                </View>
-                <View style={styles.publicAccessToggleContainer}>
-                  <View style={styles.publicAccessToggle}>
-                    <Pressable
-                      style={publicStyle}
-                      onPress={() => onPressPublic()}
-                    >
-                      <Text style={publicLabelStyle}>Public</Text>
-                    </Pressable>
-                    <Pressable
-                      style={privateStyle}
-                      onPress={() => onPressPrivate()}
-                    >
-                      <Text style={privateLabelStyle}>Private</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              </>
-            )}
-            <View style={styles.confirmButtonContainer}>
-              <Pressable
-                style={styles.confirmButton}
-                onPress={() => onPressFooterButton()}
-              >
-                <Text style={styles.confirmButtonLabel}>Confirm Location</Text>
-              </Pressable>
+      <Animated.View
+        style={[topOverlay, {
+          transform: [{ translateY: translateTopAnim }]
+        }]}
+      >
+        <Text style={styles.topText}>{headerText}</Text>
+        <OptionButton
+          onPress={() => onPressHeaderButton()}
+          containerStyle={styles.backButtonContainer}
+          buttonStyle={styles.backButton}
+          iconStyle={styles.backIcon}
+          iconTouchStyle={styles.backIconTouch}
+          iconSource={require('./icons/cancel.png')}
+          iconTouchSource={require('./icons/cancel-touch.png')}
+          iconTouchBackgroundStyle={styles.backIconTouchContainer}
+          touchDownFeedbackStyle={{}}
+          touchUpFeedbackStyle={{}}
+        />
+        {isLocationConfirmed && (
+          <>
+            <View style={styles.coordinateContainer}>
+              <Text style={styles.latitudeLabelText}>{'Latitude'}</Text>
+              <Text style={styles.longitudeLabelText}>{'Longitude'}</Text>
+              <Text style={styles.latitudeValueText}>{latitude}</Text>
+              <Text style={styles.longitudeValueText}>{longitude}</Text>
             </View>
-          </View>
-        </>
-      )}
-      {shouldShow && (
-        <Pin style={styles.pin} />
-      )}
+            <View style={styles.emptyPhotosContainer}>
+              <View style={styles.photoContainer}>
+                <Text style={styles.photoAddText}>Add a photo</Text>
+                <View style={styles.photoIconContainer}>
+                  <Image
+                    style={styles.photoIcon}
+                    source={require('./icons/add-photo.png')}
+                  />
+                </View>
+              </View>
+            </View>
+          </>
+        )}
+      </Animated.View>
+      <Animated.View
+        style={[bottomOverlay, {
+          transform: [{ translateY: translateBottomAnim }]
+        }]}>
+        {isLocationConfirmed && (
+          <>
+            <View style={styles.textInputsContainer}>
+              <View style={styles.textInputContainer}>
+                <Text style={styles.textInputLabel}>Title</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={title}
+                  onChangeText={(text) => setTitle(text)}
+                  maxLength={44}
+                  autoCorrect={false}
+                  autoCapitalize={'none'}
+                  autoCompleteType={'off'}
+                  underlineColorAndroid={'transparent'}
+                />
+              </View>
+              <View style={styles.textInputContainer}>
+                <Text style={styles.textInputLabel}>Description</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={description}
+                  onChangeText={(text) => setDescription(text)}
+                  multiline={true}
+                  scrollEnabled={false}
+                  maxLength={280}
+                  autoCorrect={false}
+                  autoCapitalize={'none'}
+                  autoCompleteType={'off'}
+                  underlineColorAndroid={'transparent'}
+                />
+              </View>
+            </View>
+            <View style={styles.publicAccessToggleContainer}>
+              <View style={styles.publicAccessToggle}>
+                <Pressable
+                  style={publicStyle}
+                  onPress={() => onPressPublic()}
+                >
+                  <Text style={publicLabelStyle}>Public</Text>
+                </Pressable>
+                <Pressable
+                  style={privateStyle}
+                  onPress={() => onPressPrivate()}
+                >
+                  <Text style={privateLabelStyle}>Private</Text>
+                </Pressable>
+              </View>
+            </View>
+          </>
+        )}
+        <View style={styles.confirmButtonContainer}>
+          <Pressable
+            style={styles.confirmButton}
+            onPress={() => onPressFooterButton()}
+          >
+            <Text style={styles.confirmButtonLabel}>{confirmText}</Text>
+          </Pressable>
+        </View>
+      </Animated.View>
+      <Pin style={pin} />
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  hidden: {
+    display: 'none'
+  },
   pin: {
     position: 'absolute',
     display: 'flex',
@@ -334,7 +344,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     // backgroundColor: '#77771133',
   },
-  leftAlignCoordinateLabelText: {
+  latitudeLabelText: {
     height: 12,
     width: '50%',
     lineHeight: 12,
@@ -343,7 +353,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     color: '#ffffffaa'
   },
-  leftAlignCoordinateValueText: {
+  latitudeValueText: {
     marginTop: 6,
     height: 14,
     width: '50%',
@@ -353,7 +363,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     color: 'white'
   },
-  rightAlignCoordinateLabelText: {
+  longitudeLabelText: {
     height: 12,
     width: '50%',
     lineHeight: 12,
@@ -364,7 +374,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     color: '#ffffffaa'
   },
-  rightAlignCoordinateValueText: {
+  longitudeValueText: {
     marginTop: 6,
     height: 14,
     width: '50%',
