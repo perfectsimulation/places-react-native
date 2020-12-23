@@ -7,12 +7,19 @@ import {
 
 const Pin = (props) => {
 
-  const { color, style } = props;
+  const {
+    shouldShow,
+    color,
+    style
+  } = props;
+
+  const show = shouldShow ?? true;
   const position = style ?? styles.pin;
+  const pin = show ? position : styles.hidden;
   const fillColor = color ?? '#f8f8ff';
 
   return (
-    <View style={position}>
+    <View style={pin}>
       <View style={styles.pinFill}>
         <View style={[styles.pinUpperColor, {
           'backgroundColor': fillColor
@@ -30,8 +37,11 @@ const Pin = (props) => {
 }
 
 const styles = StyleSheet.create({
+  hidden: {
+    display: 'none'
+  },
   pin: {
-    bottom: '16%',
+    position: 'absolute',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center'

@@ -171,7 +171,10 @@ const Map = () => {
             stopPropagation={true}
             onPress={() => onPressPin(pin)}
           >
-            <Pin color={pin.pinColor} />
+            <Pin
+              color={pin.pinColor}
+              style={styles.pin}
+            />
             <Callout tooltip />
           </Marker>
         ))}
@@ -223,6 +226,12 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject
+  },
+  pin: {
+    bottom: '16%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center'
   }
 });
 
