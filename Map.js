@@ -59,7 +59,7 @@ const Map = () => {
 
   // hide create view and pin detail
   const onTouchMapStart = () => {
-    setIsDraggingMap(allowRegionChange);
+    setIsDraggingMap(true);
     setShowPinDetail(false);
   }
 
@@ -86,8 +86,8 @@ const Map = () => {
   }
 
   // finalize new pin creation
-  const onPressConfirmButton = () => {
-    createPin();
+  const onPressConfirmButton = (pinForm) => {
+    createPin(pinForm);
     // console.log(currentRegion);
     setAllowRegionChange(true);
     setShowCreateView(false);
@@ -124,7 +124,7 @@ const Map = () => {
     setShowPlacesMenu(false);
   }
 
-  const createPin = () => {
+  const createPin = (pinForm) => {
     const pinCoordinate = {
       latitude: currentRegion.latitude,
       longitude: currentRegion.longitude,
@@ -133,6 +133,8 @@ const Map = () => {
     };
 
     const pin = {
+      title: pinForm.title,
+      description: pinForm.description,
       id: pins.length,
       coordinate: pinCoordinate,
     };
@@ -190,7 +192,7 @@ const Map = () => {
         onConfirmLocation={() => setAllowRegionChange(false)}
         onRepositionPin={() => setAllowRegionChange(true)}
         onPressCancelButton={() => onPressCancelButton()}
-        onPressConfirmButton={() => onPressConfirmButton()}
+        onPressConfirmButton={(pinForm) => onPressConfirmButton(pinForm)}
       />
       <OptionsMenu
         shouldShow={showOptionsMenu}

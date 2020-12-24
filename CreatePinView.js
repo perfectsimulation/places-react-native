@@ -42,6 +42,7 @@ const CreatePinView = (props) => {
 
   return (
     <>
+      <Pin shouldShow={shouldShow} />
       <PinPlacementOverlay
         shouldShow={shouldShowPlacementOverlay()}
         isDraggingMap={isDraggingMap}
@@ -50,10 +51,11 @@ const CreatePinView = (props) => {
       />
       <PinFormOverlay
         shouldShow={shouldShowFormOverlay()}
+        isDraggingMap={isDraggingMap}
         currentRegion={region}
         onRepositionPin={() => repositionPin()}
+        onPressConfirmButton={(pinForm) => onPressConfirmButton(pinForm)}
       />
-      <Pin shouldShow={shouldShow} />
     </>
   );
 }

@@ -12,7 +12,7 @@ const OptionsMenu = (props) => {
     onPressActivityButton, // top left
     onPressExploreButton,  // top right
     onPressPlacesButton,   // middle
-    onPressUserButton,    // bottom left
+    onPressUserButton,     // bottom left
     onPressAddButton,      // bottom right
     onCloseOptionsMenu
   } = props;
@@ -46,7 +46,7 @@ const OptionsMenu = (props) => {
         />
         <OptionButton
           onPress={() => onExplore()}
-          labelText={'Explore'}
+          labelText={'Times'}
           iconSource={require('./icons/arrows.png')}
           iconTouchSource={require('./icons/arrows-touch.png')}
           containerStyle={styles.optionButtonContainer}
@@ -88,7 +88,7 @@ const OptionsMenu = (props) => {
         />
         <OptionButton
           onPress={() => onAdd()}
-          labelText={'Add'}
+          labelText={'Create'}
           iconSource={require('./icons/pin-glyph.png')}
           iconTouchSource={require('./icons/pin-glyph-touch.png')}
           containerStyle={styles.optionButtonContainer}

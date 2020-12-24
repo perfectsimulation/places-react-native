@@ -2,11 +2,13 @@ import React, { useRef, useState, useEffect } from 'react';
 import {
   Animated,
   View,
+  ScrollView,
   Pressable,
   Image,
   Text,
   TextInput,
   Dimensions,
+  Keyboard,
   StyleSheet
 } from 'react-native';
 import OptionButton from './OptionButton';
@@ -15,19 +17,24 @@ const PinFormOverlay = (props) => {
 
   const {
     shouldShow,
+    isDraggingMap,
     currentRegion,
     onRepositionPin,
+    onPressConfirmButton,
   } = props;
 
+  const titlePlaceholder = '';
+  const descriptionPlaceholder = '';
+
+  // const titlePlaceholder = 'Moonsugar Outpost';
+  // const descriptionPlaceholder =
+  //   'Grab yourself something unbearably refreshing to while away the harrowing rapture of time.';
+
   // title input value
-  const [title, setTitle] = useState('Moonsugar Outpost');
+  const [title, setTitle] = useState(titlePlaceholder);
 
   // description input value
-  const [description, setDescription] = useState(
-    'Unbearably refreshing to visit. ' +
-    'Untold indulgences await within this divine oasis. ' +
-    'Something endless to while away the harrowing rapture of time.'
-  );
+  const [description, setDescription] = useState(descriptionPlaceholder);
 
   // selected segment of public access toggle
   const [isPublic, setIsPublic] = useState(false);
@@ -44,16 +51,43 @@ const PinFormOverlay = (props) => {
   const window = Dimensions.get('window');
   const overlayHeight = window.height * 0.45;
 
-  // initial/final positions of overlay animations
-  const beforeMoveTop = shouldShow ? -overlayHeight : 0;
-  const afterMoveTop = shouldShow ? 0 : -overlayHeight;
-  const beforeMoveBottom = shouldShow ? overlayHeight : 0;
-  const afterMoveBottom = shouldShow ? 0 : overlayHeight;
+  // heights of top and bottom overlays
+  const [topHeight, setTopHeight] = useState(overlayHeight);
+  const [bottomHeight, setBottomHeight] = useState(overlayHeight);
+  const [bottomBuffer, setBottomBuffer] = useState(bottomHeight);
 
-  // translation animation
+  // initial/final positions of overlay animations
+  const beforeMoveTop = shouldShow ? -topHeight : 0;
+  const afterMoveTop = shouldShow ? 0 : -topHeight;
+  const beforeMoveBottom = shouldShow ? bottomHeight : 0;
+  const afterMoveBottom = shouldShow ? 0 : bottomHeight;
+
+  // translation animations for show/hide events
   const moveTop = useRef(new Animated.Value(beforeMoveTop)).current;
   const moveBottom = useRef(new Animated.Value(beforeMoveBottom)).current;
-  const transitionDuration = 300;
+  const transitionDuration = 200;
+
+  // translate bottom overlay if keyboard blocks text inputs container
+  const inputsContainer = useRef(null);
+  const keyboardShift = useRef(new Animated.Value(0)).current;
+
+  // combine animation values for show/hide events and for keyboard events
+  const [translateBottom, setTranslateBottom] = useState(moveBottom);
+
+  // stagger dismissals of keyboard and overlay if user presses back while editing
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [shouldHide, setShouldHide] = useState(false);
+
+  // listen for keyboard events
+  useEffect(() => {
+    Keyboard.addListener('keyboardDidShow', onKeyboardDidShow);
+    Keyboard.addListener('keyboardDidHide', onKeyboardDidHide);
+
+    return () => {
+      Keyboard.removeListener('keyboardDidShow', onKeyboardDidShow);
+      Keyboard.removeListener('keyboardDidHide', onKeyboardDidHide);
+    };
+  }, []);
 
   // translate overlays on/off-screen
   useEffect(() => {
@@ -97,8 +131,97 @@ const PinFormOverlay = (props) => {
       setPrivateStyle(privateSegment);
       setPublicLabelStyle(publicLabel);
       setPrivateLabelStyle(privateLabel);
-
   }), [isPublic];
+
+  // update animation value for bottom overlay translation
+  useEffect(() => {
+    const combinedTranslate = Animated.add(moveBottom, keyboardShift);
+    setTranslateBottom(combinedTranslate);
+  }, [moveBottom, keyboardShift]);
+
+  // hide keyboard if user touches map
+  useEffect(() => {
+    if (isDraggingMap) {
+      Keyboard.dismiss();
+    }
+  }), [isDraggingMap];
+
+  // dismiss overlay after keyboard
+  useEffect(() => {
+    if (shouldHide) {
+      Keyboard.dismiss();
+      const timer = setTimeout(() => {
+        onRepositionPin();
+        setShouldHide(false);
+      }, 600); // TODO be precise about this
+      return () => {
+        clearTimeout(timer);
+      }
+    }
+  }, [shouldHide]);
+
+  // slide up bottom overlay to maintain visibility of text inputs container
+  const onKeyboardDidShow = (event) => {
+    setIsKeyboardOpen(true);
+    const { height: windowHeight } = Dimensions.get('window');
+    const keyboardHeight = event.endCoordinates.height;
+
+    if (!inputsContainer || !inputsContainer.current) return;
+
+    inputsContainer.current.measure((_X, _Y, _w, height, _pX, pageY) => {
+      // calculate height of entire viewport that is not behind the keyboard
+      const viewHeight = windowHeight - keyboardHeight;
+
+      // cache height and vertical position of inputs container
+      const inputsHeight = height;
+      const inputsTop = pageY;
+
+      // calculate vertical position of the bottom of inputs container
+      const inputsBottom = inputsHeight + inputsTop;
+
+      // calculate the height of inputs container behind the keyboard
+      const inputsBehindKeyboard = viewHeight - inputsBottom;
+
+      // do nothing when keyboard does not overlap inputs container at all
+      if (inputsBehindKeyboard >= 0) return;
+
+      // set height of bottom overlay buffer
+      setBottomBuffer(inputsHeight + keyboardHeight)
+
+      // shift up the bottom overlay so the inputs remain visible
+      Animated.timing(
+        keyboardShift, {
+          toValue: inputsBehindKeyboard,
+          duration: transitionDuration,
+          useNativeDriver: true,
+        }
+      ).start();
+    });
+  }
+
+  // slide down bottom overlay when keyboard hides
+  const onKeyboardDidHide = () => {
+    Animated.timing(
+      keyboardShift, {
+        toValue: 0,
+        duration: transitionDuration,
+        useNativeDriver: true,
+      }
+    ).start(() => {
+      // reset bottom overlay buffer height
+      setBottomBuffer(bottomHeight);
+      setIsKeyboardOpen(false);
+    });
+  }
+
+  // hide keyboard before repositioning pin
+  const onPressBack = () => {
+    if (isKeyboardOpen) {
+      setShouldHide(true);
+      return;
+    }
+    onRepositionPin();
+  }
 
   // handle press on public segment of access toggle
   const onPressPublic = () => {
@@ -110,6 +233,17 @@ const PinFormOverlay = (props) => {
     setIsPublic(false);
   }
 
+  // add pin to main map view
+  const onSubmit = () => {
+    const pin = {
+      title: title,
+      description: description
+    };
+
+    // TODO validate form
+    onPressConfirmButton(pin);
+  }
+
   const region = currentRegion ?? { latitude: 0, longitude: 0 };
   const latitude = region.latitude.toFixed(6);
   const longitude = region.longitude.toFixed(6);
@@ -117,13 +251,33 @@ const PinFormOverlay = (props) => {
   return (
     <>
       <Animated.View
+        onLayout={(e) => setTopHeight(e.nativeEvent.layout.height)}
         style={[styles.topOverlay, {
           transform: [{ translateY: moveTop }]
         }]}
       >
-        <Text style={styles.topText}>Create</Text>
+        <ScrollView style={styles.topContents}>
+          <Text style={styles.topText}>Create</Text>
+          <View style={styles.coordinateContainer}>
+            <Text style={styles.latitudeLabelText}>Latitude</Text>
+            <Text style={styles.longitudeLabelText}>Longitude</Text>
+            <Text style={styles.latitudeValueText}>{latitude}</Text>
+            <Text style={styles.longitudeValueText}>{longitude}</Text>
+          </View>
+          <View style={styles.emptyPhotosContainer}>
+            <View style={styles.photoContainer}>
+              <Text style={styles.photoAddText}>Add a photo</Text>
+              <View style={styles.photoIconContainer}>
+                <Image
+                  style={styles.photoIcon}
+                  source={require('./icons/add-photo.png')}
+                />
+              </View>
+            </View>
+          </View>
+        </ScrollView>
         <OptionButton
-          onPress={() => onRepositionPin()}
+          onPress={() => onPressBack()}
           containerStyle={styles.backButtonContainer}
           buttonStyle={styles.backButton}
           iconStyle={styles.backIcon}
@@ -134,29 +288,16 @@ const PinFormOverlay = (props) => {
           touchDownFeedbackStyle={{}}
           touchUpFeedbackStyle={{}}
         />
-        <View style={styles.coordinateContainer}>
-          <Text style={styles.latitudeLabelText}>Latitude</Text>
-          <Text style={styles.longitudeLabelText}>Longitude</Text>
-          <Text style={styles.latitudeValueText}>{latitude}</Text>
-          <Text style={styles.longitudeValueText}>{longitude}</Text>
-        </View>
-        <View style={styles.emptyPhotosContainer}>
-          <View style={styles.photoContainer}>
-            <Text style={styles.photoAddText}>Add a photo</Text>
-            <View style={styles.photoIconContainer}>
-              <Image
-                style={styles.photoIcon}
-                source={require('./icons/add-photo.png')}
-              />
-            </View>
-          </View>
-        </View>
       </Animated.View>
       <Animated.View
+        onLayout={(e) => setBottomHeight(e.nativeEvent.layout.height)}
         style={[styles.bottomOverlay, {
-          transform: [{ translateY: moveBottom }]
+          transform: [{ translateY: translateBottom }]
         }]}>
-        <View style={styles.textInputsContainer}>
+        <ScrollView
+          ref={inputsContainer}
+          style={styles.textInputsContainer}
+        >
           <View style={styles.textInputContainer}>
             <Text style={styles.textInputLabel}>Title</Text>
             <TextInput
@@ -185,7 +326,7 @@ const PinFormOverlay = (props) => {
               underlineColorAndroid={'transparent'}
             />
           </View>
-        </View>
+        </ScrollView>
         <View style={styles.publicAccessToggleContainer}>
           <View style={styles.publicAccessToggle}>
             <Pressable
@@ -205,20 +346,21 @@ const PinFormOverlay = (props) => {
         <View style={styles.confirmButtonContainer}>
           <Pressable
             style={styles.confirmButton}
-            onPress={() => onRepositionPin()}
+            onPress={() => onSubmit()}
           >
             <Text style={styles.confirmButtonLabel}>Confirm</Text>
           </Pressable>
         </View>
+        <View style={[styles.bottomOverlayBuffer, {
+          top: bottomHeight,
+          height: bottomBuffer
+        }]} />
       </Animated.View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  hidden: {
-    display: 'none'
-  },
   topOverlay: {
     top: 0,
     paddingTop: 60,
@@ -226,8 +368,9 @@ const styles = StyleSheet.create({
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: '#151515c3',
+    backgroundColor: '#151515c3'
   },
+  topContents: {},
   topText: {
     paddingLeft: 3,
     height: 16,
@@ -272,7 +415,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    // backgroundColor: '#77771133',
+    // backgroundColor: '#77771133'
   },
   latitudeLabelText: {
     height: 12,
@@ -345,7 +488,7 @@ const styles = StyleSheet.create({
     width: '66%',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   photoAddText: {
     paddingLeft: 2,
@@ -358,30 +501,31 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#151515c3',
+    // backgroundColor: '#151515c3'
   },
   photoIcon: {
     height: 60,
     width: 60,
     opacity: 0.7,
-    // backgroundColor: 'green'
   },
   textInputsContainer: {
     paddingHorizontal: 12,
-    paddingTop: 12,
+    paddingVertical: 12,
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
     flexWrap: 'wrap',
+    alignContent: 'stretch',
     // backgroundColor: '#88004433'
   },
   textInputContainer: {
     padding: 12,
-    width: '100%',
     display: 'flex',
-    alignContent: 'center'
+    alignContent: 'center',
+    // backgroundColor: '#2233ff44'
   },
   textInputLabel: {
+    marginBottom: -12,
     height: 12,
     width: '100%',
     lineHeight: 12,
@@ -391,7 +535,7 @@ const styles = StyleSheet.create({
     color: '#ffffffaa'
   },
   textInput: {
-    marginTop: 6,
+    paddingTop: 18,
     borderBottomWidth: 1,
     borderBottomColor: '#ffffff22',
     textAlignVertical: 'top',
@@ -406,7 +550,13 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: '#151515c3',
+    backgroundColor: '#151515c3'
+  },
+  bottomOverlayBuffer: {
+    position: 'absolute',
+    height: '100%',
+    width: '100%',
+    backgroundColor: '#151515c3'
   },
   publicAccessToggleContainer: {
     paddingVertical: 12,

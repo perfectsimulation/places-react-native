@@ -23,10 +23,7 @@ const PinDetailPreview = (props) => {
   const afterShow = show ? 0 : height;
 
   const translateAnim = useRef(new Animated.Value(beforeShow)).current;
-
-  // do not animate on first render
-  const [isFirstRender, setIsFirstRender] = useState(true);
-  const duration = 500;
+  const duration = 300;
 
   // translate on/off-screen
   useEffect(() => {
@@ -39,16 +36,6 @@ const PinDetailPreview = (props) => {
       }
     ).start();
   }, [afterShow, translateAnim]);
-
-  // record the elapsed first render
-  useEffect(() => {
-    setIsFirstRender(false);
-  }, []);
-
-  // TODO look into a better way
-  if (isFirstRender) {
-    return <View style={styles.loading} />;
-  }
 
   const { title, description } = pin;
 

@@ -81,7 +81,7 @@ const PinPlacementOverlay = (props) => {
             style={styles.confirmButton}
             onPress={() => onConfirmLocation()}
           >
-            <Text style={styles.confirmButtonLabel}>Confirm Location</Text>
+            <Text style={styles.confirmButtonLabel}>Here</Text>
           </Pressable>
         </View>
       </Animated.View>
