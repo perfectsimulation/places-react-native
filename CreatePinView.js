@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Pin from './Pin';
 import PinPlacementOverlay from './PinPlacementOverlay';
 import PinFormOverlay from './PinFormOverlay';
 
@@ -19,6 +18,11 @@ const CreatePinView = (props) => {
 
   // toggle overlay components for positioning new pin
   const [isLocationConfirmed, setIsLocationConfirmed] = useState(false);
+
+  const submitPinForm = (pinForm) => {
+    setIsLocationConfirmed(false);
+    onPressConfirmButton(pinForm);
+  }
 
   // hide pin form overlay and show pin placement overlay
   const repositionPin = () => {
@@ -42,7 +46,6 @@ const CreatePinView = (props) => {
 
   return (
     <>
-      <Pin shouldShow={shouldShow} />
       <PinPlacementOverlay
         shouldShow={shouldShowPlacementOverlay()}
         isDraggingMap={isDraggingMap}
@@ -50,11 +53,12 @@ const CreatePinView = (props) => {
         onPressCancelButton={() => onPressCancelButton()}
       />
       <PinFormOverlay
-        shouldShow={shouldShowFormOverlay()}
+        shouldShowPin={shouldShow}
+        shouldShowOverlays={shouldShowFormOverlay()}
         isDraggingMap={isDraggingMap}
         currentRegion={region}
         onRepositionPin={() => repositionPin()}
-        onPressConfirmButton={(pinForm) => onPressConfirmButton(pinForm)}
+        onPressConfirmButton={(pinForm) => submitPinForm(pinForm)}
       />
     </>
   );

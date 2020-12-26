@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
   Animated,
+  Easing,
   View,
   ScrollView,
   Pressable,
@@ -11,12 +12,14 @@ import {
   Keyboard,
   StyleSheet
 } from 'react-native';
+import Pin from './Pin';
 import OptionButton from './OptionButton';
 
 const PinFormOverlay = (props) => {
 
   const {
-    shouldShow,
+    shouldShowPin,
+    shouldShowOverlays,
     isDraggingMap,
     currentRegion,
     onRepositionPin,
@@ -35,6 +38,9 @@ const PinFormOverlay = (props) => {
 
   // description input value
   const [description, setDescription] = useState(descriptionPlaceholder);
+
+  // pin color
+  const [pinColor, setPinColor] = useState(null);
 
   // selected segment of public access toggle
   const [isPublic, setIsPublic] = useState(false);
@@ -57,15 +63,21 @@ const PinFormOverlay = (props) => {
   const [bottomBuffer, setBottomBuffer] = useState(bottomHeight);
 
   // initial/final positions of overlay animations
-  const beforeMoveTop = shouldShow ? -topHeight : 0;
-  const afterMoveTop = shouldShow ? 0 : -topHeight;
-  const beforeMoveBottom = shouldShow ? bottomHeight : 0;
-  const afterMoveBottom = shouldShow ? 0 : bottomHeight;
+  const beforeMoveTop = shouldShowOverlays ? -topHeight : 0;
+  const afterMoveTop = shouldShowOverlays ? 0 : -topHeight;
+  const beforeMoveBottom = shouldShowOverlays ? bottomHeight : 0;
+  const afterMoveBottom = shouldShowOverlays ? 0 : bottomHeight;
+  const beforeMovePin = shouldShowPin ? -500 : 0;
+  const afterMovePin = shouldShowPin ? 0 : -500;
 
   // translation animations for show/hide events
   const moveTop = useRef(new Animated.Value(beforeMoveTop)).current;
   const moveBottom = useRef(new Animated.Value(beforeMoveBottom)).current;
+  const movePin = useRef(new Animated.Value(beforeMovePin)).current;
   const transitionDuration = 200;
+
+  const [pinOverlay, setPinOverlay] = useState(styles.pinOverlay);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   // translate bottom overlay if keyboard blocks text inputs container
   const inputsContainer = useRef(null);
@@ -96,6 +108,7 @@ const PinFormOverlay = (props) => {
         moveTop, {
           toValue: afterMoveTop,
           duration: transitionDuration,
+          easing: Easing.easeOutExpo,
           useNativeDriver: true,
         }
       ).start();
@@ -104,10 +117,36 @@ const PinFormOverlay = (props) => {
         moveBottom, {
           toValue: afterMoveBottom,
           duration: transitionDuration,
+          easing: Easing.easeOutExpo,
           useNativeDriver: true,
         }
       ).start();
-  }, [shouldShow, afterMoveBottom, moveBottom]);
+  }, [shouldShowOverlays, afterMoveBottom, moveBottom]);
+
+  useEffect(() => {
+    // translate create pin into or out of view
+    Animated.spring(
+      movePin, {
+        toValue: afterMovePin,
+        duration: transitionDuration,
+        useNativeDriver: true,
+      }
+    ).start();
+  }, [shouldShowPin]);
+
+  // hide create pin before translating overlay if form is submitted
+  useEffect(() => {
+    const pinStyle = isSubmitted ? styles.hidden : styles.pinOverlay;
+    setPinOverlay(pinStyle);
+
+    if (isSubmitted) {
+      const timer = setTimeout(() => {
+        setPinColor();
+        setIsSubmitted(false);
+      }, transitionDuration);
+      return () => clearTimeout(timer);
+    }
+  }, [isSubmitted]);
 
   // set styles of public access toggle
   useEffect(() => {
@@ -193,6 +232,7 @@ const PinFormOverlay = (props) => {
         keyboardShift, {
           toValue: inputsBehindKeyboard,
           duration: transitionDuration,
+          easing: Easing.easeOutExpo,
           useNativeDriver: true,
         }
       ).start();
@@ -205,6 +245,7 @@ const PinFormOverlay = (props) => {
       keyboardShift, {
         toValue: 0,
         duration: transitionDuration,
+        easing: Easing.easeOutExpo,
         useNativeDriver: true,
       }
     ).start(() => {
@@ -237,10 +278,12 @@ const PinFormOverlay = (props) => {
   const onSubmit = () => {
     const pin = {
       title: title,
-      description: description
+      description: description,
+      pinColor: pinColor,
     };
 
     // TODO validate form
+    setIsSubmitted(true);
     onPressConfirmButton(pin);
   }
 
@@ -289,6 +332,85 @@ const PinFormOverlay = (props) => {
           touchUpFeedbackStyle={{}}
         />
       </Animated.View>
+      <Animated.View style={[pinOverlay, { transform: [{ translateY : movePin }] }]}>
+        <Pin color={pinColor} />
+      </Animated.View>
+      <View style={styles.selectColorOverlay}>
+        <View style={styles.selectColorContainer}>
+          <View style={styles.selectColorPopover}>
+            <OptionButton
+              onPress={() => setPinColor('#5e5ce6')}
+              containerStyle={styles.selectColorButtonContainer}
+              buttonStyle={[styles.selectColorButton, styles.colorPurple]}
+              shouldShow={!shouldShowOverlays}
+              showPosition={{ x: -500, y: 0 }}
+              hidePosition={{ x: 0, y: 0 }}
+              touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorPurple]}
+              touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorPurple]}
+              shouldAnimateOnPressOutOpacity
+              shouldAnimateOnPressOutScale
+              beforePressOutScale={1}
+              afterPressOutScale={1.1}
+            />
+            <OptionButton
+              onPress={() => setPinColor('#ff375f')}
+              containerStyle={styles.selectColorButtonContainer}
+              buttonStyle={[styles.selectColorButton, styles.colorPink]}
+              shouldShow={!shouldShowOverlays}
+              showPosition={{ x: -500, y: 0 }}
+              hidePosition={{ x: 0, y: 0 }}
+              touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorPink]}
+              touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorPink]}
+              shouldAnimateOnPressOutOpacity
+              shouldAnimateOnPressOutScale
+              beforePressOutScale={1}
+              afterPressOutScale={1.1}
+            />
+            <OptionButton
+              onPress={() => setPinColor('#ff9f0a')}
+              containerStyle={styles.selectColorButtonContainer}
+              buttonStyle={[styles.selectColorButton, styles.colorRed]}
+              shouldShow={!shouldShowOverlays}
+              showPosition={{ x: -500, y: 0 }}
+              hidePosition={{ x: 0, y: 0 }}
+              touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorRed]}
+              touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorRed]}
+              shouldAnimateOnPressOutOpacity
+              shouldAnimateOnPressOutScale
+              beforePressOutScale={1}
+              afterPressOutScale={1.1}
+            />
+            <OptionButton
+              onPress={() => setPinColor('#f8f8ff')}
+              containerStyle={styles.selectColorButtonContainer}
+              buttonStyle={[styles.selectColorButton, styles.colorOrange]}
+              shouldShow={!shouldShowOverlays}
+              showPosition={{ x: -500, y: 0 }}
+              hidePosition={{ x: 0, y: 0 }}
+              touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorOrange]}
+              touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorOrange]}
+              shouldAnimateOnPressOutOpacity
+              shouldAnimateOnPressOutScale
+              beforePressOutScale={1}
+              afterPressOutScale={1.1}
+            />
+            <OptionButton
+              onPress={() => setPinColor('transparent')}
+              containerStyle={styles.selectColorButtonContainer}
+              buttonStyle={[styles.selectColorButton, styles.colorTransparent]}
+              shouldShow={!shouldShowOverlays}
+              showPosition={{ x: -500, y: 0 }}
+              hidePosition={{ x: 0, y: 0 }}
+              touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorTransparent]}
+              touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorTransparent]}
+              shouldAnimateOnPressOutOpacity
+              shouldAnimateOnPressOutScale
+              beforePressOutScale={1}
+              afterPressOutScale={1.1}
+            />
+          </View>
+        </View>
+      </View>
       <Animated.View
         onLayout={(e) => setBottomHeight(e.nativeEvent.layout.height)}
         style={[styles.bottomOverlay, {
@@ -507,6 +629,94 @@ const styles = StyleSheet.create({
     height: 60,
     width: 60,
     opacity: 0.7,
+  },
+  selectColorOverlay: {
+    marginTop: 'auto',
+    bottom: 30,
+    // backgroundColor: '#33ee1133',
+  },
+  colorPurple: {
+    backgroundColor: '#5e5ce6aa',
+  },
+  colorPink: {
+    backgroundColor: '#ff375faa',
+  },
+  colorRed: {
+    backgroundColor: '#ff9f0aaa',
+  },
+  colorOrange: {
+    backgroundColor: '#f8f8ffaa',
+  },
+  colorTransparent: {
+    backgroundColor: 'transparent',
+    borderColor: '#ffffffbb',
+    borderWidth: 1,
+  },
+  pinOverlay: {
+    alignSelf: 'center',
+    position: 'absolute',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hidden: {
+    display: 'none'
+  },
+  selectColorContainer: {
+    alignSelf: 'center',
+    // backgroundColor: '#15151588',
+  },
+  selectColorPopover: {
+    alignSelf: 'center',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectColorButtonContainer: {
+    // padding: 6,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    backgroundColor: '#15151588',
+  },
+  selectColorButton: {
+    margin: 4,
+    height: 30,
+    width: 30,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: '#151515c3',
+    alignSelf: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // opacity: 0.5
+  },
+  selectColorButtonTouchDown: {
+    position: 'absolute',
+    height: 30,
+    width: 30,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  selectColorButtonTouchUp: {
+    position: 'absolute',
+    height: 32,
+    width: 32,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  selectPinContainer: {
+    alignSelf: 'center',
+    position: 'absolute',
+    height: '100%',
+    width: 56,
+  },
+  selectPinButton: {
+    height: '100%',
+    width: '100%',
   },
   textInputsContainer: {
     paddingHorizontal: 12,

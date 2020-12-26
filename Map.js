@@ -135,6 +135,7 @@ const Map = () => {
     const pin = {
       title: pinForm.title,
       description: pinForm.description,
+      pinColor: pinForm.pinColor,
       id: pins.length,
       coordinate: pinCoordinate,
     };
