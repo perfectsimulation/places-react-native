@@ -76,7 +76,11 @@ const PinFormOverlay = (props) => {
   const movePin = useRef(new Animated.Value(beforeMovePin)).current;
   const transitionDuration = 200;
 
+  // middle overlay components
   const [pinOverlay, setPinOverlay] = useState(styles.pinOverlay);
+  const [pinColorOverlay, setPinColorOverlay] = useState(styles.selectColorOverlay);
+
+  // reset form after overlay is dismissed on submission
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // translate bottom overlay if keyboard blocks text inputs container
@@ -101,8 +105,29 @@ const PinFormOverlay = (props) => {
     };
   }, []);
 
+  // drop create pin into view
+  useEffect(() => {
+    // translate create pin into or out of view
+    Animated.spring(
+      movePin, {
+        toValue: afterMovePin,
+        duration: transitionDuration,
+        useNativeDriver: true,
+      }
+    ).start(() => {
+      if (!shouldShowPin) {
+        // reset inputs
+        setPinColor();
+      }
+    });
+  }, [shouldShowPin]);
+
   // translate overlays on/off-screen
   useEffect(() => {
+      // enable color overlay
+      if (shouldShowOverlays) {
+        setPinColorOverlay(styles.selectColorOverlay);
+      }
       // translate top overlay into or out of view
       Animated.timing(
         moveTop, {
@@ -111,7 +136,12 @@ const PinFormOverlay = (props) => {
           easing: Easing.easeOutExpo,
           useNativeDriver: true,
         }
-      ).start();
+      ).start(() => {
+        if (!shouldShowOverlays) {
+          // disable select color container
+          setPinColorOverlay(styles.hidden);
+        }
+      });
       // translate bottom overlay into or out of view
       Animated.timing(
         moveBottom, {
@@ -122,17 +152,6 @@ const PinFormOverlay = (props) => {
         }
       ).start();
   }, [shouldShowOverlays, afterMoveBottom, moveBottom]);
-
-  useEffect(() => {
-    // translate create pin into or out of view
-    Animated.spring(
-      movePin, {
-        toValue: afterMovePin,
-        duration: transitionDuration,
-        useNativeDriver: true,
-      }
-    ).start();
-  }, [shouldShowPin]);
 
   // hide create pin before translating overlay if form is submitted
   useEffect(() => {
@@ -225,7 +244,7 @@ const PinFormOverlay = (props) => {
       if (inputsBehindKeyboard >= 0) return;
 
       // set height of bottom overlay buffer
-      setBottomBuffer(inputsHeight + keyboardHeight)
+      setBottomBuffer(inputsHeight + keyboardHeight);
 
       // shift up the bottom overlay so the inputs remain visible
       Animated.timing(
@@ -335,16 +354,16 @@ const PinFormOverlay = (props) => {
       <Animated.View style={[pinOverlay, { transform: [{ translateY : movePin }] }]}>
         <Pin color={pinColor} />
       </Animated.View>
-      <View style={styles.selectColorOverlay}>
+      <View style={pinColorOverlay}>
         <View style={styles.selectColorContainer}>
           <View style={styles.selectColorPopover}>
             <OptionButton
               onPress={() => setPinColor('#5e5ce6')}
               containerStyle={styles.selectColorButtonContainer}
               buttonStyle={[styles.selectColorButton, styles.colorPurple]}
-              shouldShow={!shouldShowOverlays}
-              showPosition={{ x: -500, y: 0 }}
-              hidePosition={{ x: 0, y: 0 }}
+              shouldShow={shouldShowOverlays}
+              hidePosition={{ x: -500, y: 0 }}
+              showPosition={{ x: 0, y: 0 }}
               touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorPurple]}
               touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorPurple]}
               shouldAnimateOnPressOutOpacity
@@ -356,9 +375,9 @@ const PinFormOverlay = (props) => {
               onPress={() => setPinColor('#ff375f')}
               containerStyle={styles.selectColorButtonContainer}
               buttonStyle={[styles.selectColorButton, styles.colorPink]}
-              shouldShow={!shouldShowOverlays}
-              showPosition={{ x: -500, y: 0 }}
-              hidePosition={{ x: 0, y: 0 }}
+              shouldShow={shouldShowOverlays}
+              hidePosition={{ x: -500, y: 0 }}
+              showPosition={{ x: 0, y: 0 }}
               touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorPink]}
               touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorPink]}
               shouldAnimateOnPressOutOpacity
@@ -370,9 +389,9 @@ const PinFormOverlay = (props) => {
               onPress={() => setPinColor('#ff9f0a')}
               containerStyle={styles.selectColorButtonContainer}
               buttonStyle={[styles.selectColorButton, styles.colorRed]}
-              shouldShow={!shouldShowOverlays}
-              showPosition={{ x: -500, y: 0 }}
-              hidePosition={{ x: 0, y: 0 }}
+              shouldShow={shouldShowOverlays}
+              hidePosition={{ x: -500, y: 0 }}
+              showPosition={{ x: 0, y: 0 }}
               touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorRed]}
               touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorRed]}
               shouldAnimateOnPressOutOpacity
@@ -384,9 +403,9 @@ const PinFormOverlay = (props) => {
               onPress={() => setPinColor('#f8f8ff')}
               containerStyle={styles.selectColorButtonContainer}
               buttonStyle={[styles.selectColorButton, styles.colorOrange]}
-              shouldShow={!shouldShowOverlays}
-              showPosition={{ x: -500, y: 0 }}
-              hidePosition={{ x: 0, y: 0 }}
+              shouldShow={shouldShowOverlays}
+              hidePosition={{ x: -500, y: 0 }}
+              showPosition={{ x: 0, y: 0 }}
               touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorOrange]}
               touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorOrange]}
               shouldAnimateOnPressOutOpacity
@@ -398,9 +417,9 @@ const PinFormOverlay = (props) => {
               onPress={() => setPinColor('transparent')}
               containerStyle={styles.selectColorButtonContainer}
               buttonStyle={[styles.selectColorButton, styles.colorTransparent]}
-              shouldShow={!shouldShowOverlays}
-              showPosition={{ x: -500, y: 0 }}
-              hidePosition={{ x: 0, y: 0 }}
+              shouldShow={shouldShowOverlays}
+              hidePosition={{ x: -500, y: 0 }}
+              showPosition={{ x: 0, y: 0 }}
               touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorTransparent]}
               touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorTransparent]}
               shouldAnimateOnPressOutOpacity

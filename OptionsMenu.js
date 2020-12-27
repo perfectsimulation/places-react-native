@@ -32,29 +32,29 @@ const OptionsMenu = (props) => {
       >
         <OptionButton
           onPress={() => onActivity()}
-          labelText={'Activity'}
+          labelText={'Recent'}
           iconSource={require('./icons/activity.png')}
           iconTouchSource={require('./icons/activity-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.activityButtonImage}
           iconTouchStyle={styles.activityButtonImage}
           shouldShow={shouldShow}
-          showPosition={{ x: -120, y: -300 }}
-          hidePosition={{ x: 0, y: 0 }}
+          showPosition={{ x: -140, y: -156 }}
+          hidePosition={{ x: 0, y: -104 }}
           shouldAnimateOnPressOutOpacity
           shouldAnimateOnPressOutScale
         />
         <OptionButton
-          onPress={() => onExplore()}
-          labelText={'Times'}
-          iconSource={require('./icons/arrows.png')}
-          iconTouchSource={require('./icons/arrows-touch.png')}
+          onPress={() => onUser()}
+          labelText={'People'}
+          iconSource={require('./icons/person.png')}
+          iconTouchSource={require('./icons/person-touch.png')}
           containerStyle={styles.optionButtonContainer}
-          iconStyle={styles.exploreButtonImage}
-          iconTouchStyle={styles.exploreButtonImage}
+          iconStyle={styles.userButtonImage}
+          iconTouchStyle={styles.userButtonImage}
           shouldShow={shouldShow}
-          showPosition={{ x: 120, y: -300 }}
-          hidePosition={{ x: 0, y: 0 }}
+          showPosition={{ x: -75, y: -198 }}
+          hidePosition={{ x: 0, y: -104 }}
           shouldAnimateOnPressOutOpacity
           shouldAnimateOnPressOutScale
         />
@@ -67,36 +67,36 @@ const OptionsMenu = (props) => {
           iconStyle={styles.placesButtonImage}
           iconTouchStyle={styles.placesButtonImage}
           shouldShow={shouldShow}
-          showPosition={{ x: 0, y: -200 }}
-          hidePosition={{ x: 0, y: 0 }}
+          showPosition={{ x: 0, y: -213 }}
+          hidePosition={{ x: 0, y: -104 }}
           shouldAnimateOnPressOutOpacity
           shouldAnimateOnPressOutScale
         />
         <OptionButton
-          onPress={() => onUser()}
-          labelText={'User'}
-          iconSource={require('./icons/person.png')}
-          iconTouchSource={require('./icons/person-touch.png')}
+          onPress={() => onExplore()}
+          labelText={'Times'}
+          iconSource={require('./icons/arrows.png')}
+          iconTouchSource={require('./icons/arrows-touch.png')}
           containerStyle={styles.optionButtonContainer}
-          iconStyle={styles.userButtonImage}
-          iconTouchStyle={styles.userButtonImage}
+          iconStyle={styles.exploreButtonImage}
+          iconTouchStyle={styles.exploreButtonImage}
           shouldShow={shouldShow}
-          showPosition={{ x: -120, y: -100 }}
-          hidePosition={{ x: 0, y: 0 }}
+          showPosition={{ x: 75, y: -198 }}
+          hidePosition={{ x: 0, y: -104 }}
           shouldAnimateOnPressOutOpacity
           shouldAnimateOnPressOutScale
         />
         <OptionButton
           onPress={() => onAdd()}
           labelText={'Create'}
-          iconSource={require('./icons/pin-glyph.png')}
-          iconTouchSource={require('./icons/pin-glyph-touch.png')}
+          iconSource={require('./icons/shiny.png')}
+          iconTouchSource={require('./icons/shiny-touch.png')}
           containerStyle={styles.optionButtonContainer}
           iconStyle={styles.addButtonImage}
           iconTouchStyle={styles.addButtonImage}
           shouldShow={shouldShow}
-          showPosition={{ x: 120, y: -100 }}
-          hidePosition={{ x: 0, y: 0 }}
+          showPosition={{ x: 140, y: -156 }}
+          hidePosition={{ x: 0, y: -104 }}
           shouldAnimateOnPressOutOpacity
           shouldAnimateOnPressOutScale
         />
@@ -108,31 +108,29 @@ const OptionsMenu = (props) => {
 const styles = StyleSheet.create({
   optionButtonContainer: {
     position: 'absolute',
-    bottom: 14,
-    justifyContent: 'center',
+    bottom: -22,
     alignItems: 'center'
   },
   activityButtonImage: {
-    height: 52,
-    width: 52
+    height: 40,
+    width: 40
   },
   exploreButtonImage: {
-    height: 52,
-    width: 52
+    height: 38,
+    width: 38
   },
   placesButtonImage: {
-    height: 52,
-    width: 52
+    height: 38,
+    width: 38
   },
   userButtonImage: {
-    height: 46,
-    width: 46
+    height: 34,
+    width: 34
   },
   addButtonImage: {
-    height: 40,
-    width: 40,
-    height: 48,
-    width: 48
+    height: 36,
+    width: 36,
+    left: 6
   }
 });
 

@@ -40,9 +40,6 @@ const Menu = (props) => {
   const translateAnim = useRef(new Animated.Value(beforeShow)).current;
   const opacityAnim = useRef(new Animated.Value(beforeOpacity)).current;
 
-  // do not animate on first render
-  const [isFirstRender, setIsFirstRender] = useState(true);
-
   // call onClose prop onPress of close button
   const [shouldClose, setShouldClose] = useState(false);
 
@@ -91,16 +88,6 @@ const Menu = (props) => {
     onCloseMenu();
     setShouldClose(false);
   }, [shouldClose]);
-
-  // record the elapsed first render
-  useEffect(() => {
-    setIsFirstRender(false);
-  }, []);
-
-  // TODO look into a better way
-  if (isFirstRender) {
-    return <View style={styles.loading} />;
-  }
 
   return (
     <Animated.View

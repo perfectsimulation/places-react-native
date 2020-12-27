@@ -86,16 +86,12 @@ const OptionButton = (props) => {
    const finalPosition = show ? showPos : hidePos;
    const positionValue = useRef(new Animated.ValueXY(initialPosition)).current;
 
-  // do not animate on first render
-  const [isFirstRender, setIsFirstRender] = useState(true);
-  const animationDuration = isFirstRender ? 0 : duration;
-
   // spring transform from initial to final position
   useEffect(() => {
     Animated.spring(
       positionValue, {
         toValue: finalPosition,
-        duration: animationDuration,
+        duration: duration,
         useNativeDriver: true
       }
     ).start();
@@ -142,10 +138,6 @@ const OptionButton = (props) => {
       }
     }
   }, [isPressOut, scaleValue, opacityValue]);
-
-  useEffect(() => {
-    setIsFirstRender(false);
-  });
 
   const {
     onPress,
@@ -235,25 +227,31 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   button: {
-    height: 64,
-    width: 64,
-    borderRadius: 64,
-    margin: 12,
+    position: 'absolute',
+    height: 50,
+    width: 50,
+    borderRadius: 50,
     backgroundColor: '#ffffffef',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 3,
   },
   label: {
     position: 'absolute',
-    bottom: 84,
+    bottom: 10,
     paddingLeft: 3,
-    height: 16,
-    fontSize: 12,
+    height: 12,
+    fontSize: 10,
+    textAlignVertical: 'center',
     textAlign: 'center',
     textTransform: 'uppercase',
     letterSpacing: 2,
-    color: 'white'
+    color: 'white',
   },
   icon: {
     position: 'absolute',
@@ -261,24 +259,24 @@ const styles = StyleSheet.create({
     width: 42
   },
   iconTouchBackground: {
-    height: 65,
-    width: 65,
-    borderRadius: 65,
+    height: 50,
+    width: 50,
+    borderRadius: 50,
     backgroundColor: '#000000df'
   },
   pressInFeedback: {
     position: 'absolute',
-    height: 65,
-    width: 65,
-    borderRadius: 65,
+    height: 50,
+    width: 50,
+    borderRadius: 50,
     borderColor: 'white',
     borderWidth: 2
   },
   pressOutFeedback: {
     position: 'absolute',
-    height: 80,
-    width: 80,
-    borderRadius: 80,
+    height: 65,
+    width: 65,
+    borderRadius: 66,
     borderColor: 'white',
     borderWidth: 1
   }
