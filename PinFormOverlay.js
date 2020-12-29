@@ -49,10 +49,6 @@ const PinFormOverlay = (props) => {
   const [publicStyle, setPublicStyle] = useState([styles.publicAccessSegment]);
   const [privateStyle, setPrivateStyle] = useState([styles.publicAccessSegmentSelected]);
 
-  // dynamic styles of public access segment labels
-  const [publicLabelStyle, setPublicLabelStyle] = useState([styles.publicAccessLabel]);
-  const [privateLabelStyle, setPrivateLabelStyle] = useState([styles.publicAccessLabelSelected]);
-
   // TODO useWindowDimensions instead
   const window = Dimensions.get('window');
   const overlayHeight = window.height * 0.45;
@@ -86,6 +82,7 @@ const PinFormOverlay = (props) => {
   // translate bottom overlay if keyboard blocks text inputs container
   const inputsContainer = useRef(null);
   const keyboardShift = useRef(new Animated.Value(0)).current;
+  const colorOverlayShift = useRef(new Animated.Value(0)).current;
 
   // combine animation values for show/hide events and for keyboard events
   const [translateBottom, setTranslateBottom] = useState(moveBottom);
@@ -96,12 +93,12 @@ const PinFormOverlay = (props) => {
 
   // listen for keyboard events
   useEffect(() => {
-    Keyboard.addListener('keyboardDidShow', onKeyboardDidShow);
-    Keyboard.addListener('keyboardDidHide', onKeyboardDidHide);
+    Keyboard.addListener('keyboardWillShow', onKeyboardWillShow);
+    Keyboard.addListener('keyboardWillHide', onKeyboardWillHide);
 
     return () => {
-      Keyboard.removeListener('keyboardDidShow', onKeyboardDidShow);
-      Keyboard.removeListener('keyboardDidHide', onKeyboardDidHide);
+      Keyboard.removeListener('keyboardWillShow', onKeyboardWillShow);
+      Keyboard.removeListener('keyboardWillHide', onKeyboardWillHide);
     };
   }, []);
 
@@ -117,6 +114,8 @@ const PinFormOverlay = (props) => {
     ).start(() => {
       if (!shouldShowPin) {
         // reset inputs
+        setTitle('');
+        setDescription('');
         setPinColor();
       }
     });
@@ -160,6 +159,9 @@ const PinFormOverlay = (props) => {
 
     if (isSubmitted) {
       const timer = setTimeout(() => {
+        // reset pin form inputs
+        setTitle('');
+        setDescription('');
         setPinColor();
         setIsSubmitted(false);
       }, transitionDuration);
@@ -177,19 +179,9 @@ const PinFormOverlay = (props) => {
       styles.publicAccessSegment :
       styles.publicAccessSegmentSelected;
 
-    const publicLabel = isPublic ?
-      styles.publicAccessLabelSelected :
-      styles.publicAccessLabel;
-
-    const privateLabel = isPublic ?
-      styles.publicAccessLabel :
-      styles.publicAccessLabelSelected;
-
       setPublicStyle(publicSegment);
       setPrivateStyle(privateSegment);
-      setPublicLabelStyle(publicLabel);
-      setPrivateLabelStyle(privateLabel);
-  }), [isPublic];
+  }, [isPublic]);
 
   // update animation value for bottom overlay translation
   useEffect(() => {
@@ -202,7 +194,7 @@ const PinFormOverlay = (props) => {
     if (isDraggingMap) {
       Keyboard.dismiss();
     }
-  }), [isDraggingMap];
+  }, [isDraggingMap]);
 
   // dismiss overlay after keyboard
   useEffect(() => {
@@ -211,7 +203,7 @@ const PinFormOverlay = (props) => {
       const timer = setTimeout(() => {
         onRepositionPin();
         setShouldHide(false);
-      }, 600); // TODO be precise about this
+      }, 200); // TODO be precise about this
       return () => {
         clearTimeout(timer);
       }
@@ -219,8 +211,9 @@ const PinFormOverlay = (props) => {
   }, [shouldHide]);
 
   // slide up bottom overlay to maintain visibility of text inputs container
-  const onKeyboardDidShow = (event) => {
+  const onKeyboardWillShow = (event) => {
     setIsKeyboardOpen(true);
+
     const { height: windowHeight } = Dimensions.get('window');
     const keyboardHeight = event.endCoordinates.height;
 
@@ -255,11 +248,23 @@ const PinFormOverlay = (props) => {
           useNativeDriver: true,
         }
       ).start();
+
+      // shift color overlay to rest on top of text inputs when keyboard shows
+      const singleLineHeight = 17;
+      const colorShift = Math.min(-(viewHeight - inputsTop - singleLineHeight), 0);
+      Animated.timing(
+        colorOverlayShift, {
+          toValue: colorShift,
+          duration: transitionDuration,
+          easing: Easing.easeOutExpo,
+          useNativeDriver: true,
+        }
+      ).start();
     });
   }
 
   // slide down bottom overlay when keyboard hides
-  const onKeyboardDidHide = () => {
+  const onKeyboardWillHide = () => {
     Animated.timing(
       keyboardShift, {
         toValue: 0,
@@ -272,6 +277,15 @@ const PinFormOverlay = (props) => {
       setBottomBuffer(bottomHeight);
       setIsKeyboardOpen(false);
     });
+
+    Animated.timing(
+      colorOverlayShift, {
+        toValue: 0,
+        duration: transitionDuration,
+        easing: Easing.easeOutExpo,
+        useNativeDriver: true,
+      }
+    ).start();
   }
 
   // hide keyboard before repositioning pin
@@ -306,6 +320,37 @@ const PinFormOverlay = (props) => {
     onPressConfirmButton(pin);
   }
 
+  // prevent overlap of color selector when text input grows
+  const handleSizeChange = (e) => {
+    if (!shouldShowOverlays) return;
+    // height of text input
+    const height = e.nativeEvent.contentSize.height;
+
+    // height of empty text input
+    const singleLineHeight = 17;
+
+    // multiplier for number of lines
+    const heightMultiplier = height / singleLineHeight - 1;
+
+    // move color selector toward bottom overlay by this constant value
+    const top = singleLineHeight * 2;
+
+    // calculate value to translate up the color selector
+    const translation = heightMultiplier * singleLineHeight - top;
+
+    // ensure the net translation is not downward
+    const overlayShift = Math.max(colorOverlayShift._value + translation, 0);
+
+    Animated.timing(
+      colorOverlayShift, {
+        toValue: -overlayShift,
+        duration: 64,
+        easing: Easing.easeOutExpo,
+        useNativeDriver: true,
+      }
+    ).start();
+  }
+
   const region = currentRegion ?? { latitude: 0, longitude: 0 };
   const latitude = region.latitude.toFixed(6);
   const longitude = region.longitude.toFixed(6);
@@ -318,7 +363,7 @@ const PinFormOverlay = (props) => {
           transform: [{ translateY: moveTop }]
         }]}
       >
-        <ScrollView style={styles.topContents}>
+        <ScrollView style={styles.topContents} scrollEnabled={false}>
           <Text style={styles.topText}>Create</Text>
           <View style={styles.coordinateContainer}>
             <Text style={styles.latitudeLabelText}>Latitude</Text>
@@ -342,31 +387,35 @@ const PinFormOverlay = (props) => {
           onPress={() => onPressBack()}
           containerStyle={styles.backButtonContainer}
           buttonStyle={styles.backButton}
+          buttonTouchStyle={styles.backButton}
           iconStyle={styles.backIcon}
           iconTouchStyle={styles.backIconTouch}
           iconSource={require('./icons/cancel.png')}
-          iconTouchSource={require('./icons/cancel-touch.png')}
-          iconTouchBackgroundStyle={styles.backIconTouchContainer}
+          iconTouchSource={require('./icons/cancel.png')}
           touchDownFeedbackStyle={{}}
           touchUpFeedbackStyle={{}}
         />
       </Animated.View>
-      <Animated.View style={[pinOverlay, { transform: [{ translateY : movePin }] }]}>
+      <Animated.View
+        style={[pinOverlay, { transform: [{ translateY : movePin }] }]}
+      >
         <Pin color={pinColor} />
       </Animated.View>
-      <View style={pinColorOverlay}>
+      <Animated.View
+        style={[pinColorOverlay, { transform: [{ translateY : colorOverlayShift }] }]}
+      >
         <View style={styles.selectColorContainer}>
           <View style={styles.selectColorPopover}>
             <OptionButton
               onPress={() => setPinColor('#5e5ce6')}
               containerStyle={styles.selectColorButtonContainer}
               buttonStyle={[styles.selectColorButton, styles.colorPurple]}
+              buttonTouchStyle={{}}
               shouldShow={shouldShowOverlays}
               hidePosition={{ x: -500, y: 0 }}
               showPosition={{ x: 0, y: 0 }}
               touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorPurple]}
               touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorPurple]}
-              shouldAnimateOnPressOutOpacity
               shouldAnimateOnPressOutScale
               beforePressOutScale={1}
               afterPressOutScale={1.1}
@@ -375,12 +424,12 @@ const PinFormOverlay = (props) => {
               onPress={() => setPinColor('#ff375f')}
               containerStyle={styles.selectColorButtonContainer}
               buttonStyle={[styles.selectColorButton, styles.colorPink]}
+              buttonTouchStyle={{}}
               shouldShow={shouldShowOverlays}
               hidePosition={{ x: -500, y: 0 }}
               showPosition={{ x: 0, y: 0 }}
               touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorPink]}
               touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorPink]}
-              shouldAnimateOnPressOutOpacity
               shouldAnimateOnPressOutScale
               beforePressOutScale={1}
               afterPressOutScale={1.1}
@@ -389,12 +438,12 @@ const PinFormOverlay = (props) => {
               onPress={() => setPinColor('#ff9f0a')}
               containerStyle={styles.selectColorButtonContainer}
               buttonStyle={[styles.selectColorButton, styles.colorRed]}
+              buttonTouchStyle={{}}
               shouldShow={shouldShowOverlays}
               hidePosition={{ x: -500, y: 0 }}
               showPosition={{ x: 0, y: 0 }}
               touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorRed]}
               touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorRed]}
-              shouldAnimateOnPressOutOpacity
               shouldAnimateOnPressOutScale
               beforePressOutScale={1}
               afterPressOutScale={1.1}
@@ -403,12 +452,12 @@ const PinFormOverlay = (props) => {
               onPress={() => setPinColor('#f8f8ff')}
               containerStyle={styles.selectColorButtonContainer}
               buttonStyle={[styles.selectColorButton, styles.colorOrange]}
+              buttonTouchStyle={{}}
               shouldShow={shouldShowOverlays}
               hidePosition={{ x: -500, y: 0 }}
               showPosition={{ x: 0, y: 0 }}
               touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorOrange]}
               touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorOrange]}
-              shouldAnimateOnPressOutOpacity
               shouldAnimateOnPressOutScale
               beforePressOutScale={1}
               afterPressOutScale={1.1}
@@ -417,24 +466,25 @@ const PinFormOverlay = (props) => {
               onPress={() => setPinColor('transparent')}
               containerStyle={styles.selectColorButtonContainer}
               buttonStyle={[styles.selectColorButton, styles.colorTransparent]}
+              buttonTouchStyle={{}}
               shouldShow={shouldShowOverlays}
               hidePosition={{ x: -500, y: 0 }}
               showPosition={{ x: 0, y: 0 }}
               touchDownFeedbackStyle={[styles.selectColorButtonTouchDown, styles.colorTransparent]}
               touchUpFeedbackStyle={[styles.selectColorButtonTouchUp, styles.colorTransparent]}
-              shouldAnimateOnPressOutOpacity
               shouldAnimateOnPressOutScale
               beforePressOutScale={1}
               afterPressOutScale={1.1}
             />
           </View>
         </View>
-      </View>
+      </Animated.View>
       <Animated.View
         onLayout={(e) => setBottomHeight(e.nativeEvent.layout.height)}
         style={[styles.bottomOverlay, {
           transform: [{ translateY: translateBottom }]
-        }]}>
+        }]}
+      >
         <ScrollView
           ref={inputsContainer}
           style={styles.textInputsContainer}
@@ -458,6 +508,7 @@ const PinFormOverlay = (props) => {
               style={styles.textInput}
               value={description}
               onChangeText={(text) => setDescription(text)}
+              onContentSizeChange={(e) => handleSizeChange(e)}
               multiline={true}
               scrollEnabled={false}
               maxLength={280}
@@ -474,23 +525,28 @@ const PinFormOverlay = (props) => {
               style={publicStyle}
               onPress={() => onPressPublic()}
             >
-              <Text style={publicLabelStyle}>Public</Text>
+              <Text style={styles.publicAccessLabel}>Public</Text>
             </Pressable>
             <Pressable
               style={privateStyle}
               onPress={() => onPressPrivate()}
             >
-              <Text style={privateLabelStyle}>Private</Text>
+              <Text style={styles.publicAccessLabel}>Private</Text>
             </Pressable>
           </View>
         </View>
-        <View style={styles.confirmButtonContainer}>
-          <Pressable
-            style={styles.confirmButton}
+        <View style={styles.confirmContainer}>
+          <OptionButton
+            containerStyle={styles.confirmButtonContainer}
             onPress={() => onSubmit()}
+            innerLabelText={'Confirm'}
+            labelStyle={styles.confirmButtonLabel}
+            buttonStyle={styles.confirmButton}
+            buttonTouchStyle={styles.confirmButtonTouch}
+            touchDownFeedbackStyle={{}}
+            touchUpFeedbackStyle={{}}
           >
-            <Text style={styles.confirmButtonLabel}>Confirm</Text>
-          </Pressable>
+          </OptionButton>
         </View>
         <View style={[styles.bottomOverlayBuffer, {
           top: bottomHeight,
@@ -545,8 +601,9 @@ const styles = StyleSheet.create({
     width: 26
   },
   backIconTouch: {
-    height: 32,
-    width: 32
+    height: 16,
+    width: 16,
+    opacity: 0.5,
   },
   coordinateContainer: {
     marginTop: 14,
@@ -609,14 +666,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#151515c3'
+    backgroundColor: '#00000055',
+    opacity: 0.8,
   },
   photosContainer: {
     marginVertical: 12,
     paddingLeft: 12,
     height: 140,
     width: '100%',
-    // backgroundColor: '#151515c3',
     backgroundColor: '#ffffff88',
     display: 'flex',
     flexDirection: 'row',
@@ -647,12 +704,21 @@ const styles = StyleSheet.create({
   photoIcon: {
     height: 60,
     width: 60,
-    opacity: 0.7,
+    opacity: 0.2,
+  },
+  pinOverlay: {
+    alignSelf: 'center',
+    position: 'absolute',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hidden: {
+    display: 'none'
   },
   selectColorOverlay: {
-    marginTop: 'auto',
-    bottom: 30,
-    // backgroundColor: '#33ee1133',
+    position: 'absolute',
+    paddingBottom: 80,
   },
   colorPurple: {
     backgroundColor: '#5e5ce6aa',
@@ -668,25 +734,11 @@ const styles = StyleSheet.create({
   },
   colorTransparent: {
     backgroundColor: 'transparent',
-    borderColor: '#ffffffbb',
+    borderColor: '#ffffff55',
     borderWidth: 1,
   },
-  pinOverlay: {
-    alignSelf: 'center',
-    position: 'absolute',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  hidden: {
-    display: 'none'
-  },
-  selectColorContainer: {
-    alignSelf: 'center',
-    // backgroundColor: '#15151588',
-  },
+  selectColorContainer: {},
   selectColorPopover: {
-    alignSelf: 'center',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
@@ -717,7 +769,7 @@ const styles = StyleSheet.create({
     width: 30,
     borderRadius: 30,
     borderWidth: 1,
-    borderColor: 'white',
+    borderColor: 'black',
   },
   selectColorButtonTouchUp: {
     position: 'absolute',
@@ -725,7 +777,7 @@ const styles = StyleSheet.create({
     width: 32,
     borderRadius: 32,
     borderWidth: 1,
-    borderColor: 'white',
+    borderColor: 'black',
   },
   selectPinContainer: {
     alignSelf: 'center',
@@ -738,8 +790,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   textInputsContainer: {
+    marginVertical: 12,
     paddingHorizontal: 12,
-    paddingVertical: 12,
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -788,55 +840,49 @@ const styles = StyleSheet.create({
     backgroundColor: '#151515c3'
   },
   publicAccessToggleContainer: {
-    paddingVertical: 12,
+    marginBottom: 12,
     paddingHorizontal: 24,
     width: '100%',
     // backgroundColor: '#11339933'
   },
   publicAccessToggle: {
     borderWidth: 1,
-    borderColor: 'white',
-    borderColor: '#ffffff88',
+    borderColor: '#ffffff22',
     display: 'flex',
     flexDirection: 'row',
-    backgroundColor: '#00000055',
   },
   publicAccessSegmentSelected: {
+    paddingVertical: 8,
     width: '50%',
-    backgroundColor: '#ffffff88',
+    backgroundColor: '#ffffff22',
+    borderWidth: 1,
+    borderColor: '#ffffff22',
   },
   publicAccessSegment: {
+    paddingVertical: 8,
     width: '50%',
-  },
-  publicAccessLabelSelected: {
-    height: 24,
-    width: '100%',
-    lineHeight: 24,
-    fontSize: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    fontWeight: '500',
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    color: 'black'
+    backgroundColor: '#00000055',
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   publicAccessLabel: {
-    height: 24,
+    paddingLeft: 3,
     width: '100%',
-    lineHeight: 24,
     fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 2,
     textAlign: 'center',
-    textAlignVertical: 'center',
-    color: 'white'
+    color: 'white',
+  },
+  confirmContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 12,
+    width: '100%',
+    marginTop: 12,
+    marginBottom: 36,
   },
   confirmButtonContainer: {
     width: '100%',
-    paddingTop: 16,
-    paddingBottom: 12,
-    paddingHorizontal: 24,
-    marginBottom: 36,
     justifyContent: 'center',
     alignItems: 'center',
     // backgroundColor: '#77771133'
@@ -847,7 +893,19 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000000bb'
+    backgroundColor: '#00000055',
+    borderWidth: 1,
+    borderColor: '#ffffff22',
+  },
+  confirmButtonTouch: {
+    height: 48,
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff22',
+    borderWidth: 1,
+    borderColor: '#ffffff22',
   },
   confirmButtonLabel: {
     position: 'absolute',

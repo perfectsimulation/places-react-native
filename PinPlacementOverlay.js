@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from 'react';
 import {
   Animated,
   View,
-  Pressable,
   Text,
   StyleSheet
 } from 'react-native';
@@ -66,8 +65,8 @@ const PinPlacementOverlay = (props) => {
           iconStyle={styles.backIcon}
           iconTouchStyle={styles.backIconTouch}
           iconSource={require('./icons/cancel.png')}
-          iconTouchSource={require('./icons/cancel-touch.png')}
-          iconTouchBackgroundStyle={styles.backIconTouchContainer}
+          iconTouchSource={require('./icons/cancel.png')}
+          buttonTouchStyle={styles.backButton}
           touchDownFeedbackStyle={{}}
           touchUpFeedbackStyle={{}}
         />
@@ -76,13 +75,18 @@ const PinPlacementOverlay = (props) => {
         style={[bottom, {
           transform: [{ translateY: moveBottom }]
         }]}>
-        <View style={styles.confirmButtonContainer}>
-          <Pressable
-            style={styles.confirmButton}
+        <View style={styles.confirmContainer}>
+          <OptionButton
+            containerStyle={styles.confirmButtonContainer}
             onPress={() => onConfirmLocation()}
+            innerLabelText={'Here'}
+            labelStyle={styles.confirmButtonLabel}
+            buttonStyle={styles.confirmButton}
+            buttonTouchStyle={styles.confirmButtonTouch}
+            touchDownFeedbackStyle={{}}
+            touchUpFeedbackStyle={{}}
           >
-            <Text style={styles.confirmButtonLabel}>Here</Text>
-          </Pressable>
+          </OptionButton>
         </View>
       </Animated.View>
     </>
@@ -132,13 +136,10 @@ const styles = StyleSheet.create({
     height: 16,
     width: 16
   },
-  backIconTouchContainer: {
-    height: 26,
-    width: 26
-  },
   backIconTouch: {
-    height: 32,
-    width: 32
+    height: 16,
+    width: 16,
+    opacity: 0.5,
   },
   bottomOverlay: {
     position: 'absolute',
@@ -152,9 +153,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#151515c3'
   },
+  confirmContainer: {
+    paddingHorizontal: 24,
+    width: '100%',
+  },
   confirmButtonContainer: {
     width: '100%',
-    paddingHorizontal: 24,
     justifyContent: 'center',
     alignItems: 'center',
     // backgroundColor: '#77771133'
@@ -165,10 +169,22 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000000bb'
+    backgroundColor: '#00000055',
+    borderWidth: 1,
+    borderColor: '#ffffff22',
+  },
+  confirmButtonTouch: {
+    position: 'absolute',
+    height: 48,
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff22',
+    borderWidth: 1,
+    borderColor: '#ffffff22',
   },
   confirmButtonLabel: {
-    position: 'absolute',
     alignSelf: 'center',
     paddingLeft: 3,
     height: 16,

@@ -150,7 +150,7 @@ const OptionButton = (props) => {
     labelStyle,
     iconStyle,
     iconTouchStyle,
-    iconTouchBackgroundStyle,
+    buttonTouchStyle,
     touchDownFeedbackStyle,
     touchUpFeedbackStyle
   } = props;
@@ -158,10 +158,10 @@ const OptionButton = (props) => {
   const handlePress = onPress ?? (() => {});
   const container = containerStyle ?? styles.container;
   const button = buttonStyle ?? styles.button;
+  const buttonTouch = buttonTouchStyle ?? styles.buttonTouch;
   const label = labelStyle ?? styles.label;
   const icon = iconStyle ?? styles.icon;
   const iconTouch = iconTouchStyle ?? styles.icon;
-  const iconTouchBackground = iconTouchBackgroundStyle ?? styles.iconTouchBackground;
   const touchDownFeedback = touchDownFeedbackStyle ?? styles.pressInFeedback;
   const touchUpFeedback = touchUpFeedbackStyle ?? styles.pressOutFeedback;
 
@@ -183,20 +183,20 @@ const OptionButton = (props) => {
         onPressOut={() => setIsPressOut(true)}
         onPress={() => handlePress()}
       >
-        {iconSource && (
+        {(isPressIn || isPressOut) && (
+          <View style={buttonTouch} />
+        )}
+        {iconTouchSource && (
+          <Image
+            style={[{ position: 'absolute' }, iconTouch]}
+            source={iconTouchSource}
+          />
+        )}
+        {iconSource && !(isPressIn || isPressOut) && (
           <Image
             style={[{ position: 'absolute' }, icon]}
             source={iconSource}
           />
-        )}
-        {(isPressIn || isPressOut) && iconTouchSource && (
-          <>
-            <View style={iconTouchBackground} />
-            <Image
-              style={[{ position: 'absolute' }, iconTouch]}
-              source={iconTouchSource}
-            />
-          </>
         )}
         {isPressIn && (
           <View style={touchDownFeedback} />
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     height: 42,
     width: 42
   },
-  iconTouchBackground: {
+  buttonTouch: {
     height: 50,
     width: 50,
     borderRadius: 50,
