@@ -32,7 +32,7 @@ const OptionsMenu = (props) => {
       >
         <OptionButton
           onPress={() => onActivity()}
-          labelText={'Recent'}
+          labelText={'Lines'}
           iconSource={require('./icons/activity.png')}
           iconTouchSource={require('./icons/activity-touch.png')}
           containerStyle={styles.optionButtonContainer}
@@ -46,7 +46,7 @@ const OptionsMenu = (props) => {
         />
         <OptionButton
           onPress={() => onUser()}
-          labelText={'People'}
+          labelText={'Agents'}
           iconSource={require('./icons/person.png')}
           iconTouchSource={require('./icons/person-touch.png')}
           containerStyle={styles.optionButtonContainer}

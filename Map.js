@@ -8,10 +8,11 @@ import Geolocation from '@react-native-community/geolocation';
 import { getPins } from './server';
 import Pin from './Pin';
 import CreatePinView from './CreatePinView';
+import PinDetail from './PinDetail';
 import MenuButton from './MenuButton';
 import OptionsMenu from './OptionsMenu';
+import AgentsMenu from './AgentsMenu';
 import PlacesMenu from './PlacesMenu';
-import PinDetail from './PinDetail';
 
 const Map = () => {
 
@@ -25,6 +26,7 @@ const Map = () => {
   const [showPinDetail, setShowPinDetail] = useState(false);
   const [showCreateView, setShowCreateView] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [showAgentsMenu, setShowAgentsMenu] = useState(false);
   const [showPlacesMenu, setShowPlacesMenu] = useState(false);
 
   // Use user position to set initial map region
@@ -73,24 +75,14 @@ const Map = () => {
     setShowPinDetail(true);
   }
 
-  // begin pin creation flow
-  const onPressAddButton = () => {
-    setShowCreateView(true);
+  // open agents menu
+  const onPressAgentsButton = () => {
     setShowOptionsMenu(false);
+    setShowAgentsMenu(true);
   }
 
-  // cancel pin creation flow
-  const onPressCancelButton = () => {
-    setAllowRegionChange(true);
-    setShowCreateView(false);
-  }
-
-  // finalize new pin creation
-  const onPressConfirmButton = (pinForm) => {
-    createPin(pinForm);
-    // console.log(currentRegion);
-    setAllowRegionChange(true);
-    setShowCreateView(false);
+  const onCloseAgentsMenu = () => {
+    setShowAgentsMenu(false);
   }
 
   // open places menu
@@ -122,6 +114,26 @@ const Map = () => {
 
   const onClosePlacesMenu = () => {
     setShowPlacesMenu(false);
+  }
+
+  // begin pin creation flow
+  const onPressAddButton = () => {
+    setShowCreateView(true);
+    setShowOptionsMenu(false);
+  }
+
+  // cancel pin creation flow
+  const onPressCancelButton = () => {
+    setAllowRegionChange(true);
+    setShowCreateView(false);
+  }
+
+  // finalize new pin creation
+  const onPressConfirmButton = (pinForm) => {
+    createPin(pinForm);
+    // console.log(currentRegion);
+    setAllowRegionChange(true);
+    setShowCreateView(false);
   }
 
   const createPin = (pinForm) => {
@@ -200,9 +212,13 @@ const Map = () => {
         onPressActivityButton={() => console.log('activity')}
         onPressExploreButton={() => console.log('explore')}
         onPressPlacesButton={() => onPressPlacesButton()}
-        onPressUserButton={() => console.log('user')}
+        onPressUserButton={() => onPressAgentsButton()}
         onPressAddButton={() => onPressAddButton()}
         onCloseOptionsMenu={() => setShowOptionsMenu(false)}
+      />
+      <AgentsMenu
+        shouldShow={showAgentsMenu}
+        onClose={() => onCloseAgentsMenu()}
       />
       <PlacesMenu
         shouldShow={showPlacesMenu}

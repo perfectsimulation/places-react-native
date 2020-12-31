@@ -5,7 +5,7 @@ export const getPins = async () => {
 }
 
 export const getPhotoUrlById = async (photoId) => {
-  if (!photoId || !photoId[0] || !parseFloat(photoId[0])) {
+  if (!photoId || photoId[0] == undefined) {
     return getPlaceholderPhotoUrl();
   }
   const photo = await fetchPhotoById(photoId[0]);
