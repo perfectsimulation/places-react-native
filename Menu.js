@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
   Animated,
-  View,
   Dimensions,
   StyleSheet
 } from 'react-native';
@@ -14,15 +13,22 @@ const Menu = (props) => {
     children,
     onClose,
     showDefaultCloseButton,
-    animationDuration
+    animationDuration,
+    backgroundColor,
   } = props;
 
-  // null checks / default values
+  // null checks / TODO defaultProps
   const show = shouldShow ?? true;
   const content = children ?? <></>;
   const onCloseMenu = onClose ?? (() => {});
   const showCloseButton = showDefaultCloseButton ?? true;
   const transitionDuration = animationDuration ?? 300;
+  const containerStyle = backgroundColor
+    ? {
+      ...styles.container,
+      backgroundColor: backgroundColor
+    }
+    : styles.container;
 
   // TODO useWindowDimensions instead
   const window = Dimensions.get('window');
@@ -51,7 +57,7 @@ const Menu = (props) => {
         translateAnim, {
           toValue: afterShow,
           duration: 0,
-          useNativeDriver: true,
+          useNativeDriver: true
         }
       ).start();
     } else {
@@ -61,7 +67,7 @@ const Menu = (props) => {
           translateAnim, {
             toValue: afterShow,
             duration: 0,
-            useNativeDriver: true,
+            useNativeDriver: true
           }
         ).start();
 
@@ -78,7 +84,7 @@ const Menu = (props) => {
       opacityAnim, {
         toValue: afterOpacity,
         duration: transitionDuration,
-        useNativeDriver: true,
+        useNativeDriver: true
       }
     ).start();
   }, [afterOpacity, opacityAnim]);
@@ -95,10 +101,13 @@ const Menu = (props) => {
         if (e.target == e.currentTarget)
           setShouldClose(true);
       }}
-      style={[styles.container, {
-        transform: [{ translateY: translateAnim }],
+      style={[
+        {
+          ...containerStyle,
+          transform: [{ translateY: translateAnim }],
           opacity: opacityAnim
-      }]}
+        }
+      ]}
     >
       {content}
       {showCloseButton && (
@@ -121,7 +130,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     height: '100%',
     width: '100%',
-    backgroundColor: '#151515c3',
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center'

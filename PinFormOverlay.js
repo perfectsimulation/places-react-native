@@ -359,11 +359,17 @@ const PinFormOverlay = (props) => {
     <>
       <Animated.View
         onLayout={(e) => setTopHeight(e.nativeEvent.layout.height)}
-        style={[styles.topOverlay, {
-          transform: [{ translateY: moveTop }]
-        }]}
+        style={[
+          {
+            ...styles.topOverlay,
+            transform: [{ translateY: moveTop }]
+          }
+        ]}
       >
-        <ScrollView style={styles.topContents} scrollEnabled={false}>
+        <ScrollView
+          style={styles.topContents}
+          scrollEnabled={false}
+        >
           <Text style={styles.topText}>Create</Text>
           <View style={styles.coordinateContainer}>
             <Text style={styles.latitudeLabelText}>Latitude</Text>
@@ -397,14 +403,26 @@ const PinFormOverlay = (props) => {
         />
       </Animated.View>
       <Animated.View
-        style={[pinOverlay, { transform: [{ translateY : movePin }] }]}
+        style={[
+          {
+            ...pinOverlay,
+            transform: [{ translateY : movePin }]
+          }
+        ]}
       >
         <Pin color={pinColor} />
       </Animated.View>
       <Animated.View
-        style={[pinColorOverlay, { transform: [{ translateY : colorOverlayShift }] }]}
+        style={[
+          {
+            ...pinColorOverlay,
+            transform: [{ translateY : colorOverlayShift }]
+          }
+        ]}
       >
-        <View style={styles.selectColorContainer}>
+        <View
+          style={styles.selectColorContainer}
+        >
           <View style={styles.selectColorPopover}>
             <OptionButton
               onPress={() => setPinColor('#5e5ce6')}
@@ -481,9 +499,12 @@ const PinFormOverlay = (props) => {
       </Animated.View>
       <Animated.View
         onLayout={(e) => setBottomHeight(e.nativeEvent.layout.height)}
-        style={[styles.bottomOverlay, {
-          transform: [{ translateY: translateBottom }]
-        }]}
+        style={[
+          {
+            ...styles.bottomOverlay,
+            transform: [{ translateY: translateBottom }]
+          }
+        ]}
       >
         <ScrollView
           ref={inputsContainer}
@@ -519,7 +540,9 @@ const PinFormOverlay = (props) => {
             />
           </View>
         </ScrollView>
-        <View style={styles.publicAccessToggleContainer}>
+        <View
+          style={styles.publicAccessToggleContainer}
+        >
           <View style={styles.publicAccessToggle}>
             <Pressable
               style={publicStyle}
@@ -535,7 +558,9 @@ const PinFormOverlay = (props) => {
             </Pressable>
           </View>
         </View>
-        <View style={styles.confirmContainer}>
+        <View
+          style={styles.confirmContainer}
+        >
           <OptionButton
             containerStyle={styles.confirmButtonContainer}
             onPress={() => onSubmit()}
@@ -548,10 +573,15 @@ const PinFormOverlay = (props) => {
           >
           </OptionButton>
         </View>
-        <View style={[styles.bottomOverlayBuffer, {
-          top: bottomHeight,
-          height: bottomBuffer
-        }]} />
+        <View
+          style={[
+            {
+              ...styles.bottomOverlayBuffer,
+              top: bottomHeight,
+              height: bottomBuffer
+            }
+          ]}
+        />
       </Animated.View>
     </>
   );

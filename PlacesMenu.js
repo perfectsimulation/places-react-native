@@ -6,7 +6,7 @@ import {
   StyleSheet
 } from 'react-native';
 import Menu from './Menu';
-import PinCard from './PinCard';
+import PlaceListItem from './PlaceListItem';
 
 const PlacesMenu = (props) => {
 
@@ -18,7 +18,7 @@ const PlacesMenu = (props) => {
   } = props;
 
   // null checks / default values
-  const show = shouldShow ?? true;
+  const show = shouldShow ?? false;
   const onClosePlaces = onClose ?? (() => {});
   const onSelectPlace = onSelectItem ?? (() => {});
 
@@ -44,7 +44,7 @@ const PlacesMenu = (props) => {
   }, [shouldShow]);
 
   const renderListItem = (pin) => (
-    <PinCard
+    <PlaceListItem
       pin={pin}
       onSelect={(pin) => onSelectPlace(pin)}
     />
@@ -58,6 +58,7 @@ const PlacesMenu = (props) => {
     <Menu
       shouldShow={show}
       onClose={() => onClosePlaces()}
+      backgroundColor={'#151515c3'}
     >
       <View style={styles.container}>
         <Text style={styles.headerText}>Places</Text>

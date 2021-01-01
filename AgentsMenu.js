@@ -1,12 +1,13 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
-  Image,
   FlatList,
+  useWindowDimensions,
   StyleSheet
 } from 'react-native';
 import Menu from './Menu';
+import AgentListItem from './AgentListItem';
 
 const AgentsMenu = (props) => {
 
@@ -15,16 +16,23 @@ const AgentsMenu = (props) => {
     onClose
   } = props;
 
+  // scale list items by window size
+  const windowWidth = useWindowDimensions().width;
+  const listHeaderWidth = Math.round(windowWidth / 4);
+  const listFooterWidth = listHeaderWidth;
+  const listItemWidth = Math.round(windowWidth / 2);
+
   // null checks TODO make defaultProps
-  const show = shouldShow ?? true;
+  const show = shouldShow ?? false;
   const onCloseAgents = onClose ?? (() => {});
 
   // list
   const list = useRef(null);
 
-  const [currentIndex, setCurrentIndex] = useState(3);
+  // current index
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // list item section
+  // sample data
   const data = [
     {
       imageId: 0,
@@ -68,27 +76,20 @@ const AgentsMenu = (props) => {
     }
   ];
 
-  const renderListItem = (item) => (
-    <View style={itemStyles.container}>
-      <View style={itemStyles.imageContainer}>
-        <Image
-          style={itemStyles.image}
-          source={{ uri: item.photoUrl }}
-        />
-      </View>
-      <Text style={itemStyles.nameText}>
-        {item.name}
-      </Text>
-    </View>
+  const renderListItem = (item, index) => (
+    <AgentListItem
+      isActiveItem={index === currentIndex}
+      item={item}
+      imageSize={listItemWidth}
+    />
   );
-  // list item section end
 
   const renderListHeader = () => (
-    <View style={styles.flatListHeader} />
+    <View style={{ width: listHeaderWidth }} />
   );
 
   const renderListFooter = () => (
-    <View style={styles.flatListFooter} />
+    <View style={{ width: listFooterWidth }} />
   );
 
   const renderIndicator = () => (
@@ -105,13 +106,9 @@ const AgentsMenu = (props) => {
           key={i}
           style={[
             indicatorStyles.dot,
-            i == currentIndex
-              ? {
-                ...indicatorStyles.active,
-              }
-              : {
-                ...indicatorStyles.inactive,
-              }
+            i === currentIndex
+              ? indicatorStyles.active
+              : indicatorStyles.inactive
           ]}
         />
       );
@@ -154,24 +151,46 @@ const AgentsMenu = (props) => {
     }
   });
 
+  // snap list to center the item at the current index after scroll
+  const calculateOffsets = () => {
+    let offsets = [];
+    for (let i = 0; i < data.length; i++) {
+      offsets.push(
+        i * listItemWidth
+      );
+    }
+    return offsets;
+  }
+
   return (
     <Menu
       shouldShow={show}
       onClose={() => onCloseAgents()}
+      backgroundColor={'#151515c3'}
     >
-      <View style={styles.container}>
+      <View
+        style={styles.container}
+      >
         <Text style={styles.headerText}>Agents</Text>
         <View style={styles.flatListContainer}>
           <FlatList
             ref={list}
             style={styles.flatList}
             horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            decelerationRate={'fast'}
+            snapToOffsets={calculateOffsets()}
             keyExtractor={(agent) => agent.imageId.toString()}
             data={data}
-            renderItem={({ item }) => renderListItem(item)}
+            extraData={currentIndex}
+            renderItem={({ item, index }) => renderListItem(item, index)}
+            getItemLayout={(_data, index) => ({
+              length: listItemWidth,
+              offset: listItemWidth * index + listHeaderWidth,
+              index
+            })}
             ListHeaderComponent={() => renderListHeader()}
             ListFooterComponent={() => renderListFooter()}
-            showsHorizontalScrollIndicator={false}
             onViewableItemsChanged={handleScroll.current}
             onEndReachedThreshold={0.25}
             onEndReached={() => setCurrentIndex(data.length - 1)}
@@ -183,30 +202,7 @@ const AgentsMenu = (props) => {
   );
 }
 
-const itemStyles = StyleSheet.create({
-  container: {
-    marginRight: 10,
-    // backgroundColor: '#151515c3',
-  },
-  imageContainer: {
-    marginTop: 10,
-    maxHeight: 220,
-    height: 220,
-    width: 220,
-    // backgroundColor: '#aa334444',
-  },
-  image: {
-    height: '100%',
-    width: '100%'
-  },
-  nameText: {
-    marginVertical: 10,
-    fontWeight: '500',
-    color: '#ffffffaa',
-    // backgroundColor: '#5522ee44',
-    textAlign: 'center'
-  }
-});
+
 
 const indicatorStyles = StyleSheet.create({
   container: {
@@ -252,8 +248,8 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   flatListContainer: {
-    // height: '30%',
     top: 96,
+    marginVertical: 10,
     width: '100%',
     // backgroundColor: '#88ddee11'
   },
@@ -264,13 +260,7 @@ const styles = StyleSheet.create({
   flatListContent: {
     height: '100%',
     justifyContent: 'center'
-  },
-  flatListHeader: {
-    width: 85
-  },
-  flatListFooter: {
-    width: 75
-  },
+  }
 });
 
 export default AgentsMenu;

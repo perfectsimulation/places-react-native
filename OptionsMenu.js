@@ -29,6 +29,7 @@ const OptionsMenu = (props) => {
       <Menu
         shouldShow={shouldShow}
         onClose={() => onClose()}
+        backgroundColor={'#151515c3'}
       >
         <OptionButton
           onPress={() => onActivity()}

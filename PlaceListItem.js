@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { getPhotoUrlById } from './server';
 
-const PinCard = (props) => {
+const PlaceListItem = (props) => {
 
   const { pin, onSelect } = props;
   const {
@@ -77,4 +77,4 @@ const styles = StyleSheet.create({
   notification: {},
 });
 
-export default PinCard;
+export default PlaceListItem;
