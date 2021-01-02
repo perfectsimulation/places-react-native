@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import Menu from './Menu';
 import AgentListItem from './AgentListItem';
+import PageIndicator from './common/PageIndicator';
 
 const AgentsMenu = (props) => {
 
@@ -92,31 +93,7 @@ const AgentsMenu = (props) => {
     <View style={{ width: listFooterWidth }} />
   );
 
-  const renderIndicator = () => (
-    <View style={indicatorStyles.container}>
-      {renderPageDots()}
-    </View>
-  );
-
-  const renderPageDots = () => {
-    let dots = [];
-    for (let i = 0; i < data.length; i++) {
-      dots.push(
-        <View
-          key={i}
-          style={[
-            indicatorStyles.dot,
-            i === currentIndex
-              ? indicatorStyles.active
-              : indicatorStyles.inactive
-          ]}
-        />
-      );
-    }
-    return dots;
-  }
-
-  // change the 'active' dot of the list pagination indicator
+  // update current index when list is scrolled
   const handleScroll = useRef(({ viewableItems, changed }) => {
 
     // get length of visible item array
@@ -196,37 +173,15 @@ const AgentsMenu = (props) => {
             onEndReached={() => setCurrentIndex(data.length - 1)}
           />
         </View>
-        {renderIndicator()}
+        <PageIndicator
+          currentIndex={currentIndex}
+          count={data.length}
+          style={styles.pageIndicatorPosition}
+        />
       </View>
     </Menu>
   );
 }
-
-
-
-const indicatorStyles = StyleSheet.create({
-  container: {
-    top: 96,
-    marginTop: 15,
-    paddingLeft: 5,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    // backgroundColor: '#77ee2222',
-  },
-  dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 5,
-    marginRight: 5,
-  },
-  active: {
-    backgroundColor: 'white'
-  },
-  inactive: {
-    backgroundColor: '#ffffff27'
-  }
-});
 
 const styles = StyleSheet.create({
   container: {
@@ -260,6 +215,10 @@ const styles = StyleSheet.create({
   flatListContent: {
     height: '100%',
     justifyContent: 'center'
+  },
+  pageIndicatorPosition: {
+    top: 96,
+    marginTop: 15
   }
 });
 
