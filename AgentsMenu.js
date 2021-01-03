@@ -1,14 +1,12 @@
 import React, { useRef, useState } from 'react';
 import {
   View,
-  Text,
   FlatList,
   useWindowDimensions,
   StyleSheet
 } from 'react-native';
 import Menu from './Menu';
 import AgentListItem from './AgentListItem';
-import PageIndicator from './common/PageIndicator';
 
 const AgentsMenu = (props) => {
 
@@ -17,15 +15,29 @@ const AgentsMenu = (props) => {
     onClose
   } = props;
 
-  // scale list items by window size
-  const windowWidth = useWindowDimensions().width;
-  const listHeaderWidth = Math.round(windowWidth / 4);
-  const listFooterWidth = listHeaderWidth;
-  const listItemWidth = Math.round(windowWidth / 2);
-
   // null checks TODO make defaultProps
   const show = shouldShow ?? false;
   const onCloseAgents = onClose ?? (() => {});
+
+  // scale list items by window size
+  const windowWidth = useWindowDimensions().width;
+
+  // round down item width to prevent clipping of items at edge of window
+  const maxVisibleItems = 7;
+  const listItemWidth = Math.floor(windowWidth / maxVisibleItems);
+
+  // subtract the combined width of max visible items from total window width
+  // add this marginal width to both the header and footer to ensure viewable
+  // item count in onViewableItemsChanged handler never exceeds the max value
+  const maxItemsWidth = maxVisibleItems * listItemWidth;
+  const excessWidth = windowWidth - maxItemsWidth;
+
+  // size header and footer to align list in center of window
+  // i.e. the last item is centered when list is fully scrolled to the end
+  const halfWindowWidth = Math.ceil(windowWidth / 2);
+  const halfItemWidth = Math.ceil(listItemWidth / 2);
+  const listHeaderWidth = halfWindowWidth - halfItemWidth + excessWidth;
+  const listFooterWidth = listHeaderWidth;
 
   // list
   const list = useRef(null);
@@ -77,6 +89,150 @@ const AgentsMenu = (props) => {
     }
   ];
 
+  // consider list item to be viewable if more than half of it is visible
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 51
+  });
+
+  // update current index when list is scrolled
+  const handleScroll = useRef(({ viewableItems, changed }) => {
+
+    // do nothing on first render
+    if (viewableItems.length === changed.length) return;
+
+    // do nothing if there are no viewable items
+    if (viewableItems.length === 0) return;
+
+    // Note: built for odd-numbered max visible items, allowing a center item
+    const minVisibleitems = Math.ceil(maxVisibleItems / 2);
+    const maxVisibleCenterIndex = Math.floor(maxVisibleItems / 2);
+
+    const viewableItemCount = viewableItems.length;
+
+    const sortedViewableItems = viewableItems.sort((a, b) => a.index - b.index);
+    const sortedChangedItems = changed.sort((a, b) => a.index - b.index);
+
+    const highestViewableIndex = sortedViewableItems[viewableItemCount - 1].index;
+    const lowestViewableIndex = sortedViewableItems[0].index;
+
+    const highestChangedIndex = sortedChangedItems[changed.length - 1].index;
+    const lowestChangedIndex = sortedChangedItems[0].index;
+
+    const netViewableChanged = changed.reduce((count, item) => {
+      const increment = item.isViewable ? 1 : -1;
+      return count + increment;
+    }, 0);
+
+    let focusIndex;
+
+    // handle if scroll position is somewhere in the middle of list
+    if (viewableItemCount === maxVisibleItems) {
+
+      // select center index of viewableItems
+      focusIndex = maxVisibleCenterIndex;
+    }
+
+    // handle overscroll
+    else if (viewableItemCount < minVisibleitems) {
+
+      // overscrolled past the first item in list
+      if (lowestViewableIndex === 0) {
+
+        // snap focus to first item
+        focusIndex = 0
+      }
+
+      // overscrolled past the last item in list
+      else {
+
+        // snap focus to last item
+        focusIndex = viewableItemCount - 1;
+      }
+    }
+
+    // handle if list was fully scrolled to the first or last item
+    else if (viewableItemCount === minVisibleitems) {
+
+      // scolled to the top of list (all the way to the left)
+      if (highestViewableIndex <= lowestChangedIndex) {
+        focusIndex = 0;
+      }
+
+      // scrolled to the bottom of list (all the way to the right)
+      else if (lowestViewableIndex >= highestChangedIndex) {
+        focusIndex = viewableItemCount - 1;
+      }
+    }
+
+    // handle if there are fewer viewable items than the max value
+    // four possible scenarios:
+    //  - header shortened:   scrolled near list top, toward bottom
+    //  - header lengthened:  scrolled near list top, toward top
+    //  - footer shortened:   scrolled near list bottom, toward top
+    //  - footer lengthened:  scrolled near list bottom, toward bottom
+    else {
+
+      // more viewable items after scroll
+      if (netViewableChanged > 0) {
+
+        // header shortened
+        if (highestViewableIndex === lowestChangedIndex) {
+
+          // determine how many items could fit inside the header
+          const itemSpace = maxVisibleItems - viewableItemCount;
+
+          // subtract from center index of viewable items array with max count
+          focusIndex = maxVisibleCenterIndex - itemSpace;
+        }
+
+        // footer shortened
+        else if (lowestViewableIndex === highestChangedIndex) {
+
+          // use center index of viewable items array with max count
+          focusIndex = maxVisibleCenterIndex;
+        }
+      }
+
+      // fewer viewable items after scroll
+      else if (netViewableChanged < 0) {
+
+        // header lengthened
+        if (highestViewableIndex < lowestChangedIndex) {
+
+          // determine how many items could fit inside the footer
+          const itemSpace = maxVisibleItems - viewableItemCount;
+
+          // subtract from center index of viewable items array with max count
+          focusIndex = maxVisibleCenterIndex - itemSpace;
+        }
+
+        // footer lengthened
+        else if (lowestViewableIndex > highestChangedIndex) {
+
+          // use center index of viewable items array with max count
+          focusIndex = maxVisibleCenterIndex;
+        }
+      }
+    }
+
+    // set current index
+    if (focusIndex !== undefined && focusIndex < viewableItemCount) {
+      setCurrentIndex(viewableItems[focusIndex].index);
+    }
+
+  });
+
+  // snap list to center the item at the current index after scroll
+  const calculateOffsets = () => {
+    let offsets = [];
+    for (let i = 0; i < data.length; i++) {
+      offsets.push(
+        i * listItemWidth
+      );
+    }
+    return offsets;
+  }
+
   const renderListItem = (item, index) => (
     <AgentListItem
       isActiveItem={index === currentIndex}
@@ -93,62 +249,16 @@ const AgentsMenu = (props) => {
     <View style={{ width: listFooterWidth }} />
   );
 
-  // update current index when list is scrolled
-  const handleScroll = useRef(({ viewableItems, changed }) => {
-
-    // get length of visible item array
-    if (!viewableItems || viewableItems.length === 0) return;
-    const visibleItemCount = viewableItems.length;
-
-    // 1 VISIBLE ITEM - first item -> current index
-    if (visibleItemCount === 1) {
-      // should only occur when user is overscrolling
-      setCurrentIndex(viewableItems[0].item.imageId);
-
-    // 2 VISIBLE ITEMS - first item -> current index
-    } else if (visibleItemCount === 2) {
-      // handle when user stops overscrolling at the end of the list
-      if (changed
-        && changed.length === 1
-        && changed[0].isViewable
-        && changed[0].index === data.length - 2) {
-        // item coming back into view from overscroll is second to last in list
-        // do nothing - let current index remain the last item in the list
-        // current index is equivalent to viewableItems[1].item here
-        return;
-      }
-
-      // set current index to first of two visible items
-      setCurrentIndex(viewableItems[0].item.imageId);
-
-    // 3 VISIBLE ITEMS - second item -> current index
-    } else if (visibleItemCount > 2) {
-      // set current index to middle of three visible items
-      setCurrentIndex(viewableItems[1].item.imageId);
-    }
-  });
-
-  // snap list to center the item at the current index after scroll
-  const calculateOffsets = () => {
-    let offsets = [];
-    for (let i = 0; i < data.length; i++) {
-      offsets.push(
-        i * listItemWidth
-      );
-    }
-    return offsets;
-  }
-
   return (
     <Menu
       shouldShow={show}
+      title={'Agents'}
       onClose={() => onCloseAgents()}
       backgroundColor={'#151515c3'}
     >
       <View
         style={styles.container}
       >
-        <Text style={styles.headerText}>Agents</Text>
         <View style={styles.flatListContainer}>
           <FlatList
             ref={list}
@@ -168,16 +278,10 @@ const AgentsMenu = (props) => {
             })}
             ListHeaderComponent={() => renderListHeader()}
             ListFooterComponent={() => renderListFooter()}
+            viewabilityConfig={viewabilityConfig.current}
             onViewableItemsChanged={handleScroll.current}
-            onEndReachedThreshold={0.25}
-            onEndReached={() => setCurrentIndex(data.length - 1)}
           />
         </View>
-        <PageIndicator
-          currentIndex={currentIndex}
-          count={data.length}
-          style={styles.pageIndicatorPosition}
-        />
       </View>
     </Menu>
   );
@@ -189,36 +293,16 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
     display: 'flex',
-    alignItems: 'center'
-  },
-  headerText: {
-    position: 'absolute',
-    top: 60,
-    paddingLeft: 2,
-    fontSize: 14,
-    fontWeight: '500',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    color: 'white'
+    alignItems: 'center',
+    justifyContent: 'flex-end'
   },
   flatListContainer: {
-    top: 96,
-    marginVertical: 10,
-    width: '100%',
-    // backgroundColor: '#88ddee11'
+    bottom: 106,
+    width: '100%'
   },
   flatList: {
-    width: '100%',
+    width: '100%'
     // backgroundColor: '#88ddee11'
-  },
-  flatListContent: {
-    height: '100%',
-    justifyContent: 'center'
-  },
-  pageIndicatorPosition: {
-    top: 96,
-    marginTop: 15
   }
 });
 

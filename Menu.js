@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
   Animated,
+  Text,
   Dimensions,
   StyleSheet
 } from 'react-native';
@@ -10,6 +11,7 @@ const Menu = (props) => {
 
   const {
     shouldShow,
+    title,
     children,
     onClose,
     showDefaultCloseButton,
@@ -109,6 +111,9 @@ const Menu = (props) => {
         }
       ]}
     >
+      {title && (
+        <Text style={styles.title}>{title}</Text>
+      )}
       {content}
       {showCloseButton && (
         <CloseButton
@@ -120,20 +125,25 @@ const Menu = (props) => {
 }
 
 const styles = StyleSheet.create({
-  loading: {
-    height: '100%',
-    width: '100%',
-    backgroundColor: 'black'
-  },
   container: {
     position: 'absolute',
-    bottom: 0,
     height: '100%',
     width: '100%',
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center'
-  }
+  },
+  title: {
+    position: 'absolute',
+    top: 60,
+    paddingLeft: 2,
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    color: 'white'
+  },
 });
 
 export default Menu;

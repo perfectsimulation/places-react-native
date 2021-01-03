@@ -57,11 +57,11 @@ const PlacesMenu = (props) => {
   return (
     <Menu
       shouldShow={show}
+      title={'Places'}
       onClose={() => onClosePlaces()}
       backgroundColor={'#151515c3'}
     >
       <View style={styles.container}>
-        <Text style={styles.headerText}>Places</Text>
         <FlatList
           ref={list}
           style={styles.flatList}
@@ -83,24 +83,13 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center'
   },
-  headerText: {
-    position: 'absolute',
-    top: 60,
-    paddingLeft: 2,
-    fontSize: 14,
-    fontWeight: '500',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    color: 'white'
-  },
   flatList: {
     marginBottom: 96,
     top: 96,
     width: '100%'
   },
   flatListFooter: {
-    height: 200,
+    height: 160,
     width: '100%'
   },
 });

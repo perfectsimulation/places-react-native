@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from 'react';
 import {
   Animated,
   View,
-  Text,
   Image,
   StyleSheet
 } from 'react-native';
@@ -16,8 +15,8 @@ const AgentListItem = (props) => {
   } = props;
 
   // fade item in/out
-  const beforeOpacity = isActiveItem ? 0 : 1;
-  const afterOpacity = isActiveItem ? 1 : 0;
+  const beforeOpacity = isActiveItem ? 0.2 : 1;
+  const afterOpacity = isActiveItem ? 1 : 0.2;
 
   // duration of fade animations
   const duration = isActiveItem ? 8 : 256;
@@ -59,9 +58,6 @@ const AgentListItem = (props) => {
           source={{ uri: item.photoUrl }}
         />
       </View>
-      <Text style={styles.nameText}>
-        {item.name}
-      </Text>
     </Animated.View>
   );
 }
