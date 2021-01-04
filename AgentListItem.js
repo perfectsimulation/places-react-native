@@ -15,8 +15,8 @@ const AgentListItem = (props) => {
   } = props;
 
   // fade item in/out
-  const beforeOpacity = isActiveItem ? 0.2 : 1;
-  const afterOpacity = isActiveItem ? 1 : 0.2;
+  const beforeOpacity = isActiveItem ? 0.44 : 1;
+  const afterOpacity = isActiveItem ? 1 : 0.44;
 
   // duration of fade animations
   const duration = isActiveItem ? 8 : 256;
