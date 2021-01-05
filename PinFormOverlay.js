@@ -40,7 +40,7 @@ const PinFormOverlay = (props) => {
   const [description, setDescription] = useState(descriptionPlaceholder);
 
   // pin color
-  const [pinColor, setPinColor] = useState(null);
+  const [pinColor, setPinColor] = useState(undefined);
 
   // selected segment of public access toggle
   const [isPublic, setIsPublic] = useState(false);
@@ -80,7 +80,7 @@ const PinFormOverlay = (props) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // translate bottom overlay if keyboard blocks text inputs container
-  const inputsContainer = useRef(null);
+  const inputsContainer = useRef(undefined);
   const keyboardShift = useRef(new Animated.Value(0)).current;
   const colorOverlayShift = useRef(new Animated.Value(0)).current;
 

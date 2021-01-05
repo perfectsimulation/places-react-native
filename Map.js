@@ -18,11 +18,11 @@ const Map = () => {
 
   const map = useRef();
 
-  const [currentRegion, setCurrentRegion] = useState(null);
+  const [currentRegion, setCurrentRegion] = useState(undefined);
   const [allowRegionChange, setAllowRegionChange] = useState(true);
   const [isDraggingMap, setIsDraggingMap] = useState(false);
   const [pins, setPins] = useState([]);
-  const [focusedPin, setFocusedPin] = useState(null);
+  const [focusedPin, setFocusedPin] = useState(undefined);
   const [showPinDetail, setShowPinDetail] = useState(false);
   const [showCreateView, setShowCreateView] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);

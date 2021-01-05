@@ -17,7 +17,7 @@ const PlaceListItem = (props) => {
     description
   } = pin;
 
-  const [photoUrl, setPhotoUrl] = useState(null);
+  const [photoUrl, setPhotoUrl] = useState(undefined);
 
   // Fetch pin photo url from photo ID of pin
   useEffect(() => {

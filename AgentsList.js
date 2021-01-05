@@ -11,13 +11,14 @@ import AgentListItem from './AgentListItem';
 const AgentsList = (props) => {
 
   const {
+    shouldShow,
     data,
     maxVisibleItems,
-    onFocusItem,
+    onFocusIndex,
     style,
   } = props;
 
-  const onFocus = onFocusItem ?? (() => {});
+  const onFocus = onFocusIndex ?? (() => {});
 
   // scale list items by window size
   const windowWidth = useWindowDimensions().width;
@@ -39,13 +40,13 @@ const AgentsList = (props) => {
   const listFooterWidth = listHeaderWidth;
 
   // list
-  const list = useRef(null);
+  const list = useRef(undefined);
 
   // current index
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    onFocus(data[currentIndex])
+    onFocus(currentIndex)
   }, [currentIndex]);
 
   // consider list item to be viewable if more than half of it is visible
@@ -180,7 +181,8 @@ const AgentsList = (props) => {
     <View
       style={[
         styles.flatListContainer,
-        style ?? {}
+        style ?? {},
+        shouldShow ? {} : {display:'none'}
       ]}
     >
       <FlatList

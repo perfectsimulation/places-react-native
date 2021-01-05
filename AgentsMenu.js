@@ -21,8 +21,10 @@ const AgentsMenu = (props) => {
   const onCloseAgents = onClose ?? (() => {});
   const maxVisibleItems = viewableListItemCount ?? 7;
 
-  // TODO highlightedAgent
-  const [previewAgent, setPreviewAgent] = useState({});
+  const [focusIndex, setFocusIndex] = useState(undefined);
+  const [showPreview, setShowPreview] = useState(true);
+  const [showList, setShowList] = useState(showPreview);
+  const [showDetail, setShowDetail] = useState(!showPreview);
 
   // sample data
   const data = [
@@ -75,6 +77,16 @@ const AgentsMenu = (props) => {
     });
   }, []);
 
+  useEffect(() => {
+    setShowDetail(!showPreview);
+    setShowList(showPreview);
+  }, [showPreview]);
+
+  useEffect(() => {
+    setShowPreview(!showDetail);
+    setShowList(!showDetail);
+  }, [showDetail]);
+
   return (
     <Menu
       shouldShow={show}
@@ -86,12 +98,18 @@ const AgentsMenu = (props) => {
         style={styles.container}
       >
         <AgentDetail
-          item={previewAgent}
+          shouldShowPreview={showPreview}
+          shouldShowFull={showDetail}
+          data={data}
+          focusIndex={focusIndex}
+          sizeUnits={maxVisibleItems}
+          onPressPreview={(showDetail) => setShowDetail(showDetail)}
         />
         <AgentsList
+          shouldShow={showList}
           data={data}
           maxVisibleItems={maxVisibleItems}
-          onFocusItem={(item) => setPreviewAgent(item)}
+          onFocusIndex={(index) => setFocusIndex(index)}
           style={styles.list}
         />
       </View>
@@ -102,12 +120,12 @@ const AgentsMenu = (props) => {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    paddingVertical: '30%',
     height: '100%',
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    // backgroundColor: '#4499ee55',
   },
   list: {
     alignSelf: 'flex-end',

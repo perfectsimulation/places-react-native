@@ -23,7 +23,7 @@ const PlacesMenu = (props) => {
   const onSelectPlace = onSelectItem ?? (() => {});
 
   // list
-  const list = useRef(null);
+  const list = useRef(undefined);
 
   // pins
   const [listItems, setListItems] = useState(pins);
