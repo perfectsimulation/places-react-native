@@ -5,7 +5,6 @@ import {
   StyleSheet
 } from 'react-native';
 import Menu from './Menu';
-import AgentDetail from './AgentDetail';
 import AgentsList from './AgentsList';
 
 const AgentsMenu = (props) => {
@@ -21,10 +20,11 @@ const AgentsMenu = (props) => {
   const onCloseAgents = onClose ?? (() => {});
   const maxVisibleItems = viewableListItemCount ?? 7;
 
-  const [focusIndex, setFocusIndex] = useState(undefined);
+  // either show the agents list and preview or open agent detail
   const [showPreview, setShowPreview] = useState(true);
-  const [showList, setShowList] = useState(showPreview);
-  const [showDetail, setShowDetail] = useState(!showPreview);
+
+  // selected agent from list to show in detail
+  const [focusAgent, setFocusAgent] = useState({});
 
   // sample data
   const data = [
@@ -77,15 +77,10 @@ const AgentsMenu = (props) => {
     });
   }, []);
 
-  useEffect(() => {
-    setShowDetail(!showPreview);
-    setShowList(showPreview);
-  }, [showPreview]);
-
-  useEffect(() => {
-    setShowPreview(!showDetail);
-    setShowList(!showDetail);
-  }, [showDetail]);
+  const onFocusAgent = (agent) => {
+    console.log(agent)
+    setFocusAgent(agent);
+  }
 
   return (
     <Menu
@@ -97,20 +92,15 @@ const AgentsMenu = (props) => {
       <View
         style={styles.container}
       >
-        <AgentDetail
-          shouldShowPreview={showPreview}
-          shouldShowFull={showDetail}
-          data={data}
-          focusIndex={focusIndex}
-          sizeUnits={maxVisibleItems}
-          onPressPreview={(showDetail) => setShowDetail(showDetail)}
-        />
         <AgentsList
-          shouldShow={showList}
+          shouldShow={showPreview}
           data={data}
+          onSelect={(item) => onFocusAgent(item)}
           maxVisibleItems={maxVisibleItems}
-          onFocusIndex={(index) => setFocusIndex(index)}
-          style={styles.list}
+          containerStyle={previewStyles.listContainer}
+          listStyle={previewStyles.list}
+          listContentStyle={previewStyles.listContentContainer}
+          itemStyle={previewStyles.listItem}
         />
       </View>
     </Menu>
@@ -126,11 +116,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     // backgroundColor: '#4499ee55',
+  }
+});
+
+const previewStyles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  listContainer: {
+    alignSelf: 'flex-start',
+    position: 'absolute',
+    top: 96,
+    marginTop: 10,
+    // backgroundColor: '#8844aa99',
   },
   list: {
-    alignSelf: 'flex-end',
-    position: 'absolute',
-    paddingBottom: '30%',
+    overflow: 'visible'
+  },
+  listContentContainer : {
+    alignItems: 'flex-end'
+  },
+  listItem: {
+    // backgroundColor: '#88dd22cc',
+    justifyContent: 'flex-end',
   }
 });
 

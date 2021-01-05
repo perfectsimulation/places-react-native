@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   FlatList,
@@ -13,18 +13,34 @@ const AgentsList = (props) => {
   const {
     shouldShow,
     data,
+    onSelect,
     maxVisibleItems,
-    onFocusIndex,
-    style,
+    containerStyle,
+    listStyle,
+    listContentStyle,
+    itemStyle
   } = props;
 
-  const onFocus = onFocusIndex ?? (() => {});
+  const onSelectItem = onSelect ?? (() => {});
 
   // scale list items by window size
-  const windowWidth = useWindowDimensions().width;
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+
+  // subtract list item height to calculate detail height
+  const listBottom = Math.round(windowHeight / 4);
 
   // round down item width to prevent clipping of items at edge of window
   const listItemWidth = Math.floor(windowWidth / maxVisibleItems);
+
+  // subtract list height to calculate detail height
+  const previewHeight = windowHeight - listBottom - listItemWidth;
+
+  // detail image spans across width with horizontal margins equal to item size
+  const previewImageRatio = (maxVisibleItems - 2) / maxVisibleItems;
+  const previewImageSize = Math.floor(previewImageRatio * windowWidth);
+
+  // calculate horizontal offset to center detail with 100% width of window
+  const previewOffset = (windowWidth / 2) - (listItemWidth / 2);
 
   // subtract the combined width of max visible items from total window width
   // add this marginal width to both the header and footer to ensure viewable
@@ -44,10 +60,6 @@ const AgentsList = (props) => {
 
   // current index
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    onFocus(currentIndex)
-  }, [currentIndex]);
 
   // consider list item to be viewable if more than half of it is visible
   const viewabilityConfig = useRef({
@@ -165,7 +177,13 @@ const AgentsList = (props) => {
     <AgentListItem
       isActiveItem={index === currentIndex}
       item={item}
+      onSelect={(item) => onSelectItem(item)}
       imageSize={listItemWidth}
+      containerStyle={itemStyle}
+      detailHeight={previewHeight}
+      detailWidth={windowWidth}
+      detailImageSize={previewImageSize}
+      detailOffset={previewOffset}
     />
   );
 
@@ -181,13 +199,19 @@ const AgentsList = (props) => {
     <View
       style={[
         styles.flatListContainer,
-        style ?? {},
-        shouldShow ? {} : {display:'none'}
+        containerStyle ?? {},
+        shouldShow ? {} : { display: 'none' }
       ]}
     >
       <FlatList
         ref={list}
-        style={styles.flatList}
+        style={[
+          styles.flatList,
+          listStyle ?? {}
+        ]}
+        contentContainerStyle={[
+          listContentStyle ?? {}
+        ]}
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         decelerationRate={'fast'}
@@ -216,7 +240,7 @@ const styles = StyleSheet.create({
   },
   flatList: {
     width: '100%',
-    backgroundColor: '#15151531'
+    // backgroundColor: '#15151531'
   }
 });
 

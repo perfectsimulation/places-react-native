@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import {
   Animated,
   View,
+  Pressable,
   Image,
   StyleSheet
 } from 'react-native';
@@ -11,8 +12,16 @@ const AgentListItem = (props) => {
   const {
     isActiveItem,
     item,
-    imageSize
+    onSelect,
+    imageSize,
+    containerStyle,
+    detailHeight,
+    detailWidth,
+    detailImageSize,
+    detailOffset,
   } = props;
+
+  const onPressDetail = onSelect ?? (() => {});
 
   // fade item in/out
   const beforeOpacity = isActiveItem ? 0.44 : 1;
@@ -38,21 +47,60 @@ const AgentListItem = (props) => {
   return (
     <Animated.View
       style={[
+        containerStyle ?? styles.container,
         {
-          ...styles.container,
-          opacity: opacityAnim
-        }
+          opacity: opacityAnim,
+        },
+        isActiveItem
+          ? { height: detailHeight }
+          : { height: imageSize }
       ]}
     >
+      <Pressable
+        onPress={() => onPressDetail(item)}
+        style={[
+          isActiveItem
+            ? {
+                ...styles.detailContainer,
+                height: detailHeight - imageSize,
+                width: detailWidth,
+                marginLeft: -detailOffset,
+                bottom: imageSize
+              }
+            : { display: 'none' }
+        ]}
+      >
+        <View
+          style={[
+            {
+              ...styles.imageContainer,
+              height: '100%'
+            }
+          ]}
+          >
+          <Image
+            style={[
+              isActiveItem
+                ? {
+                    ...styles.detailImage,
+                    height: detailImageSize,
+                    width: detailImageSize,
+                  }
+                : { display: 'none' }
+            ]}
+            source={{ uri: item.photoUrl }}
+          />
+        </View>
+      </Pressable>
       <View
         style={[
           {
             ...styles.imageContainer,
             height: imageSize,
-            width: imageSize
+            width: imageSize,
           }
         ]}
-        >
+      >
         <Image
           style={styles.image}
           source={{ uri: item.photoUrl }}
@@ -64,10 +112,21 @@ const AgentListItem = (props) => {
 
 const styles = StyleSheet.create({
   container: {},
-  imageContainer: {},
+  imageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   image: {
     height: '100%',
     width: '100%'
+  },
+  detailContainer: {
+    position: 'absolute',
+    // backgroundColor: '#44eeaa88',
+  },
+  detailImage: {
+    position: 'absolute',
+    // backgroundColor: '#4488eeaa',
   },
   nameText: {
     marginTop: 10,
