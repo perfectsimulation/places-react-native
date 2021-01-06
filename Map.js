@@ -12,6 +12,7 @@ import PinDetail from './PinDetail';
 import MenuButton from './MenuButton';
 import OptionsMenu from './OptionsMenu';
 import AgentsMenu from './AgentsMenu';
+import NotesMenu from './NotesMenu';
 import PlacesMenu from './PlacesMenu';
 
 const Map = () => {
@@ -24,10 +25,14 @@ const Map = () => {
   const [pins, setPins] = useState([]);
   const [focusedPin, setFocusedPin] = useState(undefined);
   const [showPinDetail, setShowPinDetail] = useState(false);
-  const [showCreateView, setShowCreateView] = useState(false);
+  const [showCreatePin, setShowCreatePin] = useState(false);
+
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showAgentsMenu, setShowAgentsMenu] = useState(false);
+  const [showNotesMenu, setShowNotesMenu] = useState(false);
   const [showPlacesMenu, setShowPlacesMenu] = useState(false);
+
+  const [isCreatingNote, setIsCreatingNote] = useState(false);
 
   // Use user position to set initial map region
   useEffect(() => {
@@ -85,6 +90,16 @@ const Map = () => {
     setShowAgentsMenu(false);
   }
 
+  const onCreateAgentNote = () => {
+    setShowAgentsMenu(false);
+    setIsCreatingNote(true);
+    onOpenNotesMenu();
+  }
+
+  const onOpenNotesMenu = () => {
+    setShowNotesMenu(true);
+  }
+
   // open places menu
   const onPressPlacesButton = () => {
     setShowOptionsMenu(false);
@@ -118,14 +133,14 @@ const Map = () => {
 
   // begin pin creation flow
   const onPressAddButton = () => {
-    setShowCreateView(true);
+    setShowCreatePin(true);
     setShowOptionsMenu(false);
   }
 
   // cancel pin creation flow
   const onPressCancelButton = () => {
     setAllowRegionChange(true);
-    setShowCreateView(false);
+    setShowCreatePin(false);
   }
 
   // finalize new pin creation
@@ -133,7 +148,7 @@ const Map = () => {
     createPin(pinForm);
     // console.log(currentRegion);
     setAllowRegionChange(true);
-    setShowCreateView(false);
+    setShowCreatePin(false);
   }
 
   const createPin = (pinForm) => {
@@ -195,11 +210,11 @@ const Map = () => {
         ))}
       </MapView>
       <MenuButton
-        shouldShow={!showCreateView}
+        shouldShow={!showCreatePin}
         onPress={() => setShowOptionsMenu(true)}
       />
       <CreatePinView
-        shouldShow={showCreateView}
+        shouldShow={showCreatePin}
         isDraggingMap={isDraggingMap}
         currentRegion={currentRegion}
         onConfirmLocation={() => setAllowRegionChange(false)}
@@ -219,6 +234,12 @@ const Map = () => {
       <AgentsMenu
         shouldShow={showAgentsMenu}
         onClose={() => onCloseAgentsMenu()}
+        onCreateAgentNote={() => onCreateAgentNote()}
+      />
+      <NotesMenu
+        shouldShow={showNotesMenu}
+        showCreate={isCreatingNote}
+        onClose={() => setShowNotesMenu(false)}
       />
       <PlacesMenu
         shouldShow={showPlacesMenu}

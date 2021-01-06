@@ -13,6 +13,7 @@ const AgentsMenu = (props) => {
   const {
     shouldShow,
     onClose,
+    onCreateAgentNote,
     viewableListItemCount,
   } = props;
 
@@ -73,7 +74,7 @@ const AgentsMenu = (props) => {
   ];
 
   useEffect(() => {
-    if (show) setShowList(true);
+    if (show && !showDetail) setShowList(true);
   }, [show]);
 
   // prefetch item photos
@@ -91,9 +92,12 @@ const AgentsMenu = (props) => {
   }
 
   const onCloseDetail = () => {
-    setFocusAgent({});
-    // setShowList(true);
     setShowDetail(false);
+  }
+
+  const onCreateNote = () => {
+    onCloseDetail(false);
+    onCreateAgentNote();
   }
 
   const onPressClose = () => {
@@ -104,7 +108,6 @@ const AgentsMenu = (props) => {
   return (
     <Menu
       shouldShow={show}
-      // title={showList ? 'Agents' : String.empty }
       title={showList ? 'Agents' : focusAgent.name }
       onClose={() => onPressClose()}
       backgroundColor={'#151515c3'}
@@ -126,6 +129,7 @@ const AgentsMenu = (props) => {
           shouldShow={showDetail}
           item={focusAgent}
           maxVisibleItems={maxVisibleItems}
+          onPressCreate={() => onCreateNote()}
           onClose={() => onCloseDetail()}
         />
       </View>

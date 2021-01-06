@@ -15,10 +15,12 @@ const AgentDetail = (props) => {
     shouldShow,
     item,
     maxVisibleItems,
+    onPressCreate,
     onClose,
   } = props;
 
   const onCloseDetail = onClose ?? (() => {});
+  const onCreateNote = onPressCreate ?? (() => {});
 
   const { width: windowWidth } = useWindowDimensions();
   const listItemWidth = Math.floor(windowWidth / maxVisibleItems);
@@ -69,7 +71,10 @@ const AgentDetail = (props) => {
           <Pressable style={styles.optionButton}>
             <Text style={styles.buttonLabel}>Notes</Text>
           </Pressable>
-          <Pressable style={styles.optionButton}>
+          <Pressable
+            style={styles.optionButton}
+            onPress={() => onCreateNote()}
+          >
             <Text style={styles.buttonLabel}>Create</Text>
           </Pressable>
         </View>
