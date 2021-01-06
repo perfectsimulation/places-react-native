@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import Menu from './Menu';
 import AgentsList from './AgentsList';
+import AgentDetail from './AgentDetail';
 
 const AgentsMenu = (props) => {
 
@@ -17,14 +18,15 @@ const AgentsMenu = (props) => {
 
   // null checks TODO make defaultProps
   const show = shouldShow ?? false;
-  const onCloseAgents = onClose ?? (() => {});
+  const onCloseMenu = onClose ?? (() => {});
   const maxVisibleItems = viewableListItemCount ?? 7;
 
-  // either show the agents list and preview or open agent detail
-  const [showPreview, setShowPreview] = useState(true);
+  // either show the list or show the detail
+  const [showList, setShowList] = useState(true);
+  const [showDetail, setShowDetail] = useState(!showList);
 
   // selected agent from list to show in detail
-  const [focusAgent, setFocusAgent] = useState({});
+  const [focusAgent, setFocusAgent] = useState();
 
   // sample data
   const data = [
@@ -70,6 +72,10 @@ const AgentsMenu = (props) => {
     }
   ];
 
+  useEffect(() => {
+    if (show) setShowList(true);
+  }, [show]);
+
   // prefetch item photos
   useEffect(() => {
     data.map((item) => {
@@ -77,30 +83,50 @@ const AgentsMenu = (props) => {
     });
   }, []);
 
-  const onFocusAgent = (agent) => {
-    console.log(agent)
+  // focus agent on list item selection
+  const onOpenDetail = (agent) => {
     setFocusAgent(agent);
+    setShowList(false);
+    setShowDetail(true);
+  }
+
+  const onCloseDetail = () => {
+    setFocusAgent({});
+    // setShowList(true);
+    setShowDetail(false);
+  }
+
+  const onPressClose = () => {
+    onCloseDetail();
+    onCloseMenu();
   }
 
   return (
     <Menu
       shouldShow={show}
-      title={'Agents'}
-      onClose={() => onCloseAgents()}
+      // title={showList ? 'Agents' : String.empty }
+      title={showList ? 'Agents' : focusAgent.name }
+      onClose={() => onPressClose()}
       backgroundColor={'#151515c3'}
     >
       <View
         style={styles.container}
       >
         <AgentsList
-          shouldShow={showPreview}
+          shouldShow={showList}
           data={data}
-          onSelect={(item) => onFocusAgent(item)}
+          onSelect={(item) => onOpenDetail(item)}
           maxVisibleItems={maxVisibleItems}
-          containerStyle={previewStyles.listContainer}
-          listStyle={previewStyles.list}
-          listContentStyle={previewStyles.listContentContainer}
-          itemStyle={previewStyles.listItem}
+          containerStyle={styles.listContainer}
+          listStyle={styles.list}
+          listContentStyle={styles.listContentContainer}
+          itemStyle={styles.listItem}
+        />
+        <AgentDetail
+          shouldShow={showDetail}
+          item={focusAgent}
+          maxVisibleItems={maxVisibleItems}
+          onClose={() => onCloseDetail()}
         />
       </View>
     </Menu>
@@ -116,29 +142,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     // backgroundColor: '#4499ee55',
-  }
-});
-
-const previewStyles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center'
   },
   listContainer: {
     alignSelf: 'flex-start',
     position: 'absolute',
-    top: 96,
-    marginTop: 10,
+    marginTop: 106,
+    height: '100%',
     // backgroundColor: '#8844aa99',
   },
   list: {
-    overflow: 'visible'
+    overflow: 'visible',
   },
   listContentContainer : {
+    alignSelf: 'flex-start',
     alignItems: 'flex-end'
   },
   listItem: {

@@ -33,7 +33,7 @@ const AgentsList = (props) => {
   const listItemWidth = Math.floor(windowWidth / maxVisibleItems);
 
   // subtract list height to calculate detail height
-  const previewHeight = windowHeight - listBottom - listItemWidth;
+  const previewHeight = windowHeight - listBottom;
 
   // detail image spans across width with horizontal margins equal to item size
   const previewImageRatio = (maxVisibleItems - 2) / maxVisibleItems;

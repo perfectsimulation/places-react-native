@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import {
   Animated,
   Text,
-  Dimensions,
+  useWindowDimensions,
   StyleSheet
 } from 'react-native';
 import CloseButton from './CloseButton';
@@ -16,6 +16,7 @@ const Menu = (props) => {
     onClose,
     showDefaultCloseButton,
     animationDuration,
+    style,
     backgroundColor,
   } = props;
 
@@ -25,16 +26,8 @@ const Menu = (props) => {
   const onCloseMenu = onClose ?? (() => {});
   const showCloseButton = showDefaultCloseButton ?? true;
   const transitionDuration = animationDuration ?? 300;
-  const containerStyle = backgroundColor
-    ? {
-      ...styles.container,
-      backgroundColor: backgroundColor
-    }
-    : styles.container;
 
-  // TODO useWindowDimensions instead
-  const window = Dimensions.get('window');
-  const height = window.height;
+  const { height } = useWindowDimensions();
 
   // translate entire menu on/off-screen
   const beforeShow = show ? height : 0;
@@ -104,11 +97,14 @@ const Menu = (props) => {
           setShouldClose(true);
       }}
       style={[
+        style ?? styles.container,
         {
-          ...containerStyle,
           transform: [{ translateY: translateAnim }],
           opacity: opacityAnim
-        }
+        },
+        backgroundColor
+          ? { backgroundColor: backgroundColor }
+          : {}
       ]}
     >
       {title && (
