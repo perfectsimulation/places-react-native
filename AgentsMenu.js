@@ -148,9 +148,7 @@ const styles = StyleSheet.create({
     // backgroundColor: '#4499ee55',
   },
   listContainer: {
-    alignSelf: 'flex-start',
     position: 'absolute',
-    marginTop: 106,
     height: '100%',
     // backgroundColor: '#8844aa99',
   },
@@ -158,7 +156,7 @@ const styles = StyleSheet.create({
     overflow: 'visible',
   },
   listContentContainer : {
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
     alignItems: 'flex-end'
   },
   listItem: {

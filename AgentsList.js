@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   FlatList,
@@ -61,10 +61,17 @@ const AgentsList = (props) => {
   // current index
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // current item detail
+  const [showDetail, setShowDetail] = useState(false);
+
   // consider list item to be viewable if more than half of it is visible
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 51
   });
+
+  useEffect(() => {
+    setShowDetail(false);
+  }, [currentIndex]);
 
   // update current index when list is scrolled
   const handleScroll = useRef(({ viewableItems, changed }) => {
@@ -173,14 +180,20 @@ const AgentsList = (props) => {
     return offsets;
   }
 
+  const onTogglePreview = (showPreview) => {
+    setShowDetail(showPreview);
+  }
+
   const renderListItem = (item, index) => (
     <AgentListItem
-      isActiveItem={index === currentIndex}
+      showActive={index === currentIndex}
       item={item}
-      onSelect={(item) => onSelectItem(item)}
+      onSelect={(item) => onTogglePreview(item)}
+      hideList={showDetail}
       imageSize={listItemWidth}
+      activeHeight={previewHeight}
+      listBottom={listBottom}
       containerStyle={itemStyle}
-      detailHeight={previewHeight}
       detailWidth={windowWidth}
       detailImageSize={previewImageSize}
       detailOffset={previewOffset}

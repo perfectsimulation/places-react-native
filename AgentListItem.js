@@ -1,7 +1,6 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   Animated,
-  View,
   Pressable,
   Image,
   StyleSheet
@@ -10,94 +9,180 @@ import {
 const AgentListItem = (props) => {
 
   const {
-    isActiveItem,
+    showActive,
     item,
     onSelect,
+    hideList,
     imageSize,
+    activeHeight,
+    listBottom,
     containerStyle,
-    detailHeight,
     detailWidth,
     detailImageSize,
     detailOffset,
   } = props;
 
-  const onPressDetail = onSelect ?? (() => {});
+  const onSelectItem = onSelect ?? (() => {});
+
+  // show detail when preview image is pressed
+  const [showPreview, setShowPreview] = useState(false);
 
   // fade item in/out
-  const beforeOpacity = isActiveItem ? 0.44 : 1;
-  const afterOpacity = isActiveItem ? 1 : 0.44;
+  const beforeOpacity = showActive ? 0 : 1;
+  const afterOpacity = showActive ? 1 : 0;
 
-  // duration of fade animations
-  const duration = isActiveItem ? 8 : 256;
+  const beforePreview = showPreview ? 0 : 1;
+  const afterPreview = showPreview ? 1 : 0;
+
+  const beforeHideList = hideList ? 0 : 1;
+  const afterHideList = hideList ? 1 : 0;
+
+  // durations of animations
+  const opacityDuration = showActive ? 8 : 256;
+  const previewDuration = 256;
 
   // opacity animation value
   const opacityAnim = useRef(new Animated.Value(beforeOpacity)).current;
+
+  // scale and translate the preview image
+  const previewAnim = useRef(new Animated.Value(beforePreview)).current;
+
+  // translate the list item image out of view when a preview is showing
+  const hideListAnim = useRef(new Animated.Value(beforeHideList)).current;
+
+  // animation value to fade list item
+  const opacity = opacityAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.44, 1]
+  });
+
+  // animation value to slide up preview image
+  const rise = previewAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, (activeHeight - imageSize) * -0.375]
+  });
+
+  // animation value to shrink preview image
+  const shrink = previewAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0.5]
+  });
+
+  // animation value to hide list item image
+  const hide = hideListAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, (listBottom + imageSize)]
+  });
 
   // animate opacity when active status changes
   useEffect(() => {
     Animated.timing(
       opacityAnim, {
         toValue: afterOpacity,
-        duration: duration,
+        duration: opacityDuration,
         useNativeDriver: true
       }
     ).start();
-  }, [isActiveItem, opacityAnim]);
+  }, [showActive]);
+
+  // play preview animation when list item is selected
+  useEffect(() => {
+    Animated.timing(
+      previewAnim, {
+        toValue: afterPreview,
+        duration: previewDuration,
+        useNativeDriver: true
+      }
+    ).start();
+  }, [showPreview]);
+
+  // hide list item image when an item preview is showing
+  useEffect(() => {
+    Animated.timing(
+      hideListAnim, {
+        toValue: afterHideList,
+        duration: previewDuration,
+        useNativeDriver: true
+      }
+    ).start();
+  }, [hideList]);
+
+  // minimize detail when current index of list changes
+  useEffect(() => {
+    if (!showActive) {
+      if (!hideList) {
+        setShowPreview(false);
+      }
+    }
+  }, [hideList, showActive]);
+
+  const onPressPreview = () => {
+    onSelectItem(!showPreview);
+    setShowPreview(!showPreview);
+  }
 
   return (
     <Animated.View
       style={[
         containerStyle ?? styles.container,
         {
-          opacity: opacityAnim,
+          opacity: opacity,
         },
-        isActiveItem
-          ? { height: detailHeight }
+        showActive
+          ? { height: activeHeight }
           : { height: imageSize }
       ]}
     >
-      <Pressable
-        onPress={() => onPressDetail(item)}
-        style={[
-          isActiveItem
-            ? {
-                ...styles.detailContainer,
-                height: detailHeight - imageSize,
-                width: detailWidth,
-                marginLeft: -detailOffset,
-                bottom: imageSize
-              }
-            : { display: 'none' }
-        ]}
-      >
-        <View
+        <Pressable
+          onPress={() => onPressPreview()}
           style={[
-            {
-              ...styles.imageContainer,
-              height: '100%'
-            }
+            showActive
+              ? {
+                  ...styles.detailContainer,
+                  // backgroundColor: '#77aa77aa',
+                  height: activeHeight - imageSize,
+                  width: detailWidth,
+                  marginLeft: -detailOffset,
+                  bottom: imageSize
+                }
+              : { display: 'none' }
           ]}
-          >
-          <Image
+        >
+          <Animated.View
             style={[
-              isActiveItem
-                ? {
-                    ...styles.detailImage,
-                    height: detailImageSize,
-                    width: detailImageSize,
-                  }
-                : { display: 'none' }
+              {
+                ...styles.imageContainer,
+                // backgroundColor: '#77aa77aa',
+                transform: [
+                  { translateY: rise },
+                  { scaleX: shrink },
+                  { scaleY: shrink }
+                ]
+              }
             ]}
-            source={{ uri: item.photoUrl }}
-          />
-        </View>
-      </Pressable>
-      <View
+            >
+            <Image
+              style={[
+                showActive
+                  ? {
+                      ...styles.detailImage,
+                      height: detailImageSize,
+                      width: detailImageSize
+                    }
+                  : { display: 'none' }
+              ]}
+              source={{ uri: item.photoUrl }}
+            />
+          </Animated.View>
+        </Pressable>
+      <Animated.View
         style={[
           {
             ...styles.imageContainer,
+            // backgroundColor: '#77aa77aa',
             height: imageSize,
             width: imageSize,
+            transform: [{ translateY: hide }]
           }
         ]}
       >
@@ -105,7 +190,7 @@ const AgentListItem = (props) => {
           style={styles.image}
           source={{ uri: item.photoUrl }}
         />
-      </View>
+      </Animated.View>
     </Animated.View>
   );
 }
@@ -115,6 +200,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    height: '100%',
   },
   image: {
     height: '100%',
