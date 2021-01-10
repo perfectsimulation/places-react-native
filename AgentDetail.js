@@ -1,162 +1,122 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
+  useWindowDimensions,
+  Animated,
   View,
-  Image,
   Text,
   Pressable,
-  useWindowDimensions,
   StyleSheet
 } from 'react-native';
-import Menu from './Menu';
 
 const AgentDetail = (props) => {
 
   const {
     shouldShow,
     item,
-    maxVisibleItems,
     onPressCreate,
     onClose,
+    overlaySize,
   } = props;
+
 
   const onCloseDetail = onClose ?? (() => {});
   const onCreateNote = onPressCreate ?? (() => {});
 
-  const { width: windowWidth } = useWindowDimensions();
-  const listItemWidth = Math.floor(windowWidth / maxVisibleItems);
-  const headerImageSize = listItemWidth * 2;
+  const { height: windowHeight } = useWindowDimensions();
+  const overlayHeight = overlaySize ?? windowHeight * 0.66;
 
-  if (item === undefined || !item.name) {
-    return <></>;
-  }
+  const afterShow = shouldShow ? 1 : 0;
+  const beforeShow = shouldShow ? 0 : 1;
+
+  const show = useRef(new Animated.Value(beforeShow)).current;
+  const showHeight = show.interpolate({
+    inputRange: [0, 1],
+    outputRange: [overlayHeight, 0]
+  });
+
+  useEffect(() => {
+    Animated.spring(
+      show, {
+        toValue: afterShow,
+        duration: 256,
+        useNativeDriver: true
+      }
+    ).start();
+  }, [shouldShow]);
 
   return (
-    <Menu
+    <Animated.View
       shouldShow={shouldShow}
       showDefaultCloseButton={false}
-      style={styles.container}
-      backgroundColor={'#151515c3'}
+      backgroundColor={'#00000055'}
+      style={[{
+        ...styles.container,
+        height: windowHeight,
+        bottom: ((windowHeight - overlayHeight) * -1),
+        transform: [{ translateY: showHeight }]
+      }]}
     >
       <View style={styles.menuContent}>
-        <View
-          style={[
-            styles.header,
-            {
-              height: headerImageSize
-            }
-          ]}
-        >
-          <View
-            style={[
-              styles.imageContainer,
-              {
-                height: headerImageSize,
-                width: headerImageSize
-              }
-            ]}
-          >
-            <Image
-              style={styles.image}
-              source={{ uri: item.photoUrl }}
-            />
-          </View>
-          <View style={styles.infoTextContainer}>
-            <Text style={styles.infoText}>{item.name}</Text>
-          </View>
-        </View>
         <View style={styles.optionsContainer}>
           <Pressable style={styles.optionButton}>
-            <Text style={styles.buttonLabel}>Info</Text>
+            <Text style={styles.buttonLabel}>♤</Text>
           </Pressable>
           <Pressable style={styles.optionButton}>
-            <Text style={styles.buttonLabel}>Notes</Text>
+            <Text style={styles.buttonLabel}>♢</Text>
           </Pressable>
-          <Pressable
-            style={styles.optionButton}
-            onPress={() => onCreateNote()}
-          >
-            <Text style={styles.buttonLabel}>Create</Text>
+          <Pressable style={styles.optionButton}>
+            <Text style={styles.buttonLabel}>♧</Text>
+          </Pressable>
+          <Pressable style={styles.optionButton}>
+            <Text style={styles.buttonLabel}>♡</Text>
           </Pressable>
         </View>
       </View>
-    </Menu>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: 'flex-end',
+    alignSelf: 'center',
+    width: '100%',
     borderTopWidth: 1,
     borderStyle: 'solid',
-    borderColor: '#ffffff20',
-    height: '88%',
-    width: '100%',
-    alignItems: 'center'
+    borderColor: '#66666620',
+    alignItems: 'center',
+    display: 'flex'
   },
   menuContent: {
     height: '100%',
-    width: '100%',
-  },
-  header: {
-    margin: 10,
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center'
-  },
-  imageContainer: {
-    // backgroundColor: '#4499ee11',
-    marginTop: 10,
-  },
-  image: {
-    height: '100%',
     width: '100%'
   },
-  infoTextContainer: {
-    flex: 1,
-    marginLeft: 10,
-    padding: 10,
-    display: 'flex',
-    justifyContent: 'space-between',
-    overflow: 'hidden',
-    // backgroundColor: '#aaee8811'
-    display: 'none'
-  },
-  infoText: {
-    color: '#ffffffaa',
-    // backgroundColor: '#aaee8811'
-  },
   optionsContainer: {
-    margin: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    display: 'flex',
+    padding: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'stretch',
-    // backgroundColor: '#4499ee22',
+    justifyContent: 'space-around',
+    display: 'flex'
   },
   optionButton: {
-    marginHorizontal: 5,
-    flex: 1,
+    height: 30,
+    width: 30,
     borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: '#ffffff20',
-    height: 40,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    // backgroundColor: '#4499ee11',
+    borderRadius: 40,
     backgroundColor: '#00000055',
+    borderColor: '#ffffff22'
   },
   buttonLabel: {
-    alignSelf: 'center',
-    paddingLeft: 3,
-    fontSize: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 2,
+    fontSize: 16,
+    lineHeight: 28,
+    fontWeight: '100',
     textAlign: 'center',
-    textAlignVertical: 'center',
     textTransform: 'uppercase',
     letterSpacing: 2,
-    color: '#ffffffaa'
+    color: '#ffffff',
+    height: '100%',
+    width: '100%',
   }
 });
 

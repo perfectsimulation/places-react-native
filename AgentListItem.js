@@ -76,7 +76,7 @@ const AgentListItem = (props) => {
 
   // animate opacity when active status changes
   useEffect(() => {
-    Animated.timing(
+    Animated.spring(
       opacityAnim, {
         toValue: afterOpacity,
         duration: opacityDuration,
@@ -87,7 +87,7 @@ const AgentListItem = (props) => {
 
   // play preview animation when list item is selected
   useEffect(() => {
-    Animated.timing(
+    Animated.spring(
       previewAnim, {
         toValue: afterPreview,
         duration: previewDuration,
@@ -98,7 +98,7 @@ const AgentListItem = (props) => {
 
   // hide list item image when an item preview is showing
   useEffect(() => {
-    Animated.timing(
+    Animated.spring(
       hideListAnim, {
         toValue: afterHideList,
         duration: previewDuration,
@@ -116,6 +116,10 @@ const AgentListItem = (props) => {
     }
   }, [hideList, showActive]);
 
+  useEffect(() => {
+    if (item && item.photoUrl) Image.prefetch(item.photoUrl);
+  }, [item]);
+
   const onPressPreview = () => {
     onSelectItem(!showPreview);
     setShowPreview(!showPreview);
@@ -126,65 +130,61 @@ const AgentListItem = (props) => {
       style={[
         containerStyle ?? styles.container,
         {
-          opacity: opacity,
+          opacity: opacity
         },
         showActive
           ? { height: activeHeight }
           : { height: imageSize }
       ]}
     >
-        <Pressable
-          onPress={() => onPressPreview()}
-          style={[
-            showActive
-              ? {
-                  ...styles.detailContainer,
-                  // backgroundColor: '#77aa77aa',
-                  height: activeHeight - imageSize,
-                  width: detailWidth,
-                  marginLeft: -detailOffset,
-                  bottom: imageSize
-                }
-              : { display: 'none' }
-          ]}
-        >
-          <Animated.View
-            style={[
-              {
-                ...styles.imageContainer,
-                // backgroundColor: '#77aa77aa',
-                transform: [
-                  { translateY: rise },
-                  { scaleX: shrink },
-                  { scaleY: shrink }
-                ]
-              }
-            ]}
-            >
-            <Image
-              style={[
-                showActive
-                  ? {
-                      ...styles.detailImage,
-                      height: detailImageSize,
-                      width: detailImageSize
-                    }
-                  : { display: 'none' }
-              ]}
-              source={{ uri: item.photoUrl }}
-            />
-          </Animated.View>
-        </Pressable>
-      <Animated.View
+      <Pressable
+        onPress={() => onPressPreview()}
         style={[
-          {
+          showActive
+            ? {
+                ...styles.detailContainer,
+                // backgroundColor: '#77aa77aa',
+                height: activeHeight - imageSize,
+                width: detailWidth,
+                marginLeft: -detailOffset,
+                bottom: imageSize
+              }
+            : { display: 'none' }
+        ]}
+      >
+        <Animated.View
+          style={[{
             ...styles.imageContainer,
             // backgroundColor: '#77aa77aa',
-            height: imageSize,
-            width: imageSize,
-            transform: [{ translateY: hide }]
-          }
-        ]}
+            transform: [
+              { translateY: rise },
+              { scaleX: shrink },
+              { scaleY: shrink }
+            ]
+          }]}
+        >
+          <Image
+            style={[
+              showActive
+                ? {
+                    ...styles.detailImage,
+                    height: detailImageSize,
+                    width: detailImageSize
+                  }
+                : { display: 'none' }
+            ]}
+            source={{ uri: item.photoUrl }}
+          />
+        </Animated.View>
+      </Pressable>
+      <Animated.View
+        style={[{
+          ...styles.imageContainer,
+          // backgroundColor: '#77aa77aa',
+          height: imageSize,
+          width: imageSize,
+          transform: [{ translateY: hide }]
+        }]}
       >
         <Image
           style={styles.image}
@@ -213,15 +213,6 @@ const styles = StyleSheet.create({
   detailImage: {
     position: 'absolute',
     // backgroundColor: '#4488eeaa',
-  },
-  nameText: {
-    marginTop: 10,
-    height: 18,
-    lineHeight: 18,
-    fontWeight: '500',
-    color: '#ffffffaa',
-    textAlign: 'center'
-    // backgroundColor: '#88ddee11'
   }
 });
 

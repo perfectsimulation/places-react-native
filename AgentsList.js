@@ -11,9 +11,9 @@ import AgentListItem from './AgentListItem';
 const AgentsList = (props) => {
 
   const {
-    shouldShow,
     data,
     onSelect,
+    scrollEnabled,
     maxVisibleItems,
     containerStyle,
     listStyle,
@@ -182,6 +182,8 @@ const AgentsList = (props) => {
 
   const onTogglePreview = (showPreview) => {
     setShowDetail(showPreview);
+    const focus = showPreview ? data[currentIndex] : undefined;
+    onSelectItem(focus);
   }
 
   const renderListItem = (item, index) => (
@@ -213,7 +215,6 @@ const AgentsList = (props) => {
       style={[
         styles.flatListContainer,
         containerStyle ?? {},
-        shouldShow ? {} : { display: 'none' }
       ]}
     >
       <FlatList
@@ -228,6 +229,7 @@ const AgentsList = (props) => {
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         decelerationRate={'fast'}
+        scrollEnabled={scrollEnabled}
         snapToOffsets={calculateOffsets()}
         keyExtractor={(agent) => agent.imageId.toString()}
         data={data}

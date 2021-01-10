@@ -23,8 +23,8 @@ const AgentsMenu = (props) => {
   const maxVisibleItems = viewableListItemCount ?? 7;
 
   // either show the list or show the detail
-  const [showList, setShowList] = useState(true);
-  const [showDetail, setShowDetail] = useState(!showList);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
+  const [showDetail, setShowDetail] = useState(!scrollEnabled);
 
   // selected agent from list to show in detail
   const [focusAgent, setFocusAgent] = useState();
@@ -74,7 +74,7 @@ const AgentsMenu = (props) => {
   ];
 
   useEffect(() => {
-    if (show && !showDetail) setShowList(true);
+    if (show && !showDetail) setScrollEnabled(true);
   }, [show]);
 
   // prefetch item photos
@@ -84,15 +84,24 @@ const AgentsMenu = (props) => {
     });
   }, []);
 
-  // focus agent on list item selection
-  const onOpenDetail = (agent) => {
-    setFocusAgent(agent);
-    setShowList(false);
+
+  const onOpenDetail = () => {
+    setScrollEnabled(false);
     setShowDetail(true);
   }
 
   const onCloseDetail = () => {
+    setScrollEnabled(true);
     setShowDetail(false);
+  }
+
+  const onToggleFocus = (agent) => {
+    setFocusAgent(agent);
+    if (agent) {
+      onOpenDetail();
+    } else {
+      onCloseDetail();
+    }
   }
 
   const onCreateNote = () => {
@@ -108,7 +117,7 @@ const AgentsMenu = (props) => {
   return (
     <Menu
       shouldShow={show}
-      title={showList ? 'Agents' : focusAgent.name }
+      title={focusAgent ? focusAgent.name : 'Agents'}
       onClose={() => onPressClose()}
       backgroundColor={'#151515c3'}
     >
@@ -116,9 +125,9 @@ const AgentsMenu = (props) => {
         style={styles.container}
       >
         <AgentsList
-          shouldShow={showList}
           data={data}
-          onSelect={(item) => onOpenDetail(item)}
+          onSelect={(agent) => onToggleFocus(agent)}
+          scrollEnabled={scrollEnabled}
           maxVisibleItems={maxVisibleItems}
           containerStyle={styles.listContainer}
           listStyle={styles.list}
@@ -128,7 +137,6 @@ const AgentsMenu = (props) => {
         <AgentDetail
           shouldShow={showDetail}
           item={focusAgent}
-          maxVisibleItems={maxVisibleItems}
           onPressCreate={() => onCreateNote()}
           onClose={() => onCloseDetail()}
         />
