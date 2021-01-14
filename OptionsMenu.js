@@ -1,105 +1,103 @@
 import React from 'react';
-import {
-  StyleSheet
-} from 'react-native';
+import { StyleSheet } from 'react-native';
 import Menu from './Menu';
-import OptionButton from './OptionButton';
+import Button from './Button';
 
 const OptionsMenu = (props) => {
 
   const {
     shouldShow,
-    onPressActivityButton, // top left
-    onPressExploreButton,  // top right
+    onPressActivityButton, // leftmost
+    onPressUserButton,     // left
     onPressPlacesButton,   // middle
-    onPressUserButton,     // bottom left
-    onPressAddButton,      // bottom right
+    onPressExploreButton,  // right
+    onPressAddButton,      // rightmost
     onCloseOptionsMenu
   } = props;
 
-  const onActivity = onPressActivityButton ?? (() => {});
-  const onExplore = onPressExploreButton ?? (() => {});
-  const onPlaces = onPressPlacesButton ?? (() => {});
-  const onUser = onPressUserButton ?? (() => {});
-  const onAdd = onPressAddButton ?? (() => {});
-  const onClose = onCloseOptionsMenu ?? (() => {});
+  // TODO util for anim translation props showPosition/hidePosition
+  // export { flourishRadial } from common/animateLayout.js
+  // flourishRadial = (i, count) => { x: xi , y: yi }
+  //    props:  i       - index
+  //            count   - total items to flourish
+  //            origin  - reference to center point
+  // -----------------------------------------------
+  // For each Button in this file
+  // origin={ x: f(screen), y: f(screen) }
+  // hidePosition={ origin }
+  // showPosition={ flourishRadial(0, 5, origin) }
 
   return (
     <>
       <Menu
         shouldShow={shouldShow}
-        onClose={() => onClose()}
+        onClose={() => onCloseOptionsMenu()}
         backgroundColor={'#151515c3'}
       >
-        <OptionButton
-          onPress={() => onActivity()}
+        <Button
           labelText={'Lines'}
-          iconSource={require('./icons/activity.png')}
-          iconTouchSource={require('./icons/activity-touch.png')}
-          containerStyle={styles.optionButtonContainer}
-          iconStyle={styles.activityButtonImage}
-          iconTouchStyle={styles.activityButtonImage}
           shouldShow={shouldShow}
+          onPress={() => onPressActivityButton()}
           showPosition={{ x: -140, y: -156 }}
           hidePosition={{ x: 0, y: -104 }}
-          shouldAnimateOnPressOutOpacity
-          shouldAnimateOnPressOutScale
+          iconSource={require('./icons/activity.png')}
+          iconTouchSource={require('./icons/activity-touch.png')}
+          iconStyle={styles.activityButtonImage}
+          iconTouchStyle={styles.activityButtonImage}
+          {...optionButtonStyles}
+          {...optionButtonAnimProps}
         />
-        <OptionButton
-          onPress={() => onUser()}
+        <Button
           labelText={'Agents'}
-          iconSource={require('./icons/person.png')}
-          iconTouchSource={require('./icons/person-touch.png')}
-          containerStyle={styles.optionButtonContainer}
-          iconStyle={styles.userButtonImage}
-          iconTouchStyle={styles.userButtonImage}
           shouldShow={shouldShow}
+          onPress={() => onPressUserButton()}
           showPosition={{ x: -75, y: -198 }}
           hidePosition={{ x: 0, y: -104 }}
-          shouldAnimateOnPressOutOpacity
-          shouldAnimateOnPressOutScale
+          iconSource={require('./icons/person.png')}
+          iconTouchSource={require('./icons/person-touch.png')}
+          iconStyle={styles.userButtonImage}
+          iconTouchStyle={styles.userButtonImage}
+          {...optionButtonStyles}
+          {...optionButtonAnimProps}
         />
-        <OptionButton
-          onPress={() => onPlaces()}
+        <Button
           labelText={'Places'}
-          iconSource={require('./icons/places.png')}
-          iconTouchSource={require('./icons/places-touch.png')}
-          containerStyle={styles.optionButtonContainer}
-          iconStyle={styles.placesButtonImage}
-          iconTouchStyle={styles.placesButtonImage}
           shouldShow={shouldShow}
+          onPress={() => onPressPlacesButton()}
           showPosition={{ x: 0, y: -213 }}
           hidePosition={{ x: 0, y: -104 }}
-          shouldAnimateOnPressOutOpacity
-          shouldAnimateOnPressOutScale
+          iconSource={require('./icons/places.png')}
+          iconTouchSource={require('./icons/places-touch.png')}
+          iconStyle={styles.placesButtonImage}
+          iconTouchStyle={styles.placesButtonImage}
+          {...optionButtonStyles}
+          {...optionButtonAnimProps}
         />
-        <OptionButton
-          onPress={() => onExplore()}
+        <Button
           labelText={'Times'}
-          iconSource={require('./icons/arrows.png')}
-          iconTouchSource={require('./icons/arrows-touch.png')}
-          containerStyle={styles.optionButtonContainer}
-          iconStyle={styles.exploreButtonImage}
-          iconTouchStyle={styles.exploreButtonImage}
           shouldShow={shouldShow}
+          onPress={() => onPressExploreButton()}
           showPosition={{ x: 75, y: -198 }}
           hidePosition={{ x: 0, y: -104 }}
-          shouldAnimateOnPressOutOpacity
-          shouldAnimateOnPressOutScale
+          iconSource={require('./icons/arrows.png')}
+          iconTouchSource={require('./icons/arrows-touch.png')}
+          iconStyle={styles.exploreButtonImage}
+          iconTouchStyle={styles.exploreButtonImage}
+          {...optionButtonStyles}
+          {...optionButtonAnimProps}
         />
-        <OptionButton
-          onPress={() => onAdd()}
+        <Button
           labelText={'Create'}
-          iconSource={require('./icons/shiny.png')}
-          iconTouchSource={require('./icons/shiny-touch.png')}
-          containerStyle={styles.optionButtonContainer}
-          iconStyle={styles.addButtonImage}
-          iconTouchStyle={styles.addButtonImage}
           shouldShow={shouldShow}
+          onPress={() => onPressAddButton()}
           showPosition={{ x: 140, y: -156 }}
           hidePosition={{ x: 0, y: -104 }}
-          shouldAnimateOnPressOutOpacity
-          shouldAnimateOnPressOutScale
+          iconSource={require('./icons/shiny.png')}
+          iconTouchSource={require('./icons/shiny-touch.png')}
+          iconStyle={styles.addButtonImage}
+          iconTouchStyle={styles.addButtonImage}
+          {...optionButtonStyles}
+          {...optionButtonAnimProps}
         />
       </Menu>
     </>
@@ -112,27 +110,108 @@ const styles = StyleSheet.create({
     bottom: -22,
     alignItems: 'center'
   },
+  optionButton: {
+    position: 'absolute',
+    height: 50,
+    width: 50,
+    borderRadius: 50,
+    backgroundColor: '#ffffffef',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 3
+  },
+  optionButtonLabel: {
+    position: 'absolute',
+    bottom: 10,
+    paddingLeft: 3,
+    height: 12,
+    fontSize: 10,
+    textAlignVertical: 'center',
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    color: 'white'
+  },
+  optionButtonTouch: {
+    position: 'absolute',
+    height: 50,
+    width: 50,
+    borderRadius: 50,
+    backgroundColor: '#000000df'
+  },
+  optionButtonPressIn: {
+    position: 'absolute',
+    height: 50,
+    width: 50,
+    borderRadius: 50,
+    borderColor: 'white',
+    borderWidth: 2
+  },
+  optionButtonPressOut: {
+    position: 'absolute',
+    height: 65,
+    width: 65,
+    borderRadius: 66,
+    borderColor: 'white',
+    borderWidth: 1
+  },
   activityButtonImage: {
+    position: 'absolute',
     height: 40,
     width: 40
   },
   exploreButtonImage: {
+    position: 'absolute',
     height: 38,
     width: 38
   },
   placesButtonImage: {
+    position: 'absolute',
     height: 38,
     width: 38
   },
   userButtonImage: {
+    position: 'absolute',
     height: 34,
     width: 34
   },
   addButtonImage: {
+    position: 'absolute',
     height: 36,
     width: 36,
     left: 6
   }
 });
+
+const optionButtonStyles = {
+  containerStyle: styles.optionButtonContainer,
+  buttonStyle: styles.optionButton,
+  labelStyle: styles.optionButtonLabel,
+  buttonTouchStyle: styles.optionButtonTouch,
+  touchDownFeedbackStyle: styles.optionButtonPressIn,
+  touchUpFeedbackStyle: styles.optionButtonPressOut
+};
+
+// TODO export { ...animProps } from common/animProps.js
+const optionButtonAnimProps = {
+  transitionDuration: 200,
+  animateShowPosition: true,
+  animateTouchEndOpacity: true,
+  animateTouchEndScale: true
+};
+
+OptionsMenu.defaultProps = {
+  onPressActivityButton: (() => {}),
+  onPressUserButton: (() => {}),
+  onPressPlacesButton: (() => {}),
+  onPressExploreButton: (() => {}),
+  onPressAddButton: (() => {}),
+  onCloseOptionsMenu: (() => {}),
+};
 
 export default OptionsMenu;

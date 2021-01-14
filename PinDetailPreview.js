@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   Animated,
   Easing,
@@ -7,7 +7,7 @@ import {
   Text,
   StyleSheet
 } from 'react-native';
-import OptionButton from './OptionButton';
+import Button from './Button';
 
 const PinDetailPreview = (props) => {
   const window = Dimensions.get('window');
@@ -50,14 +50,15 @@ const PinDetailPreview = (props) => {
         <Text style={styles.titleText}>{title}</Text>
         <Text style={styles.subText}>{description}</Text>
         <View style={styles.buttonsContainer}>
-          <OptionButton
+          <Button
             labelText={'Add'}
             containerStyle={styles.optionButtonContainer}
             buttonStyle={styles.optionButton}
             labelStyle={styles.optionButtonLabel}
+            iconStyle={styles.mediumOptionIcon}
             iconSource={require('./icons/cubes-white.png')}
           />
-          <OptionButton
+          <Button
             labelText={'Link'}
             containerStyle={styles.optionButtonContainer}
             buttonStyle={styles.optionButton}

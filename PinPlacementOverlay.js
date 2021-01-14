@@ -5,7 +5,7 @@ import {
   Text,
   StyleSheet
 } from 'react-native';
-import OptionButton from './OptionButton';
+import Button from './Button';
 
 const PinPlacementOverlay = (props) => {
   const {
@@ -58,7 +58,7 @@ const PinPlacementOverlay = (props) => {
         }]}
       >
         <Text style={styles.topText}>Drop a spot</Text>
-        <OptionButton
+        <Button
           onPress={() => onPressCancelButton()}
           containerStyle={styles.backButtonContainer}
           buttonStyle={styles.backButton}
@@ -76,7 +76,7 @@ const PinPlacementOverlay = (props) => {
           transform: [{ translateY: moveBottom }]
         }]}>
         <View style={styles.confirmContainer}>
-          <OptionButton
+          <Button
             containerStyle={styles.confirmButtonContainer}
             onPress={() => onConfirmLocation()}
             innerLabelText={'Here'}
@@ -85,8 +85,7 @@ const PinPlacementOverlay = (props) => {
             buttonTouchStyle={styles.confirmButtonTouch}
             touchDownFeedbackStyle={{}}
             touchUpFeedbackStyle={{}}
-          >
-          </OptionButton>
+          />
         </View>
       </Animated.View>
     </>
@@ -133,10 +132,12 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   backIcon: {
+    position: 'absolute',
     height: 16,
     width: 16
   },
   backIconTouch: {
+    position: 'absolute',
     height: 16,
     width: 16,
     opacity: 0.5,

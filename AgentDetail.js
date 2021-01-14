@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   useWindowDimensions,
   Animated,
@@ -18,12 +18,11 @@ const AgentDetail = (props) => {
     overlaySize,
   } = props;
 
-
   const onCloseDetail = onClose ?? (() => {});
   const onCreateNote = onPressCreate ?? (() => {});
 
   const { height: windowHeight } = useWindowDimensions();
-  const overlayHeight = overlaySize ?? windowHeight * 0.66;
+  const overlayHeight = overlaySize ?? windowHeight * 0.71;
 
   const afterShow = shouldShow ? 1 : 0;
   const beforeShow = shouldShow ? 0 : 1;
