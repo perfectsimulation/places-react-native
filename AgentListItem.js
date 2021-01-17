@@ -144,7 +144,7 @@ const AgentListItem = (props) => {
 
   // show item detail
   const onPressPreview = () => {
-    onSelectItem(!showPreview);
+    onSelectItem(item);
     setShowPreview(!showPreview);
   }
 

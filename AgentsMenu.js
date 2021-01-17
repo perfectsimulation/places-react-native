@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Image,
   StyleSheet
 } from 'react-native';
 import Menu from './Menu';
@@ -29,6 +28,7 @@ const AgentsMenu = (props) => {
   // either show the list or show the detail
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [showDetail, setShowDetail] = useState(!scrollEnabled);
+  const [showDetailFull, setShowDetailFull] = useState(false);
 
   // selected agent from list to show in detail
   const [focusAgent, setFocusAgent] = useState();
@@ -48,23 +48,31 @@ const AgentsMenu = (props) => {
     if (show && !showDetail) setScrollEnabled(true);
   }, [show]);
 
-  const onOpenDetail = () => {
+  const onOpenDetailPreview = () => {
     setScrollEnabled(false);
     setShowDetail(true);
   }
 
-  const onCloseDetail = () => {
+  const onCloseDetailPreview = () => {
     setScrollEnabled(true);
     setShowDetail(false);
     setFocusAgent(undefined);
   }
 
-  const onToggleFocus = (agent) => {
+  const onOpenDetailFull = () => {
+    setShowDetailFull(true);
+  }
+
+  const onCloseDetailFull = () => {
+    setShowDetailFull(false);
+  }
+
+  const onTogglePreview = (agent) => {
     setFocusAgent(agent);
     if (agent) {
-      onOpenDetail();
+      onOpenDetailPreview();
     } else {
-      onCloseDetail();
+      onCloseDetailPreview();
     }
   }
 
@@ -74,7 +82,8 @@ const AgentsMenu = (props) => {
   }
 
   const onPressClose = () => {
-    onCloseDetail();
+    onCloseDetailPreview();
+    onCloseDetailFull();
     onCloseMenu();
   }
 
@@ -91,7 +100,7 @@ const AgentsMenu = (props) => {
         <AgentsList
           data={agents}
           showPreview={showDetail}
-          onSelect={(agent) => onToggleFocus(agent)}
+          onSelect={(agent) => onTogglePreview(agent)}
           scrollEnabled={scrollEnabled}
           maxVisibleItems={maxVisibleItems}
           containerStyle={styles.listContainer}
@@ -101,9 +110,11 @@ const AgentsMenu = (props) => {
         />
         <AgentDetail
           shouldShow={showDetail}
+          showPreview={!showDetailFull}
           item={focusAgent}
+          onClosePreview={() => onCloseDetailPreview()}
+          onOpenFull={() => onOpenDetailFull()}
           onPressCreate={() => onCreateNote()}
-          onClose={() => onCloseDetail()}
         />
       </View>
     </Menu>

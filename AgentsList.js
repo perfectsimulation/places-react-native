@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+
+import React, { useRef, useState, useEffect } from 'react';
 import {
+  useWindowDimensions,
   View,
   FlatList,
-  useWindowDimensions,
   StyleSheet
 } from 'react-native';
 import AgentListItem from './AgentListItem';
@@ -187,9 +188,9 @@ const AgentsList = (props) => {
     return offsets;
   }
 
-  const onTogglePreview = (showPreview) => {
-    setShowDetail(showPreview);
-    const focus = showPreview ? data[currentIndex] : undefined;
+  const onTogglePreview = (item) => {
+    const focus = item ?? undefined;
+    setShowDetail(focus);
     onSelectItem(focus);
   }
 
@@ -221,7 +222,7 @@ const AgentsList = (props) => {
     <View
       style={[
         styles.flatListContainer,
-        containerStyle ?? {},
+        containerStyle ?? {}
       ]}
     >
       <FlatList
