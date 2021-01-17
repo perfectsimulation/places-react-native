@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import {
+  useWindowDimensions,
   Animated,
   Easing,
-  Dimensions,
   View,
   Text,
   StyleSheet
@@ -10,13 +10,21 @@ import {
 import Button from './Button';
 
 const PinDetailPreview = (props) => {
-  const window = Dimensions.get('window');
-  const height = Math.round(window.height * 0.25);
 
-  const { pin, shouldShow } = props;
+  const {
+    shouldShow,
+    pin,
+    onPressAdd,
+  } = props;
+
+  const { title, description } = pin;
 
   // null checks / default values
   const show = shouldShow ?? true;
+  const onPressAddButton = onPressAdd ?? (() => {console.log('add')});
+
+  const windowHeight = useWindowDimensions().height;
+  const height = Math.round(windowHeight * 0.25);
 
   // translate entire menu on/off-screen TODO use window height
   const beforeShow = show ? height : 0;
@@ -35,9 +43,7 @@ const PinDetailPreview = (props) => {
         useNativeDriver: true,
       }
     ).start();
-  }, [afterShow, translateAnim]);
-
-  const { title, description } = pin;
+  }, [show]);
 
   return (
     <Animated.View
@@ -51,6 +57,7 @@ const PinDetailPreview = (props) => {
         <Text style={styles.subText}>{description}</Text>
         <View style={styles.buttonsContainer}>
           <Button
+            onPress={() => onPressAddButton()}
             labelText={'Add'}
             containerStyle={styles.optionButtonContainer}
             buttonStyle={styles.optionButton}
@@ -134,10 +141,6 @@ const styles = StyleSheet.create({
   mediumOptionIcon: {
     height: 38,
     width: 38
-  },
-  largeOptionIcon: {
-    height: 44,
-    width: 44
   },
   optionButtonLabel: {
     position: 'absolute',

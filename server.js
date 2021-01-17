@@ -4,8 +4,14 @@ export const getPins = async () => {
   return pins;
 }
 
+export const getAgents = async () => {
+  const agentsData = await fetchAgents();
+  const agents = agentsData.map((agentData) => parseAgent(agentData));
+  return agents;
+}
+
 export const getPhotoUrlById = async (photoId) => {
-  if (!photoId || photoId[0] == undefined) {
+  if (photoId === undefined || photoId[0] === undefined) {
     return getPlaceholderPhotoUrl();
   }
   const photo = await fetchPhotoById(photoId[0]);
@@ -19,6 +25,12 @@ const rootUrl = 'https://my-json-server.typicode.com/perfectsimulation/based';
 // fetch all pins
 const fetchPins = async () => {
   return fetch(`${rootUrl}/pins`)
+    .then((response) => response.json())
+    .then((json) => json);
+}
+
+const fetchAgents = async () => {
+  return fetch(`${rootUrl}/agents`)
     .then((response) => response.json())
     .then((json) => json);
 }
@@ -57,4 +69,16 @@ const parsePin = (pinData) => {
   };
 
   return pin;
+}
+
+const parseAgent = (agentData) => {
+  const agent = {
+    'id': agentData.id,
+    'name': agentData.name,
+    'photoId': agentData.photoId,
+    'noteIds': agentData.noteIds,
+    'eventIds': agentData.eventIds
+  };
+
+  return agent;
 }

@@ -5,6 +5,7 @@ import {
   Image,
   StyleSheet
 } from 'react-native';
+import { getPhotoUrlById } from './server';
 
 const AgentListItem = (props) => {
 
@@ -22,7 +23,13 @@ const AgentListItem = (props) => {
     detailOffset,
   } = props;
 
+  const {
+    photoId
+  } = item;
+
   const onSelectItem = onSelect ?? (() => {});
+
+  const [photoUrl, setPhotoUrl] = useState(undefined);
 
   // show detail when preview image is pressed
   const [showPreview, setShowPreview] = useState(false);
@@ -114,12 +121,28 @@ const AgentListItem = (props) => {
         setShowPreview(false);
       }
     }
-  }, [hideList, showActive]);
+  }, [showActive]);
 
+  // minimize detail when agents menu closes
   useEffect(() => {
-    if (item && item.photoUrl) Image.prefetch(item.photoUrl);
-  }, [item]);
+    if (!hideList) {
+      setShowPreview(false);
+    }
+  }, [hideList]);
 
+  // fetch the photo for this list item
+  useEffect(() => {
+    const getPhoto = async () => {
+      const photoUrl = await getPhotoUrlById([photoId]);
+      return photoUrl;
+    }
+
+    getPhoto()
+      .then((photoUrl) => setPhotoUrl(photoUrl))
+      .catch((error) => alert(error.message));
+  }, [photoId]);
+
+  // show item detail
   const onPressPreview = () => {
     onSelectItem(!showPreview);
     setShowPreview(!showPreview);
@@ -173,7 +196,7 @@ const AgentListItem = (props) => {
                   }
                 : { display: 'none' }
             ]}
-            source={{ uri: item.photoUrl }}
+            source={photoUrl ? { uri: photoUrl } : require('./icons/missing.png')}
           />
         </Animated.View>
       </Pressable>
@@ -188,7 +211,7 @@ const AgentListItem = (props) => {
       >
         <Image
           style={styles.image}
-          source={{ uri: item.photoUrl }}
+          source={photoUrl ? { uri: photoUrl } : require('./icons/missing.png')}
         />
       </Animated.View>
     </Animated.View>

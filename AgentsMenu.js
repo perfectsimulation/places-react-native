@@ -7,6 +7,7 @@ import {
 import Menu from './Menu';
 import AgentsList from './AgentsList';
 import AgentDetail from './AgentDetail';
+import { getAgents } from './server';
 
 const AgentsMenu = (props) => {
 
@@ -22,6 +23,9 @@ const AgentsMenu = (props) => {
   const onCloseMenu = onClose ?? (() => {});
   const maxVisibleItems = viewableListItemCount ?? 7;
 
+  // agents data
+  const [agents, setAgents] = useState([]);
+
   // either show the list or show the detail
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [showDetail, setShowDetail] = useState(!scrollEnabled);
@@ -29,61 +33,20 @@ const AgentsMenu = (props) => {
   // selected agent from list to show in detail
   const [focusAgent, setFocusAgent] = useState();
 
-  // sample data
-  const data = [
-    {
-      imageId: 0,
-      name: 'Terrible Fate',
-      photoUrl: 'https://i.pinimg.com/originals/69/3a/81/693a8141af2b5d88ca24d249b0048876.png',
-    },
-    {
-      imageId: 1,
-      name: 'Chaos',
-      photoUrl: 'https://www.pngkey.com/png/full/801-8019597_hades-the-chaos-update.png',
-    },
-    {
-      imageId: 2,
-      name: 'Asterius',
-      photoUrl: 'https://i.redd.it/blna4mjr9uw21.png',
-    },
-    {
-      imageId: 3,
-      name: 'Megaera',
-      photoUrl: 'https://i.redd.it/xcz1skgqdh241.png',
-    },
-    {
-      imageId: 4,
-      name: 'Alecto',
-      photoUrl: 'https://i.redd.it/es9j9yzvysl21.png',
-    },
-    {
-      imageId: 5,
-      name: 'Hypnos',
-      photoUrl: 'https://i.redd.it/cbyurjd9eh241.png',
-    },
-    {
-      imageId: 6,
-      name: 'Thanatos',
-      photoUrl: 'https://i.redd.it/wp9z4ekmysl21.png',
-    },
-    {
-      imageId: 7,
-      name: 'Zagreus',
-      photoUrl: 'https://static.wikia.nocookie.net/hades/images/2/29/Zagreus.png/revision/latest',
+  useEffect(() => {
+    const getAgentsData = async () => {
+      const agentsData = await getAgents();
+      return agentsData;
     }
-  ];
+
+    getAgentsData()
+      .then((agents) => setAgents(agents))
+      .catch((error) => alert(error.message));
+  }, []);
 
   useEffect(() => {
     if (show && !showDetail) setScrollEnabled(true);
   }, [show]);
-
-  // prefetch item photos
-  useEffect(() => {
-    data.map((item) => {
-      Image.prefetch(item.photoUrl)
-    });
-  }, []);
-
 
   const onOpenDetail = () => {
     setScrollEnabled(false);
@@ -93,6 +56,7 @@ const AgentsMenu = (props) => {
   const onCloseDetail = () => {
     setScrollEnabled(true);
     setShowDetail(false);
+    setFocusAgent(undefined);
   }
 
   const onToggleFocus = (agent) => {
@@ -105,7 +69,7 @@ const AgentsMenu = (props) => {
   }
 
   const onCreateNote = () => {
-    onCloseDetail(false);
+    onCloseDetail();
     onCreateAgentNote();
   }
 
@@ -125,7 +89,8 @@ const AgentsMenu = (props) => {
         style={styles.container}
       >
         <AgentsList
-          data={data}
+          data={agents}
+          showPreview={showDetail}
           onSelect={(agent) => onToggleFocus(agent)}
           scrollEnabled={scrollEnabled}
           maxVisibleItems={maxVisibleItems}

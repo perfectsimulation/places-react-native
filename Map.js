@@ -8,6 +8,7 @@ import Geolocation from '@react-native-community/geolocation';
 import { getPins } from './server';
 import Pin from './Pin';
 import CreatePinView from './CreatePinView';
+import CreateEventView from './CreateEventView';
 import PinDetail from './PinDetail';
 import MenuButton from './MenuButton';
 import OptionsMenu from './OptionsMenu';
@@ -24,9 +25,12 @@ const Map = () => {
   const [isDraggingMap, setIsDraggingMap] = useState(false);
   const [pins, setPins] = useState([]);
   const [focusedPin, setFocusedPin] = useState(undefined);
+
   const [showPinDetail, setShowPinDetail] = useState(false);
   const [showCreatePin, setShowCreatePin] = useState(false);
+  const [showCreateEvent, setShowCreateEvent] = useState(false);
 
+  const [showMenuButton, setShowMenuButton] = useState(true);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showAgentsMenu, setShowAgentsMenu] = useState(false);
   const [showNotesMenu, setShowNotesMenu] = useState(false);
@@ -132,15 +136,17 @@ const Map = () => {
   }
 
   // begin pin creation flow
-  const onPressAddButton = () => {
+  const onSelectCreatePin = () => {
     setShowCreatePin(true);
     setShowOptionsMenu(false);
+    setShowMenuButton(false);
   }
 
   // cancel pin creation flow
-  const onPressCancelButton = () => {
+  const onCancelCreatePin = () => {
     setAllowRegionChange(true);
     setShowCreatePin(false);
+    setShowMenuButton(true);
   }
 
   // finalize new pin creation
@@ -149,6 +155,19 @@ const Map = () => {
     // console.log(currentRegion);
     setAllowRegionChange(true);
     setShowCreatePin(false);
+    setShowMenuButton(true);
+  }
+
+  // begin event creation flow
+  const onSelectCreateEvent = () => {
+    setShowPinDetail(false);
+    setShowCreateEvent(true);
+    setShowMenuButton(false);
+  }
+
+  const onCancelCreateEvent = () => {
+    setShowCreateEvent(false);
+    setShowMenuButton(true);
   }
 
   const createPin = (pinForm) => {
@@ -210,7 +229,7 @@ const Map = () => {
         ))}
       </MapView>
       <MenuButton
-        shouldShow={!showCreatePin}
+        shouldShow={showMenuButton}
         onPress={() => setShowOptionsMenu(true)}
       />
       <CreatePinView
@@ -219,8 +238,13 @@ const Map = () => {
         currentRegion={currentRegion}
         onConfirmLocation={() => setAllowRegionChange(false)}
         onRepositionPin={() => setAllowRegionChange(true)}
-        onPressCancelButton={() => onPressCancelButton()}
+        onPressCancelButton={() => onCancelCreatePin()}
         onPressConfirmButton={(pinForm) => onPressConfirmButton(pinForm)}
+      />
+      <CreateEventView
+        shouldShow={showCreateEvent}
+        pin={focusedPin}
+        onPressCancelButton={() => onCancelCreateEvent()}
       />
       <OptionsMenu
         shouldShow={showOptionsMenu}
@@ -228,7 +252,7 @@ const Map = () => {
         onPressExploreButton={() => console.log('explore')}
         onPressPlacesButton={() => onPressPlacesButton()}
         onPressUserButton={() => onPressAgentsButton()}
-        onPressAddButton={() => onPressAddButton()}
+        onPressAddButton={() => onSelectCreatePin()}
         onCloseOptionsMenu={() => setShowOptionsMenu(false)}
       />
       <AgentsMenu
@@ -251,6 +275,7 @@ const Map = () => {
         shouldShow={showPinDetail}
         showPreview={true}
         pin={focusedPin ?? {}}
+        onPressAdd={() => onSelectCreateEvent()}
       />
     </View>
   );

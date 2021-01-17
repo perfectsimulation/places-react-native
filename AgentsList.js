@@ -12,6 +12,7 @@ const AgentsList = (props) => {
 
   const {
     data,
+    showPreview,
     onSelect,
     scrollEnabled,
     maxVisibleItems,
@@ -72,6 +73,12 @@ const AgentsList = (props) => {
   useEffect(() => {
     setShowDetail(false);
   }, [currentIndex]);
+
+  useEffect(() => {
+    if (!showPreview) {
+      setShowDetail(false);
+    }
+  }, [showPreview]);
 
   // update current index when list is scrolled
   const handleScroll = useRef(({ viewableItems, changed }) => {
@@ -231,7 +238,7 @@ const AgentsList = (props) => {
         decelerationRate={'fast'}
         scrollEnabled={scrollEnabled}
         snapToOffsets={calculateOffsets()}
-        keyExtractor={(agent) => agent.imageId.toString()}
+        keyExtractor={(agent) => agent.id.toString()}
         data={data}
         extraData={currentIndex}
         renderItem={({ item, index }) => renderListItem(item, index)}
