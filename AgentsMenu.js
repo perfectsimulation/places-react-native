@@ -13,22 +13,16 @@ const AgentsMenu = (props) => {
   const {
     shouldShow,
     onClose,
-    onCreateAgentNote,
     viewableListItemCount,
   } = props;
-
-  // null checks TODO make defaultProps
-  const show = shouldShow ?? false;
-  const onCloseMenu = onClose ?? (() => {});
-  const maxVisibleItems = viewableListItemCount ?? 7;
 
   // agents data
   const [agents, setAgents] = useState([]);
 
   // either show the list or show the detail
   const [scrollEnabled, setScrollEnabled] = useState(true);
-  const [showDetail, setShowDetail] = useState(!scrollEnabled);
-  const [showDetailFull, setShowDetailFull] = useState(false);
+  const [showList, setShowList] = useState(true);
+  const [showDetail, setShowDetail] = useState(false);
 
   // selected agent from list to show in detail
   const [focusAgent, setFocusAgent] = useState();
@@ -45,76 +39,68 @@ const AgentsMenu = (props) => {
   }, []);
 
   useEffect(() => {
-    if (show && !showDetail) setScrollEnabled(true);
-  }, [show]);
+    if (shouldShow && !showDetail) {
+      setShowList(true);
+      setScrollEnabled(true);
+    }
+  }, [shouldShow]);
 
-  const onOpenDetailPreview = () => {
+  const onOpenDetail = () => {
     setScrollEnabled(false);
     setShowDetail(true);
   }
 
-  const onCloseDetailPreview = () => {
+  const onCloseDetail = () => {
     setScrollEnabled(true);
     setShowDetail(false);
     setFocusAgent(undefined);
   }
 
-  const onOpenDetailFull = () => {
-    setShowDetailFull(true);
-  }
-
-  const onCloseDetailFull = () => {
-    setShowDetailFull(false);
-  }
-
-  const onTogglePreview = (agent) => {
+  const onSelectItem = (agent) => {
     setFocusAgent(agent);
     if (agent) {
-      onOpenDetailPreview();
+      onOpenDetail();
     } else {
-      onCloseDetailPreview();
+      onCloseDetail();
     }
   }
 
-  const onCreateNote = () => {
+  const handleClose = () => {
     onCloseDetail();
-    onCreateAgentNote();
-  }
-
-  const onPressClose = () => {
-    onCloseDetailPreview();
-    onCloseDetailFull();
-    onCloseMenu();
+    onClose();
   }
 
   return (
     <Menu
-      shouldShow={show}
-      title={focusAgent ? focusAgent.name : 'Agents'}
-      onClose={() => onPressClose()}
+      shouldShow={shouldShow}
+      title={showList && !showDetail ? 'Agents' : undefined}
+      onClose={() => handleClose()}
       backgroundColor={'#151515c3'}
     >
-      <View
-        style={styles.container}
-      >
-        <AgentsList
-          data={agents}
-          showPreview={showDetail}
-          onSelect={(agent) => onTogglePreview(agent)}
-          scrollEnabled={scrollEnabled}
-          maxVisibleItems={maxVisibleItems}
-          containerStyle={styles.listContainer}
-          listStyle={styles.list}
-          listContentStyle={styles.listContentContainer}
-          itemStyle={styles.listItem}
-        />
+      <View style={styles.menuContent}>
+        <Menu
+          shouldShow={showList}
+          title={focusAgent ? focusAgent.name : undefined}
+          showDefaultCloseButton={false}
+        >
+          <AgentsList
+            data={agents}
+            showPreview={showDetail}
+            onSelect={(agent) => onSelectItem(agent)}
+            scrollEnabled={scrollEnabled}
+            maxVisibleItems={viewableListItemCount}
+            containerStyle={styles.listContainer}
+            listStyle={styles.list}
+            listContentStyle={styles.listContentContainer}
+            itemStyle={styles.listItem}
+          />
+        </Menu>
         <AgentDetail
           shouldShow={showDetail}
-          showPreview={!showDetailFull}
           item={focusAgent}
-          onClosePreview={() => onCloseDetailPreview()}
-          onOpenFull={() => onOpenDetailFull()}
-          onPressCreate={() => onCreateNote()}
+          onMaximize={() => setShowList(false)}
+          onMinimize={() => setShowList(true)}
+          onClose={() => onCloseDetail()}
         />
       </View>
     </Menu>
@@ -122,7 +108,7 @@ const AgentsMenu = (props) => {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  menuContent: {
     position: 'absolute',
     height: '100%',
     width: '100%',
@@ -148,5 +134,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   }
 });
+
+AgentsMenu.defaultProps = {
+  shouldShow: false,
+  onClose: (() => {}),
+  viewableListItemCount: 7
+};
 
 export default AgentsMenu;

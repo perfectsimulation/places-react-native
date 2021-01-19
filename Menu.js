@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
+  useWindowDimensions,
   Animated,
   Text,
-  useWindowDimensions,
   StyleSheet
 } from 'react-native';
 import CloseButton from './CloseButton';
@@ -17,25 +17,18 @@ const Menu = (props) => {
     showDefaultCloseButton,
     animationDuration,
     style,
-    backgroundColor,
+    backgroundColor
   } = props;
-
-  // null checks / TODO defaultProps
-  const show = shouldShow ?? true;
-  const content = children ?? <></>;
-  const onCloseMenu = onClose ?? (() => {});
-  const showCloseButton = showDefaultCloseButton ?? true;
-  const transitionDuration = animationDuration ?? 300;
 
   const { height } = useWindowDimensions();
 
   // translate entire menu on/off-screen
-  const beforeShow = show ? height : 0;
-  const afterShow = show ? 0 : height;
+  const beforeShow = shouldShow ? height : 0;
+  const afterShow = shouldShow ? 0 : height;
 
   // fade entire menu in/out
-  const beforeOpacity = show ? 0 : 1;
-  const afterOpacity = show ? 1 : 0;
+  const beforeOpacity = shouldShow ? 0 : 1;
+  const afterOpacity = shouldShow ? 1 : 0;
 
   // translate and opacity ref values
   const translateAnim = useRef(new Animated.Value(beforeShow)).current;
@@ -46,7 +39,7 @@ const Menu = (props) => {
 
   // translate menu on/off-screen
   useEffect(() => {
-    if (show) {
+    if (shouldShow) {
       // translate entire menu on-screen instantly
       Animated.timing(
         translateAnim, {
@@ -69,24 +62,24 @@ const Menu = (props) => {
         return (() => {
           clearTimeout(timer);
         });
-      }, transitionDuration); // TODO use actual animation length
+      }, animationDuration);
     }
-  }, [shouldClose, afterShow, translateAnim]);
+  }, [shouldShow, shouldClose]);
 
   // fade menu in/out
   useEffect(() => {
     Animated.timing(
       opacityAnim, {
         toValue: afterOpacity,
-        duration: transitionDuration,
+        duration: animationDuration,
         useNativeDriver: true
       }
     ).start();
-  }, [afterOpacity, opacityAnim]);
+  }, [shouldShow]);
 
   // close this menu from this close button
   useEffect(() => {
-    onCloseMenu();
+    onClose();
     setShouldClose(false);
   }, [shouldClose]);
 
@@ -99,19 +92,17 @@ const Menu = (props) => {
       style={[
         style ?? styles.container,
         {
+          backgroundColor: backgroundColor,
           transform: [{ translateY: translateAnim }],
           opacity: opacityAnim
-        },
-        backgroundColor
-          ? { backgroundColor: backgroundColor }
-          : {}
+        }
       ]}
     >
       {title && (
         <Text style={styles.title}>{title}</Text>
       )}
-      {content}
-      {showCloseButton && (
+      {children}
+      {showDefaultCloseButton && (
         <CloseButton
           onClose={() => setShouldClose(true)}
         />
@@ -141,5 +132,16 @@ const styles = StyleSheet.create({
     color: 'white'
   },
 });
+
+Menu.defaultProps = {
+  shouldShow: true,
+  title: undefined,
+  children: <></>,
+  onClose: (() => {}),
+  showDefaultCloseButton: true,
+  animationDuration: 300,
+  style: undefined,
+  backgroundColor: 'transparent'
+};
 
 export default Menu;

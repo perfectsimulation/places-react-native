@@ -23,8 +23,6 @@ const AgentsList = (props) => {
     itemStyle
   } = props;
 
-  const onSelectItem = onSelect ?? (() => {});
-
   // scale list items by window size
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
@@ -191,7 +189,7 @@ const AgentsList = (props) => {
   const onTogglePreview = (item) => {
     const focus = item ?? undefined;
     setShowDetail(focus);
-    onSelectItem(focus);
+    onSelect(focus);
   }
 
   const renderListItem = (item, index) => (
@@ -220,20 +218,12 @@ const AgentsList = (props) => {
 
   return (
     <View
-      style={[
-        styles.flatListContainer,
-        containerStyle ?? {}
-      ]}
+      style={[styles.flatListContainer, containerStyle]}
     >
       <FlatList
         ref={list}
-        style={[
-          styles.flatList,
-          listStyle ?? {}
-        ]}
-        contentContainerStyle={[
-          listContentStyle ?? {}
-        ]}
+        style={[styles.flatList, listStyle]}
+        contentContainerStyle={listContentStyle}
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         decelerationRate={'fast'}
@@ -266,5 +256,17 @@ const styles = StyleSheet.create({
     // backgroundColor: '#15151531'
   }
 });
+
+AgentsList.defaultProps = {
+  shouldShow: true,
+  data: {},
+  onSelect: (() => {}),
+  scrollEnabled: true,
+  maxVisibleItems: 7,
+  containerStyle: {},
+  listStyle: {},
+  listContentStyle: {},
+  itemStyle: {}
+};
 
 export default AgentsList;
