@@ -214,7 +214,6 @@ const DraggableDrawer = (props) => {
     >
       <Animated.View
         style={[{
-          ...styles.content,
           top: marginHeight,
           height: windowHeight,
           transform: [{ translateY: contentMargin }],
@@ -223,6 +222,7 @@ const DraggableDrawer = (props) => {
       >
         <Animated.View
           style={[{
+            ...styles.fullHeight,
             opacity: previewContentOpacity
           }]}
         >
@@ -230,6 +230,8 @@ const DraggableDrawer = (props) => {
         </Animated.View>
         <Animated.View
           style={[{
+            ...styles.content,
+            ...styles.fullHeight,
             opacity: contentOpacity
           }]}
         >
@@ -247,10 +249,14 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     // backgroundColor: '#4444aa22'
   },
+  fullHeight: {
+    height: '100%'
+  },
   content: {
-    width: '100%',
-    // backgroundColor: '#66bb5566'
-  }
+    alignSelf: 'center',
+    position: 'absolute',
+    width: '100%'
+  },
 });
 
 DraggableDrawer.defaultProps = {
