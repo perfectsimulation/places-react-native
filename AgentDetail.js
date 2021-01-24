@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import DraggableDrawer from './DraggableDrawer';
 import SegmentedControl from './SegmentedControl';
+import AgentProfile from './AgentProfile';
 
 const AgentDetail = (props) => {
 
@@ -34,11 +35,7 @@ const AgentDetail = (props) => {
       <View
         style={styles.info}
       >
-        <View>
-          <Text style={styles.contentText}>
-            Info
-          </Text>
-        </View>
+        <AgentProfile/>
       </View>
     );
   }
@@ -71,7 +68,7 @@ const AgentDetail = (props) => {
     );
   }
 
-  const [segmentContent, setSegmentContent] = useState(renderDataContent());
+  const [segmentContent, setSegmentContent] = useState(renderInfoContent());
 
   const renderPreviewContent = () => (
     <View style={styles.previewContainer}>
@@ -121,8 +118,7 @@ const styles = StyleSheet.create({
   info: {
     padding: 10,
     flex: 1,
-    display: 'flex',
-    backgroundColor: '#88eeaa22'
+    display: 'flex'
   },
   time: {
     padding: 10,
@@ -141,7 +137,8 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingTop: 108,
-    height: '100%'
+    height: '100%',
+    // backgroundColor: '#bb337722'
   },
   contentText: {
     paddingLeft: 3,

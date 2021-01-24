@@ -232,6 +232,7 @@ const DraggableDrawer = (props) => {
           style={[{
             ...styles.content,
             ...styles.fullHeight,
+            marginTop: showPreview ? windowHeight : 0,
             opacity: contentOpacity
           }]}
         >
